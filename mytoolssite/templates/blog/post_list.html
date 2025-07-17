@@ -1,0 +1,165 @@
+{# templates/blog/post_list.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center mb-4 border-bottom pb-2">{{ page_title }}</h1>
+
+    {% if posts %}
+        <div id="post-list-container"> {# Add a container for JS targeting #}
+            {% for post in posts %}
+            <div class="card mb-4 post-summary-card" data-post-slug="{{ post.slug }}"> {# Add class & data slug #}
+                <div class="card-body">
+                    <h2 class="card-title h4"><a href="{{ post.get_absolute_url }}" class="text-decoration-none">{{ post.title }}</a></h2>
+                    <p class="card-subtitle mb-2" style="font-size: 0.9em;">
+                        By {{ post.author.username }} on {{ post.published_date|date:"F j, Y" }}
+                    </p>
+                    {# Div to hold rendered content, initially contains raw markdown #}
+                    <div class="post-summary-content mb-3">
+                         {{ post.content|safe }} {# Output raw markdown for JS #}
+                    </div>
+                    <a href="{{ post.get_absolute_url }}" class="icon-link read-more-link">
+                        Read More <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                    </a>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+        {# Add Pagination later if needed #}
+    {% else %}
+        <p class="text-center">No blog posts have been published yet.</p>
+    {% endif %}
+
+</div>
+
+{# --- Add specific CSS for summary truncation --- #}
+<style>
+    .post-summary-content {
+        max-height: 10em; /* Adjust max height as needed (e.g., lines of text) */
+        overflow: hidden;
+        position: relative;
+        /* Add subtle fade-out at the bottom */
+        -webkit-mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+        mask-image: linear-gradient(to bottom, black 70%, transparent 100%);
+         /* Apply base markdown styling inherited from custom.css's .post-content */
+         line-height: 1.6;
+         color: var(--muted-text-color); /* Start with muted color */
+    }
+     .post-summary-content > *:last-child {
+         margin-bottom: 0 !important; /* Prevent margin cutoff look */
+     }
+
+     /* Styles inherited from custom.css for .post-content will apply */
+     .post-summary-content h1, .post-summary-content h2, /* etc */
+     .post-summary-content p {
+          color: var(--muted-text-color); /* Ensure preview text is muted */
+          font-size: 0.95rem; /* Slightly smaller summary text */
+          margin-bottom: 0.8rem;
+     }
+     .post-summary-content code:not([class*="language-"]) { /* Adjust inline code */
+        font-size: 0.8em;
+     }
+     .post-summary-content pre { /* Adjust code blocks */
+        max-height: 8em;
+        font-size: 0.85em;
+     }
+     .post-summary-content a { /* Ensure links use muted text color */
+         color: var(--muted-text-color) !important;
+         opacity: 0.9;
+         text-decoration: underline;
+     }
+     .post-summary-content a:hover {
+         color: var(--link-color) !important;
+         opacity: 1;
+     }
+
+    /* Style the card itself */
+    .post-summary-card .card-body {
+        /* padding adjustments if needed */
+    }
+     .post-summary-card .read-more-link {
+        display: inline-block; /* Allow margin */
+        margin-top: 0.5rem; /* Space above read more */
+     }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# --- Include Marked.js and Highlight.js via CDN (same as post_detail) --- #}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css" id="hljs-dark-theme" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css" id="hljs-light-theme" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+{# hljs.highlightAll() can be called once after processing all summaries #}
+
+{# --- Markdown Rendering & Highlighting Logic for List --- #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const postSummaries = document.querySelectorAll('.post-summary-content');
+
+    if (postSummaries.length > 0) {
+        // Configure Marked.js once
+        marked.setOptions({
+            gfm: true, breaks: true, sanitize: false, smartLists: true, smartypants: true,
+            highlight: function (code, lang) {
+                const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                try { return hljs.highlight(code, { language, ignoreIllegals: true }).value; }
+                catch (error) { return hljs.highlight(code, { language: 'plaintext', ignoreIllegals: true }).value; }
+            }
+        });
+
+        // Process each summary area
+        postSummaries.forEach(contentArea => {
+            const rawMarkdown = contentArea.innerHTML; // Get raw markdown
+            try {
+                const renderedHtml = marked.parse(rawMarkdown);
+                contentArea.innerHTML = renderedHtml; // Replace with rendered HTML
+            } catch (e) {
+                 console.error("Error parsing Markdown for summary:", e);
+                 // Optionally leave raw or show error for this specific post
+            }
+        });
+
+        // Highlight all code blocks on the page after processing all summaries
+        hljs.highlightAll();
+
+    } // end if postSummaries
+
+    // --- Theme switching for highlight.js (Copy from post_detail extra_js) ---
+    const lightThemeLink = document.getElementById('hljs-light-theme');
+    const darkThemeLink = document.getElementById('hljs-dark-theme');
+    function switchHighlightTheme(theme) {
+        if (!lightThemeLink || !darkThemeLink) return;
+        if (theme === 'dark') { lightThemeLink.media = 'not all'; darkThemeLink.media = 'all'; }
+        else { lightThemeLink.media = 'all'; darkThemeLink.media = 'not all'; }
+    }
+    const currentTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+    switchHighlightTheme(currentTheme);
+    const themeToggleButton = document.getElementById('theme-toggle-btn');
+     if (themeToggleButton) {
+         themeToggleButton.addEventListener('click', () => {
+             setTimeout(() => {
+                  const newTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+                  switchHighlightTheme(newTheme);
+             }, 50);
+         });
+     }
+     const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            if (mutation.attributeName === 'class') {
+                 const newTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+                 switchHighlightTheme(newTheme);
+            }
+        });
+     });
+     observer.observe(document.body, { attributes: true });
+
+}); // End DOMContentLoaded
+</script>
+{# --- Theme toggle inherited from base --- #}
+{% endblock %}

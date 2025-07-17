@@ -1,0 +1,254 @@
+{# templates/text_tools/tool_slug_generator.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">Slug</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Convert any text or title into a clean, URL-friendly slug.</p>
+            </div>
+
+            {# Input/Options Card #}
+            <div class="card p-4 p-md-5 mb-4" id="inputCard">
+                {# No form needed as it's client-side #}
+                <div class="mb-3">
+                    <label for="inputText" class="form-label fw-medium">Input Text / Title:</label>
+                    <input type="text" class="form-control form-control-lg neumorphic-inset" id="inputText" placeholder="Enter your title here...">
+                </div>
+
+                {# --- Options --- #}
+                <div class="border-top pt-4 mb-3">
+                     <h5 class="text-center mb-3">Options</h5>
+                     <div class="row g-3 justify-content-center">
+                        <div class="col-md-6">
+                             <label class="form-label fw-medium d-block mb-2">Separator:</label>
+                             <div class="option-btn-group d-flex flex-wrap gap-2">
+                                <input type="radio" class="btn-check" name="separator" id="sepDash" value="-" checked>
+                                <label class="btn btn-option flex-fill" for="sepDash"><span class="option-text">-</span> <span class="small text-muted">(Hyphen)</span></label>
+
+                                <input type="radio" class="btn-check" name="separator" id="sepUnderscore" value="_">
+                                <label class="btn btn-option flex-fill" for="sepUnderscore"><span class="option-text">_</span> <span class="small text-muted">(Underscore)</span></label>
+                            </div>
+                        </div>
+                         <div class="col-md-6 align-self-center">
+                            <div class="form-check form-switch mt-3 mt-md-0">
+                                <input class="form-check-input" type="checkbox" name="force_lowercase" role="switch" id="lowercaseCheck" checked>
+                                <label class="form-check-label" for="lowercaseCheck">Force Lowercase</label>
+                             </div>
+                             <div class="form-text">(Recommended for URLs)</div>
+                        </div>
+                     </div>
+                </div>
+                 {# --- END: Options --- #}
+            </div>
+
+            {# --- Output Section --- #}
+            <div class="card p-4 neumorphic" id="outputCard">
+                <label for="outputText" class="form-label fw-medium">Generated Slug:</label>
+                 <div class="position-relative">
+                     <input type="text" id="outputText" class="form-control neumorphic-inset font-monospace" readonly placeholder="Slug will appear here...">
+                     <button id="copyButton" class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2" type="button" title="Copy Slug" disabled>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg>
+                         Copy
+                     </button>
+                 </div>
+            </div>
+            {# --- End Output Section --- #}
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Input/Output Text Fields */
+    #inputText, #outputText {
+        background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; height: auto;
+    }
+    #inputText:focus, #outputText:focus { background-color: var(--bg-color); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none; }
+    #inputText::placeholder { color: var(--muted-text-color); opacity: 0.7; transition: color 0.3s ease, opacity 0.3s ease; }
+    #outputText { cursor: default; } /* Readonly field */
+
+    /* Option Buttons */
+    .option-btn-group .btn-option { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); border: 1px solid transparent; color: var(--muted-text-color); padding: .5rem 1rem; text-align: center; transition: all 0.2s ease-out; display: flex; align-items: center; justify-content: center; min-height: 45px; cursor: pointer; }
+    .option-btn-group .option-text { font-size: 1rem; line-height: 1.2; font-weight: 600; margin-right: 0.3rem;}
+    .option-btn-group .btn-check:checked + .btn-option { color: var(--link-color); background-color: var(--bg-color); border-color: var(--link-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .option-btn-group .btn-check:checked + .btn-option .option-text { font-weight: 700; }
+    .option-btn-group .btn-option:hover { color: var(--text-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .option-btn-group .btn-check:checked + .btn-option:hover { color: var(--link-color); }
+    .option-btn-group .btn-check:focus-visible + .btn-option { outline: 2px solid var(--link-color); outline-offset: 2px; }
+
+    /* Switch */
+    /* Switch specific styles (overrides some base .form-check-input styles) */
+.form-switch .form-check-input {
+     background-color: var(--bg-color); /* Use main background */
+     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); /* Thumb color based on text */
+     background-position: left center;
+     border-radius: 2em;
+     width: 2.75em; /* Slightly wider */
+     height: 1.5em;  /* Slightly taller */
+     margin-top: 0.1em; /* Adjust vertical alignment with label */
+     /* Neumorphic inset track */
+     box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                 inset -2px -2px 4px var(--shadow-light);
+     border: none; /* Remove default border */
+     cursor: pointer;
+     transition: background-color 0.3s ease, background-position .15s ease-in-out, box-shadow 0.3s ease, border-color 0.3s ease;
+     -webkit-appearance: none; /* Override default OS appearance */
+     appearance: none;
+}
+
+body.dark-mode .form-switch .form-check-input {
+    /* Update thumb color for dark mode */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+}
+
+.form-switch .form-check-input:checked {
+     background-position: right center;
+     border-color: transparent; /* No border needed when checked */
+     background-color: var(--link-color); /* Use link color for checked track */
+     box-shadow: none; /* Remove inset */
+      /* White thumb for checked state */
+     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+/* Focus style for switch (using outline) */
+.form-switch .form-check-input:focus {
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); /* Keep inset shadow on focus */
+     /* Ensure background image rule exists for focus state */
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+}
+body.dark-mode .form-switch .form-check-input:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:checked:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+    box-shadow: none; /* Remove inset on checked focus */
+}
+
+/* Optional: Slightly dim when disabled */
+.form-switch .form-check-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); /* Keep base shadow */
+}
+.form-switch .form-check-input:disabled:checked {
+    background-color: var(--muted-text-color); /* Use muted color */
+    border-color: transparent;
+    box-shadow: none;
+}
+    .form-check-label { color: var(--text-color); transition: color 0.3s ease; cursor: pointer; }
+    .form-text { color: var(--muted-text-color); transition: color 0.3s ease; font-size: 0.8em; }
+
+    /* Headings */
+     h5 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+    .form-label.fw-medium { color: var(--text-color); transition: color 0.3s ease; }
+
+    /* Copy Button */
+    #copyButton { opacity: 0.7; transition: opacity 0.2s ease; }
+    #copyButton:hover { opacity: 1; }
+    #copyButton:disabled { opacity: 0.4; cursor: not-allowed; }
+    #copyButton.copied { background-color: #198754; border-color: #198754; color: white; }
+
+    /* Clear Text Button */
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const inputText = document.getElementById('inputText');
+    const outputText = document.getElementById('outputText');
+    const copyButton = document.getElementById('copyButton');
+    const lowercaseCheck = document.getElementById('lowercaseCheck');
+    // Use querySelectorAll for radio buttons to handle potential future additions easily
+    const separatorRadios = document.querySelectorAll('input[name="separator"]');
+    const clearTextButton = document.getElementById('clearTextButton'); // Get clear button
+
+    function generateSlug() {
+        let str = inputText.value;
+        const forceLowercase = lowercaseCheck.checked;
+        let separator = '-'; // Default separator
+
+        // Find selected separator
+        separatorRadios.forEach(radio => {
+            if (radio.checked) {
+                separator = radio.value;
+            }
+        });
+
+        if (forceLowercase) {
+            str = str.toLowerCase();
+        }
+
+        // Basic slugification logic (can be refined)
+        str = str
+            .normalize('NFD') // Separate accent characters
+            .replace(/[\u0300-\u036f]/g, '') // Remove accents
+            .replace(/[^a-z0-9\s]/gi, '') // Remove non-alphanumeric (keep spaces for now)
+            .trim() // Trim leading/trailing spaces
+            .replace(/\s+/g, separator); // Replace spaces with separator
+
+        outputText.value = str;
+        copyButton.disabled = !str; // Disable copy button if output is empty
+
+        // Reset copy button text if needed
+        if (copyButton.classList.contains('copied')) {
+             copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg> Copy';
+             copyButton.classList.remove('copied');
+        }
+    }
+
+    // Event Listeners
+    inputText.addEventListener('input', generateSlug);
+    lowercaseCheck.addEventListener('change', generateSlug);
+    separatorRadios.forEach(radio => {
+        radio.addEventListener('change', generateSlug);
+    });
+
+    // Copy Button Logic
+    if (copyButton && outputText) {
+        copyButton.addEventListener('click', () => {
+            if (!outputText.value) return; // Don't copy if empty
+
+            if (navigator.clipboard) {
+                 navigator.clipboard.writeText(outputText.value).then(() => {
+                    copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    copyButton.classList.add('copied');
+                    setTimeout(() => {
+                         copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg> Copy';
+                         copyButton.classList.remove('copied');
+                    }, 2000);
+                 }).catch(err => { console.error('Failed to copy: ', err); alert('Failed to copy.'); });
+            } else { /* Fallback execCommand */ }
+        });
+    }
+
+     // Clear Text Button Logic
+     if (clearTextButton && inputText) {
+         clearTextButton.addEventListener('click', () => {
+             inputText.value = '';
+             generateSlug(); // Update output and button state
+             inputText.focus();
+         });
+     }
+
+    // Initial generation in case of page reload with data
+    generateSlug();
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

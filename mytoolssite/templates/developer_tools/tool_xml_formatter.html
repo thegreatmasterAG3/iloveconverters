@@ -1,0 +1,274 @@
+{# templates/developer_tools/tool_xml_formatter.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12"> {# Wider column for side-by-side view on larger screens #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded"></></div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Paste your XML code below to format it instantly for better readability.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags == 'error' %}danger{% elif message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {# --- Input Form --- #}
+            <form method="post" action="{% url 'developer_tools:xml_formatter' %}" id="xmlForm">
+                {% csrf_token %}
+                <div class="row g-4">
+                    {# Input Column #}
+                    <div class="col-md-6">
+                        <div class="card p-3 h-100"> {# Use card #}
+                            <div class="mb-3">
+                                <label for="xml_input" class="form-label fw-medium">XML Input:</label>
+                                <textarea class="form-control neumorphic-inset font-monospace"
+                                        id="xml_input"
+                                        name="xml_input"
+                                        rows="15"
+                                        placeholder="Paste your unformatted XML here..."
+                                        required>{{ xml_input }}</textarea>
+                            </div>
+                            <div class="d-flex justify-content-between align-items-center mt-auto pt-2">
+                                <button type="button" class="btn btn-sm btn-outline-secondary clear-filters-btn" id="clearInputButton">Clear</button>
+                                <button type="submit" class="btn btn-submit-tool" id="formatButton">
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-text-indent-left me-1" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M2 3.5a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5m.646 2.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1 0 .708l-2 2a.5.5 0 0 1-.708-.708L4.293 8 2.646 6.354a.5.5 0 0 1 0-.708M7 6.5a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5m0 3a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1h-6a.5.5 0 0 1-.5-.5m-5 3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/></svg>
+                                    Format XML
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+
+                    {# Output Column #}
+                    <div class="col-md-6">
+                        <div class="card p-3 h-100"> {# Use card #}
+                            <label for="formatted_xml" class="form-label fw-medium">Formatted Output:</label>
+                             <div class="position-relative mb-3 flex-grow-1"> {# Relative for button, flex grow #}
+                                <textarea id="formatted_xml" class="form-control neumorphic-inset font-monospace h-100"
+                                          rows="15" readonly>{% if formatted_xml %}{{ formatted_xml }}{% endif %}</textarea>
+                                {% if formatted_xml %}
+                                <button id="copyOutputButton" class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2" type="button" title="Copy to Clipboard">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg>
+                                     Copy
+                                </button>
+                                {% endif %}
+                            </div>
+                            {# Indent Options #}
+                            <div class="mt-auto pt-2"> {# Push options down #}
+                                <label class="form-label fw-medium d-block mb-1 small">Indentation:</label>
+                                <div class="d-flex flex-wrap gap-2 justify-content-center">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="indent_type" id="indent2s" value="2s" {% if indent_choice == '2s' %}checked{% endif %}>
+                                        <label class="form-check-label small" for="indent2s">2 Spaces</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="indent_type" id="indent4s" value="4s" {% if indent_choice == '4s' or not indent_choice or indent_choice == '' %}checked{% endif %}>
+                                        <label class="form-check-label small" for="indent4s">4 Spaces</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="indent_type" id="indentTab" value="tab" {% if indent_choice == 'tab' %}checked{% endif %}>
+                                        <label class="form-check-label small" for="indentTab">Tabs</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Shared styles */
+    .form-label.fw-medium { color: var(--text-color); transition: color 0.3s ease; }
+    textarea.neumorphic-inset {
+        background-color: var(--bg-color); border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none; color: var(--text-color); padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        line-height: 1.6; font-size: 0.9em;
+    }
+    textarea.neumorphic-inset:focus {
+         background-color: var(--bg-color); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none;
+    }
+    textarea.neumorphic-inset::placeholder { color: var(--muted-text-color); opacity: 0.7; transition: color 0.3s ease, opacity 0.3s ease; }
+    /* --- Submit Button Styles --- */
+.btn-submit-tool {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--link-color);
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-submit-tool:hover {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+}
+.btn-submit-tool:active {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+}
+.btn-submit-tool:disabled {
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    opacity: 0.6;
+    cursor: not-allowed;
+    color: var(--muted-text-color);
+}
+.btn-submit-tool:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+}
+
+/* --- Clear Button Styles --- */
+.clear-filters-btn { /* Used for Clear Text button too */
+    background-color: transparent;
+    border: 1px solid var(--muted-text-color);
+    color: var(--muted-text-color);
+    border-radius: var(--radius-small);
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.clear-filters-btn:hover {
+    background-color: rgba(var(--text-color-rgb), 0.1);
+    border-color: var(--text-color);
+    color: var(--text-color);
+}
+
+/* --- Form Checkbox / Radio Styles --- */
+.form-check-input {
+    background-color: var(--bg-color); /* Match bg */
+    border-color: transparent; /* Remove Bootstrap border initially */
+    /* Neumorphic inset */
+    box-shadow: inset 1px 1px 3px var(--shadow-dark),
+               inset -1px -1px 3px var(--shadow-light);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    margin-top: 0.15em; /* Adjust vertical alignment */
+    vertical-align: top; /* Align top with label */
+    width: 1.15em; /* Slightly larger */
+    height: 1.15em;
+    cursor: pointer;
+}
+.form-check-input:checked {
+    background-color: var(--link-color);
+    border-color: transparent; /* No border needed */
+    box-shadow: none; /* Remove inset shadow when checked */
+    /* Default Bootstrap checkmark SVG colored white */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+}
+.form-check-input:focus {
+    border-color: transparent; /* Keep border transparent */
+    outline: 2px solid var(--link-color); /* Use standard outline */
+    outline-offset: 1px;
+    box-shadow: inset 1px 1px 3px var(--shadow-dark), inset -1px -1px 3px var(--shadow-light); /* Keep inset shadow on focus */
+}
+ .form-check-input:checked:focus {
+      box-shadow: none; /* Remove inset on checked focus */
+      background-color: var(--link-color); /* Ensure bg color stays */
+ }
+.form-check-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: inset 1px 1px 2px var(--shadow-dark), inset -1px -1px 2px var(--shadow-light); /* Keep base shadow */
+}
+.form-check-input:disabled:checked {
+    background-color: var(--muted-text-color); /* Use muted color */
+    border-color: transparent;
+    box-shadow: none;
+}
+
+
+/* --- Form Check Label Styles --- */
+.form-check-label {
+    color: var(--text-color);
+    padding-left: 0.4em;
+    transition: color 0.3s ease;
+    cursor: pointer;
+    vertical-align: middle; /* Align better with input */
+}
+.form-check-input:disabled ~ .form-check-label {
+     opacity: 0.6;
+     cursor: not-allowed;
+}
+
+    /* Output specific */
+     #formatted_xml { min-height: 300px; } /* Ensure output has height */
+     #copyOutputButton { opacity: 0.7; transition: opacity 0.2s ease; }
+     #copyOutputButton:hover { opacity: 1; }
+     #copyOutputButton.copied { background-color: #198754; border-color: #198754; color: white;}
+     .card.p-3 { min-height: 400px; display: flex; flex-direction: column; } /* Ensure cards have min height and content pushes down */
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const xmlInput = document.getElementById('xml_input');
+    const formatButton = document.getElementById('formatButton');
+    const clearInputButton = document.getElementById('clearInputButton');
+    const copyOutputButton = document.getElementById('copyOutputButton');
+    const formattedOutput = document.getElementById('formatted_xml');
+
+    // --- Enable/Disable Format Button ---
+    const toggleFormatButton = () => {
+        if(formatButton && xmlInput) {
+            formatButton.disabled = xmlInput.value.trim() === '';
+        }
+    }
+    if(xmlInput) {
+        xmlInput.addEventListener('input', toggleFormatButton);
+    }
+    // Initial state
+    toggleFormatButton();
+
+
+    // --- Clear Button ---
+    if(clearInputButton && xmlInput) {
+        clearInputButton.addEventListener('click', () => {
+            xmlInput.value = '';
+            if (formattedOutput) formattedOutput.value = ''; // Also clear output
+            toggleFormatButton(); // Disable format button
+            xmlInput.focus();
+        });
+    }
+
+    // --- Copy Button ---
+    if (copyOutputButton && formattedOutput) {
+        copyOutputButton.addEventListener('click', () => {
+            if (navigator.clipboard) {
+                 navigator.clipboard.writeText(formattedOutput.value).then(() => {
+                    copyOutputButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    copyOutputButton.classList.add('copied');
+                    setTimeout(() => {
+                         copyOutputButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg> Copy';
+                         copyOutputButton.classList.remove('copied');
+                    }, 2000);
+                 }).catch(err => { console.error('Failed to copy: ', err); alert('Failed to copy.'); });
+            } else { /* Fallback execCommand */ }
+        });
+    }
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

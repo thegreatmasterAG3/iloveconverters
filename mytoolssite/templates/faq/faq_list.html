@@ -1,0 +1,105 @@
+{# templates/faq/faq_list.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <h1 class="text-center mb-4 border-bottom pb-2">{{ page_title }}</h1>
+    <p class="lead text-center mb-5 text-muted">Find answers to common questions about our tools and services.</p>
+
+    {% if faq_items %}
+        <div class="accordion" id="faqAccordion">
+            {% for item in faq_items %}
+            <div class="accordion-item neumorphic mb-3"> {# Apply neumorphic style, add margin #}
+                <h2 class="accordion-header" id="heading{{ forloop.counter }}">
+                    <button class="accordion-button collapsed" type="button" data-bs-toggle="collapse" data-bs-target="#collapse{{ forloop.counter }}" aria-expanded="false" aria-controls="collapse{{ forloop.counter }}">
+                       {{ item.question }}
+                    </button>
+                </h2>
+                <div id="collapse{{ forloop.counter }}" class="accordion-collapse collapse" aria-labelledby="heading{{ forloop.counter }}" data-bs-parent="#faqAccordion">
+                    <div class="accordion-body">
+                        {# Use safe filter if answers contain HTML, linebreaks otherwise #}
+                         {{ item.answer|linebreaks }}
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    {% else %}
+        <p class="text-center">No frequently asked questions have been added yet.</p>
+    {% endif %}
+
+</div>
+
+{# Add custom styling for the accordion to match the theme #}
+<style>
+    .accordion-item {
+        background-color: var(--card-bg-color); /* Use card background */
+        border: none; /* Remove default border */
+        border-radius: var(--radius-main); /* Match card radius */
+        /* Neumorphic shadow applied via class */
+        overflow: hidden; /* Prevent content spill */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+     .accordion-header {
+         /* Reset button default styles */
+         margin-bottom: 0;
+     }
+
+    .accordion-button {
+        background-color: transparent; /* Make button background transparent */
+        color: var(--text-color); /* Use theme text color */
+        font-weight: 500;
+        box-shadow: none !important; /* Remove bootstrap's default button shadow */
+        border-radius: var(--radius-main); /* Ensure radius consistency */
+         transition: color 0.3s ease, background-color 0.3s ease;
+         padding: 1.25rem 1.5rem; /* Adjust padding */
+    }
+
+    .accordion-button:not(.collapsed) {
+        color: var(--link-color); /* Use link color when expanded */
+        background-color: transparent; /* Keep transparent */
+        /* Optional: add subtle inset shadow when expanded */
+        /* box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light) !important; */
+    }
+
+    /* Style the arrow icon */
+    .accordion-button::after {
+        /* Use Bootstrap's default SVG arrow but color it */
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23#{'{'}--text-color-hex url-encoded{'}'}'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+        transition: transform .2s ease-in-out, background-image 0.3s ease;
+        /* You might need to URL-encode the color variable if used directly */
+    }
+    body.dark-mode .accordion-button::after {
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23e0e0e0'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    }
+    .accordion-button:not(.collapsed)::after {
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%23#{'{'}--link-color-hex url-encoded{'}'}'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+         transform: rotate(-180deg);
+    }
+    body.dark-mode .accordion-button:not(.collapsed)::after {
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16' fill='%235eadff'%3e%3cpath fill-rule='evenodd' d='M1.646 4.646a.5.5 0 0 1 .708 0L8 10.293l5.646-5.647a.5.5 0 0 1 .708.708l-6 6a.5.5 0 0 1-.708 0l-6-6a.5.5 0 0 1 0-.708z'/%3e%3c/svg%3e");
+    }
+
+    /* Accordion body */
+    .accordion-body {
+        padding: 1rem 1.5rem 1.5rem 1.5rem; /* Adjust padding */
+        color: var(--muted-text-color); /* Use muted text for answers */
+        transition: color 0.3s ease;
+        line-height: 1.7;
+    }
+
+    /* Remove focus ring when button clicked, but keep for keyboard nav */
+     .accordion-button:focus {
+        box-shadow: none; /* Remove bootstrap focus shadow */
+        /* Use :focus-visible for keyboard focus outline */
+    }
+     .accordion-button:focus-visible {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+    }
+
+</style>
+{% endblock %}

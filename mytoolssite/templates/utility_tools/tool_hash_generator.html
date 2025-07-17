@@ -1,0 +1,327 @@
+{# templates/utility_tools/tool_hash_generator.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-11"> {# Wider column #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">#G</div>
+                 <h1 class="fw-bold">Hash Generator</h1>
+                 <p class="lead text-muted">Generate MD5, SHA-1, SHA-256, and SHA-512 hash digests from your text input.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {# --- Input Form Section --- #}
+            <div class="card p-4 p-md-5 mb-4" id="inputCard">
+                <form method="post" action="{% url 'utility_tools:hash_generator' %}" id="hashForm">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="text_input" class="form-label fw-medium">Input Text:</label>
+                        <textarea class="form-control neumorphic-inset font-monospace"
+                                  id="text_input"
+                                  name="text_input"
+                                  rows="8"
+                                  placeholder="Paste or type text here..."
+                                  required>{{ text_input }}</textarea>
+                    </div>
+
+                    {# --- Algorithm Selection --- #}
+                    <div class="my-4 text-center">
+                        <label class="form-label fw-medium d-block mb-3">Select Hash Algorithm:</label>
+                        <div class="btn-group flex-wrap justify-content-center gap-2" role="group" aria-label="Hash algorithm selection">
+                            {% for algo in supported_algorithms %}
+                                <input type="radio" class="btn-check" name="hash_algorithm" id="algo_{{ algo }}" value="{{ algo }}" autocomplete="off" {% if selected_algorithm == algo %}checked{% endif %}>
+                                <label class="btn neumorphic-radio hash-btn" for="algo_{{ algo }}">{{ algo|upper }}</label>
+                            {% endfor %}
+                         </div>
+                    </div>
+                    {# --- End Algorithm Selection --- #}
+
+                     <div class="text-center mt-3">
+                         <button type="button" class="btn btn-outline-secondary clear-filters-btn me-2" id="clearTextButton">Clear Text</button>
+                         <button type="submit" class="btn btn-submit-tool" id="generateButton">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-hash me-1" viewBox="0 0 16 16"><path d="M8.39 12.648a1.32 1.32 0 0 0-.015.18c0 .305.21.508.5.508.266 0 .492-.172.555-.477l.554-2.703h1.204c.421 0 .617-.234.617-.547 0-.312-.188-.53-.617-.53h-.985l.516-2.524h1.265c.43 0 .618-.227.618-.547 0-.313-.188-.524-.618-.524h-1.046l.476-2.304a1.06 1.06 0 0 0 .016-.164.51.51 0 0 0-.516-.516.54.54 0 0 0-.539.43l-.523 2.554H7.617l.477-2.304c.008-.04.015-.09.015-.15a.5.5 0 0 0-.516-.516.54.54 0 0 0-.539.43L6.53 5.484H5.414c-.43 0-.617.22-.617.532 0 .312.187.539.617.539h.906l-.515 2.523H4.609c-.421 0-.609.219-.609.531 0 .313.188.547.61.547h.97l-.554 2.703c-.008.04-.015.09-.015.18 0 .305.21.508.5.508.265 0 .492-.172.554-.477l.555-2.703h2.242l-.515 2.499zM7.07 9.975H4.828l.51-2.523h2.242zm.256-3.563H9.57l-.516 2.524H6.808z"/></svg>
+                             Generate Hash
+                         </button>
+                     </div>
+                </form>
+            </div>
+             {# --- End Input Form --- #}
+
+
+             {# --- Results Section --- #}
+            {% if generated_hash %}
+            <div class="card p-4 mt-4" id="resultsCard">
+                <h3 class="text-center mb-3">Result ({{ selected_algorithm|upper }})</h3>
+                <div class="position-relative">
+                    {# Use input type="text" for easier selection/copy #}
+                    <input type="text" id="hashOutput" class="form-control neumorphic-inset font-monospace text-center" readonly value="{{ generated_hash }}">
+                    <button id="copyButton" class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2" type="button" title="Copy to Clipboard">
+                         <svg class="bi bi-clipboard" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg>
+                        Copy
+                    </button>
+                </div>
+                 <div class="text-center mt-3">
+                    <a href="{% url 'utility_tools:hash_generator' %}" class="btn btn-outline-secondary clear-filters-btn">
+                        <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                        Generate Another Hash
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            {# --- End Results Section --- #}
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Style text area */
+    textarea.neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        line-height: 1.6;
+        min-height: 150px; /* Adjust height */
+    }
+    textarea.neumorphic-inset:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+    textarea.neumorphic-inset::placeholder {
+         color: var(--muted-text-color);
+         opacity: 0.7;
+         transition: color 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* Form Label */
+    .form-label.fw-medium {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+    }
+
+    /* Neumorphic Radio Buttons */
+    .neumorphic-radio {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        border: 1px solid transparent;
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out;
+        padding: .5rem 1rem;
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+    .btn-check:checked + .neumorphic-radio {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        border-color: transparent;
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    .neumorphic-radio:hover {
+        color: var(--text-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+    .btn-check:checked + .neumorphic-radio:hover {
+        color: var(--link-color);
+    }
+    .btn-check:focus-visible + .neumorphic-radio {
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        z-index: 1;
+    }
+    .btn-group > .btn-check:checked + .neumorphic-radio {
+        z-index: 1;
+    }
+
+    /* Result Input */
+    #hashOutput {
+        background-color: var(--card-bg-color); /* Match card */
+        border-radius: var(--radius-small);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        border: none;
+        color: var(--muted-text-color); /* Muted color for output */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        font-size: 0.9em;
+        text-align: center; /* Center hash */
+        padding-right: 45px; /* Space for copy button */
+        word-break: break-all; /* Wrap long hash if needed, though usually not */
+    }
+    #hashOutput:focus {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    /* Copy Button */
+    #copyButton {
+         opacity: 0.7;
+         transition: opacity 0.2s ease;
+    }
+    #copyButton:hover {
+         opacity: 1;
+    }
+    #copyButton.copied {
+        background-color: #198754; /* Bootstrap success green */
+        border-color: #198754;
+        color: white;
+    }
+
+    /* Results Heading */
+     #resultsCard h3 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+
+    /* Buttons */
+    .btn-submit-tool { /* Generate Hash button */
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--link-color);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn-submit-tool:hover {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+    .btn-submit-tool:active {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+     .btn-submit-tool:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    }
+
+    .clear-filters-btn { /* For Clear Text & Generate Another buttons */
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        border-radius: var(--radius-small);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .clear-filters-btn:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for clear button, copy button, auto-submit on radio change #}
+{# JS for clear button, copy button, and maybe auto-submit #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('hashForm');
+    const clearButton = document.getElementById('clearTextButton');
+    const inputTextArea = document.getElementById('text_input');
+    const outputInput = document.getElementById('hashOutput'); // Target input for hash result
+    const copyButton = document.getElementById('copyButton');
+    const algoRadios = form.querySelectorAll('input[name="hash_algorithm"]');
+    const resultsCard = document.getElementById('resultsCard');
+    const generateButton = document.getElementById('generateButton'); // Get generate button
+
+    // Clear Text Area
+    if(clearButton && inputTextArea && outputInput) {
+        clearButton.addEventListener('click', () => {
+            inputTextArea.value = '';
+            outputInput.value = ''; // Clear output field as well
+            if(resultsCard) resultsCard.style.display = 'none'; // Hide results card
+            // Reset radio to default ('sha256')
+            const defaultRadio = document.getElementById('algo_sha256');
+            if(defaultRadio) defaultRadio.checked = true;
+             // Visually deactivate other buttons (using label selector)
+             document.querySelectorAll('.hash-btn').forEach(btnLabel => {
+                 const radioId = btnLabel.getAttribute('for');
+                 const radio = document.getElementById(radioId);
+                 if (radio && radio.value !== 'sha256') {
+                     btnLabel.classList.remove('active'); // Assuming 'active' class is used for styling checked state
+                 } else if (radio && radio.value === 'sha256') {
+                      btnLabel.classList.add('active');
+                 }
+             });
+
+            inputTextArea.focus();
+            toggleGenerateButton(); // Disable generate button if text is now empty
+        });
+    }
+
+    // Copy Button Logic
+    if (copyButton && outputInput) {
+        copyButton.addEventListener('click', () => {
+            if (navigator.clipboard) {
+                 navigator.clipboard.writeText(outputInput.value).then(() => {
+                    copyButton.innerHTML = '<svg class="bi bi-check-lg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    copyButton.classList.add('copied');
+                    setTimeout(() => {
+                         copyButton.innerHTML = '<svg class="bi bi-clipboard" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg> Copy';
+                         copyButton.classList.remove('copied');
+                    }, 2000);
+                 }).catch(err => { alert('Failed to copy.'); });
+            } else { /* Fallback execCommand */
+                 try {
+                    outputInput.select();
+                    outputInput.setSelectionRange(0, 99999); /* For mobile devices */
+                    document.execCommand('copy');
+                    // Add feedback
+                 } catch (err) { alert('Copying failed.'); }
+             }
+        });
+    }
+
+    // --- Enable/Disable Generate Button ---
+    const toggleGenerateButton = () => {
+        if(generateButton && inputTextArea){
+            generateButton.disabled = inputTextArea.value.trim() === '';
+        }
+    }
+
+    if (inputTextArea) {
+        inputTextArea.addEventListener('input', toggleGenerateButton);
+    }
+
+    // Ensure results card is hidden initially if no hash value is present
+    if (resultsCard && (!outputInput || outputInput.value === '')) {
+         resultsCard.style.display = 'none';
+    } else if(resultsCard) {
+         resultsCard.style.display = ''; // Ensure visible if hash IS present
+    }
+
+    // Initial state check for generate button
+    toggleGenerateButton();
+
+});
+</script>
+{% endblock %}

@@ -1,0 +1,399 @@
+{# templates/utility_tools/tool_unit_converter.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">📐</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Convert between common units of length, mass, temperature, and more.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {# --- Input Form Section --- #}
+            <div class="card p-4 p-md-5" id="inputCard">
+                <form method="post" action="{% url 'utility_tools:unit_converter' %}" id="unitConvertForm">
+                    {% csrf_token %}
+
+                    <div class="row g-3 align-items-center">
+                        {# Input Value #}
+                        <div class="col-md-5">
+                            <label for="inputValue" class="form-label fw-medium">Value:</label>
+                            <input type="number" step="any" {# Allow decimals #}
+                                   class="form-control form-control-lg neumorphic-inset"
+                                   id="inputValue"
+                                   name="input_value"
+                                   value="{{ input_value|default:'' }}"
+                                   placeholder="Enter value"
+                                   required>
+                        </div>
+
+                        {# From Unit #}
+                        <div class="col-md-3">
+                            <label for="fromUnitSelect" class="form-label fw-medium">From:</label>
+                            <select class="form-select form-select-lg neumorphic-inset" id="fromUnitSelect" name="from_unit" required>
+                                <option value="" disabled {% if not from_unit %}selected{% endif %}>Select Unit</option>
+                                {% for category, units in unit_categories.items %}
+                                    <optgroup label="{{ category }}">
+                                        {% for unit_symbol, unit_name in units.items %}
+                                            <option value="{{ unit_symbol }}" {% if from_unit == unit_symbol %}selected{% endif %}>{{ unit_name }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                {% endfor %}
+                            </select>
+                        </div>
+
+                         {# Swap Button Placeholder (JS needed) #}
+                         <div class="col-md-1 text-center align-self-end pb-2">
+                             <button type="button" id="swapUnitsButton" class="btn btn-secondary neumorphic-radio" title="Swap Units" aria-label="Swap units">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-arrow-left-right" viewBox="0 0 16 16"> <path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5m14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5"/> </svg>
+                             </button>
+                         </div>
+
+                        {# To Unit #}
+                        <div class="col-md-3">
+                             <label for="toUnitSelect" class="form-label fw-medium">To:</label>
+                             <select class="form-select form-select-lg neumorphic-inset" id="toUnitSelect" name="to_unit" required>
+                                <option value="" disabled {% if not to_unit %}selected{% endif %}>Select Unit</option>
+                                {% for category, units in unit_categories.items %}
+                                    <optgroup label="{{ category }}">
+                                        {% for unit_symbol, unit_name in units.items %}
+                                            <option value="{{ unit_symbol }}" {% if to_unit == unit_symbol %}selected{% endif %}>{{ unit_name }}</option>
+                                        {% endfor %}
+                                    </optgroup>
+                                {% endfor %}
+                            </select>
+                        </div>
+                    </div> {# End row #}
+
+                    {# Submit Button #}
+                    <div class="text-center mt-4">
+                        <button type="submit" class="btn btn-submit-tool" id="convertButton">
+                           <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-arrow-repeat me-1" viewBox="0 0 16 16"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.5a.5.5 0 0 1 0-1h3.5a.5.5 0 0 1 .5.5v3.5a.5.5 0 0 1-1 0V6.118A5.002 5.002 0 0 0 8 3zM3.5 12.5a.5.5 0 0 1 .5-.5h3.5a.5.5 0 0 1 0 1H4v1.882a5.002 5.002 0 0 0 8.051-.078.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.5a.5.5 0 0 1 .5.5z"/></svg>
+                            Convert
+                        </button>
+                        <button type="button" class="btn btn-outline-secondary clear-filters-btn ms-2" id="clearButton">Clear</button>
+                    </div>
+                </form>
+            </div>
+             {# --- End Input Form Section --- #}
+
+
+             {# --- Results Section --- #}
+            {% if converted_value is not None %} {# Display only if a conversion happened #}
+            <div class="card p-4 mt-4 neumorphic" id="resultsCard">
+                <h3 class="text-center mb-3">Result</h3>
+                <div class="row justify-content-center">
+                     <div class="col-md-8">
+                         <label for="outputValue" class="form-label fw-medium">Converted Value:</label>
+                         <div class="position-relative">
+                             <input type="text" id="outputValue" class="form-control form-control-lg neumorphic-inset text-center font-monospace" readonly value="{{ converted_value }}">
+                              <button id="copyButton" class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2" type="button" title="Copy to Clipboard">
+                                 <svg class="bi bi-clipboard" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg>
+                                Copy
+                            </button>
+                         </div>
+                     </div>
+                </div>
+            </div>
+            {% endif %}
+            {# --- End Results Section --- #}
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Re-use styles from other tools or custom.css */
+    .form-label.fw-medium {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+    }
+    /* Style number inputs */
+    input[type="number"].neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        height: auto;
+         font-size: 1.1rem; /* Slightly larger input text */
+        -moz-appearance: textfield; /* Firefox - hide number spinners */
+    }
+    input[type=number].neumorphic-inset::-webkit-inner-spin-button,
+    input[type=number].neumorphic-inset::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"].neumorphic-inset:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+    input[type="number"].neumorphic-inset::placeholder {
+        color: var(--muted-text-color);
+        opacity: 0.7;
+        transition: color 0.3s ease, opacity 0.3s ease;
+    }
+    /* Style select boxes */
+    .form-select.neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right .75rem center;
+        background-size: 16px 12px;
+        appearance: none;
+        font-size: 1.1rem; /* Match input size */
+        height: calc(1.5em + 1.5rem + 2px); /* Adjust height to match lg size */
+    }
+    body.dark-mode .form-select.neumorphic-inset {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+    .form-select.neumorphic-inset:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+    /* Style optgroup labels */
+    select.neumorphic-inset optgroup {
+        font-weight: bold;
+        font-style: italic;
+        color: var(--muted-text-color); /* Make optgroup label muted */
+        background-color: var(--bg-color); /* Match background */
+    }
+     /* Style options */
+    select.neumorphic-inset option {
+        background-color: var(--card-bg-color); /* Use card bg for options */
+        color: var(--text-color);
+    }
+
+    /* Swap Button Style */
+    #swapUnitsButton {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        border: 1px solid transparent;
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out;
+        padding: 0.5rem 0.6rem;
+        line-height: 1;
+    }
+     #swapUnitsButton:hover {
+        color: var(--text-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+     #swapUnitsButton:active {
+         color: var(--link-color);
+         background-color: var(--bg-color);
+         box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+     #swapUnitsButton:focus-visible {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         z-index: 1;
+     }
+
+
+    /* Submit Button Styles */
+    .btn-submit-tool {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--link-color);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn-submit-tool:hover {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+    .btn-submit-tool:active {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    .btn-submit-tool:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    }
+
+    /* Clear Button */
+    .clear-filters-btn {
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        border-radius: var(--radius-small);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .clear-filters-btn:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+
+    /* Results Section */
+     #resultsCard h3 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+     #outputValue { /* Readonly output input */
+        text-align: center;
+        font-size: 1.2em; /* Larger result text */
+        padding-right: 45px; /* Space for copy button */
+        background-color: var(--card-bg-color); /* Match card */
+        border-radius: var(--radius-small);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        border: none;
+        color: var(--text-color); /* Use main text color for result */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    }
+    #outputValue:focus {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    /* Copy Button */
+    #copyButton {
+         opacity: 0.7;
+         transition: opacity 0.2s ease;
+    }
+    #copyButton:hover {
+         opacity: 1;
+    }
+    #copyButton.copied {
+        background-color: #198754;
+        border-color: #198754;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for clear button, copy button, swap button #}
+{# JS for clear button, copy button, swap button #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('unitConvertForm');
+    const clearButton = document.getElementById('clearButton');
+    const inputField = document.getElementById('inputValue');
+    const outputField = document.getElementById('outputValue');
+    const copyButton = document.getElementById('copyButton');
+    const fromSelect = document.getElementById('fromUnitSelect');
+    const toSelect = document.getElementById('toUnitSelect');
+    const swapButton = document.getElementById('swapUnitsButton');
+    const resultsCard = document.getElementById('resultsCard');
+    // const convertButton = document.getElementById('convertButton'); // Submit button
+
+    // Clear Fields
+    if(clearButton && inputField && outputField && fromSelect && toSelect) {
+        clearButton.addEventListener('click', () => {
+            inputField.value = '';
+            outputField.value = '';
+            fromSelect.selectedIndex = 0;
+            toSelect.selectedIndex = 0;
+            if(copyButton) copyButton.classList.add('d-none');
+            if(resultsCard) resultsCard.style.display = 'none';
+            inputField.focus();
+        });
+    }
+
+    // Copy Button Logic
+    if (copyButton && outputField) {
+        // Show/Hide copy button based on output content initially
+        if (outputField.value.trim() === '') {
+             copyButton.classList.add('d-none');
+        } else {
+             copyButton.classList.remove('d-none');
+        }
+
+        copyButton.addEventListener('click', () => {
+            if (navigator.clipboard) {
+                 navigator.clipboard.writeText(outputField.value).then(() => {
+                    copyButton.innerHTML = '<svg class="bi bi-check-lg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    copyButton.classList.add('copied');
+                    setTimeout(() => {
+                         copyButton.innerHTML = '<svg class="bi bi-clipboard" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg> Copy';
+                         copyButton.classList.remove('copied');
+                    }, 2000);
+                 }).catch(err => { alert('Failed to copy.'); });
+            } else { /* Fallback */
+                 try { outputField.select(); outputField.setSelectionRange(0, 99999); document.execCommand('copy'); /* Add feedback */ }
+                 catch (err) { alert('Copying failed.'); }
+            }
+        });
+    }
+
+    // Swap Units Button
+    if (swapButton && fromSelect && toSelect) {
+        swapButton.addEventListener('click', () => {
+            const fromValue = fromSelect.value;
+            const toValue = toSelect.value;
+
+            // Basic check: don't swap if either is unselected
+            if (!fromValue || !toValue) return;
+
+            fromSelect.value = toValue;
+            toSelect.value = fromValue;
+
+            // If there's already a result, try to swap input/output and resubmit
+            if (inputField && outputField && outputField.value && !isNaN(parseFloat(outputField.value))) {
+                const inputVal = inputField.value;
+                const outputVal = outputField.value;
+                 inputField.value = outputVal; // Put result into input
+                 outputField.value = ''; // Clear output for resubmit
+                 if(copyButton) copyButton.classList.add('d-none');
+                 form.requestSubmit(); // Resubmit form
+            } else if (inputField.value.trim() !== '') {
+                 // If only input has value, just swap units and submit
+                 outputField.value = ''; // Clear previous output if any
+                 if(copyButton) copyButton.classList.add('d-none');
+                 form.requestSubmit();
+            }
+        });
+    }
+
+    // Hide results card initially if no result is passed from backend
+     if (resultsCard && (!outputField || outputField.value === '')) {
+         resultsCard.style.display = 'none';
+    } else if(resultsCard) {
+         resultsCard.style.display = ''; // Ensure visible if result IS present
+    }
+
+});
+</script>
+{% endblock %}

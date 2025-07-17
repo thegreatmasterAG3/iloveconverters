@@ -1,0 +1,216 @@
+{# templates/core/category_video.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container px-4 py-2"> {# Reduced top padding #}
+    <h1 class="pb-2 border-bottom text-center mb-4">{{ page_title }}</h1> {# Reduced bottom margin #}
+    <p class="text-center lead mb-4">Tools for converting video formats, trimming clips, compressing files, and more.</p>
+
+    <!-- ================== Filter Section for Video Tools ================== -->
+    <div class="container mb-4" id="sticky-filter-section"> {# Re-use sticky ID #}
+        <!-- Row for Search and Mobile Filter Button -->
+        <div class="row justify-content-center align-items-center mb-3">
+            <div class="col">
+                <input type="search" id="tool-search-input" class="form-control form-control-lg" placeholder="Search video tools..." aria-label="Search video tools">
+            </div>
+            <div class="col-auto d-lg-none">
+                <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFiltersVideo" aria-controls="offcanvasFiltersVideo">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16"> <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/> </svg>
+                    Filter Type
+                </button>
+            </div>
+        </div>
+
+        <!-- Inline Type Filters Container (Hidden on small screens) -->
+        <div class="row justify-content-center gy-3 d-none d-lg-flex" id="inline-filters-container">
+            <div class="col-12 col-lg text-center text-lg-start">
+                <span class="me-3 fw-bold">Tool Type:</span>
+                 <div class="form-check form-check-inline">
+                    <input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeSimpleInlineVideo" value="simple" checked>
+                    <label class="form-check-label" for="filterTypeSimpleInlineVideo">Simple</label>
+                    {# Many video tools are complex, 'simple' might refer to interface #}
+                </div>
+                 <div class="form-check form-check-inline">
+                    <input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeAiInlineVideo" value="ai" checked>
+                    <label class="form-check-label" for="filterTypeAiInlineVideo">AI ✨</label>
+                     {# Add AI checkbox if/when you have AI video tools #}
+                </div>
+            </div>
+             <!-- Clear Button (Inline) -->
+             <div class="col-12 col-lg-auto text-center text-lg-end">
+                 <button id="clear-filters-btn-inline-video" class="btn btn-sm btn-outline-secondary clear-filters-btn" type="button">Clear Type Filter</button>
+             </div>
+        </div>
+    </div><!-- End Sticky Filter Section -->
+
+    <!-- Offcanvas Filter Menu for Video Tools -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFiltersVideo" aria-labelledby="offcanvasFiltersLabelVideo">
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabelVideo">Filter Tool Type</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <!-- Type Filters (Offcanvas) -->
+        <div class="mb-3">
+            <h6>Tool Type:</h6>
+            <div class="form-check"><input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeSimpleOffcanvasVideo" value="simple" checked><label class="form-check-label" for="filterTypeSimpleOffcanvasVideo">Simple</label></div>
+            <div class="form-check"><input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeAiOffcanvasVideo" value="ai" checked><label class="form-check-label" for="filterTypeAiOffcanvasVideo">AI ✨</label></div>
+        </div>
+        <!-- Clear Button (Offcanvas) -->
+        <div class="d-grid gap-2">
+            <button id="clear-filters-btn-offcanvas-video" class="btn btn-outline-secondary clear-filters-btn" type="button">Clear Type Filter</button>
+        </div>
+      </div>
+    </div>
+    <!-- ================== End Filter Section ================== -->
+
+
+    <!-- Tool Listing Section -->
+    <div class="container px-0 py-2" id="tool-list-container">
+        <!-- Row to contain the tool cards -->
+        <div class="row g-4 py-5 row-cols-1 row-cols-md-2 row-cols-lg-3" id="tools-grid">
+
+            {# --- PASTE ONLY VIDEO TOOL CARDS BELOW --- #}
+
+            <div class="feature col tool-card" data-tool-name="MOV to MP4 Converter Video Format Apple Simple" data-tool-categories="video converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">MOV→MP4</div><h3 class="fs-4 card-title">MOV to MP4</h3></div><p class="card-text">Convert Apple MOV video files to the widely compatible MP4 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="AVI to MP4 Converter Video Format Simple" data-tool-categories="video converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">AVI→MP4</div><h3 class="fs-4 card-title">AVI to MP4</h3></div><p class="card-text">Convert older AVI video files to the modern MP4 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="MP4 to GIF Converter Video Animation Simple" data-tool-categories="video image converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">MP4→GIF</div><h3 class="fs-4 card-title">MP4 to GIF</h3></div><p class="card-text">Convert short video clips (MP4) into animated GIF images.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="Compress Video Reduce File Size Simple" data-tool-categories="video utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V↓</div><h3 class="fs-4 card-title">Compress Video</h3></div><p class="card-text">Reduce the file size of your video files (MP4, MOV, etc.).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Cut Trim Video Editor Clip Simple" data-tool-categories="video utility" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V✂</div><h3 class="fs-4 card-title">Cut Video</h3></div><p class="card-text">Trim or cut sections from your video files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="Merge Video Combine Clips Join Simple" data-tool-categories="video utility" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V+V</div><h3 class="fs-4 card-title">Merge Video</h3></div><p class="card-text">Combine multiple video clips into a single video file.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Rotate Video Flip Orientation Simple" data-tool-categories="video utility" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V⟳</div><h3 class="fs-4 card-title">Rotate Video</h3></div><p class="card-text">Rotate videos that were recorded in the wrong orientation.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Resize Video Dimensions Resolution Simple" data-tool-categories="video utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V↔</div><h3 class="fs-4 card-title">Resize Video</h3></div><p class="card-text">Change the resolution (e.g., 1080p, 720p) of your video files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="Add Watermark Video Stamp Logo Simple" data-tool-categories="video utility" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V™</div><h3 class="fs-4 card-title">Add Watermark (Video)</h3></div><p class="card-text">Add a text or logo watermark to your video files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Extract Audio from Video MP4 to MP3 Simple" data-tool-categories="video audio converter utility" data-tool-type="simple"> {# Also relevant #}
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V>A</div><h3 class="fs-4 card-title">Extract Audio from Video</h3></div><p class="card-text">Extract the sound or music from a video file (e.g., MP4 to MP3).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+             {# Add potential AI video tools here, e.g., AI Video Upscaling, AI Auto-Subtitling #}
+
+            {# --- END VIDEO TOOL CARDS --- #}
+
+        </div> <!-- /row #tools-grid -->
+        <!-- Message shown when no tools match filters -->
+        <div id="no-results-message" class="text-center py-5" style="display: none;">
+            <h2>No video tools found matching your criteria.</h2>
+            <p>Try adjusting your search or filters.</p>
+        </div>
+    </div> <!-- /container #tool-list-container -->
+</div>
+<!-- SVG definitions are in base.html -->
+{% endblock %}
+
+
+{% block extra_js %}
+<!-- JavaScript for Search and Filter (Adapted for Video category page) -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('tool-search-input');
+    // Only select TYPE checkboxes on this page
+    const typeCheckboxes = document.querySelectorAll('.type-filter-checkbox');
+    const toolCards = document.querySelectorAll('.tool-card'); // Cards on this page only
+    const noResultsMessage = document.getElementById('no-results-message');
+    const toolsGrid = document.getElementById('tools-grid');
+    const clearFiltersBtns = document.querySelectorAll('.clear-filters-btn');
+    const offcanvasElement = document.getElementById('offcanvasFiltersVideo'); // Use the correct ID
+    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
+
+    // Sync checkboxes between inline and offcanvas
+    function syncCheckboxes(sourceCheckbox) {
+        const isType = sourceCheckbox.classList.contains('type-filter-checkbox');
+        const value = sourceCheckbox.value;
+        const isChecked = sourceCheckbox.checked;
+
+        if (isType) {
+            typeCheckboxes.forEach(cb => {
+                if (cb.value === value && cb !== sourceCheckbox) {
+                    cb.checked = isChecked;
+                }
+            });
+        }
+    }
+
+    function filterTools() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedTypes = [...new Set(Array.from(typeCheckboxes)
+                                       .filter(checkbox => checkbox.checked)
+                                       .map(checkbox => checkbox.value))];
+        let visibleCount = 0;
+
+        toolCards.forEach(card => {
+            const toolName = card.dataset.toolName.toLowerCase();
+            const toolType = card.dataset.toolType;
+            // Category check is implicit - all cards are Video tools
+
+            const typeMatch = selectedTypes.includes(toolType);
+            const searchMatch = searchTerm === '' || toolName.includes(searchTerm);
+
+            // Show/Hide Card: Type and Search must match
+            if (typeMatch && searchMatch) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                 card.style.display = 'none';
+            }
+        });
+
+        // Show/Hide "No Results" message and grid
+        if (visibleCount === 0) {
+            noResultsMessage.style.display = 'block';
+            toolsGrid.style.display = 'none';
+        } else {
+            noResultsMessage.style.display = 'none';
+            toolsGrid.style.display = '';
+        }
+    }
+
+    // --- Event Listeners ---
+    searchInput.addEventListener('input', filterTools);
+
+    typeCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', (event) => {
+            syncCheckboxes(event.target);
+            filterTools();
+        });
+    });
+
+    clearFiltersBtns.forEach(button => {
+        button.addEventListener('click', () => {
+            searchInput.value = '';
+            typeCheckboxes.forEach(checkbox => checkbox.checked = true);
+            filterTools();
+
+             if (offcanvasElement.classList.contains('show')) {
+                 offcanvasInstance.hide();
+             }
+        });
+    });
+
+    // Initial filter run
+     filterTools();
+});
+</script>
+
+{# --- Theme Toggle Script (Inherited from base.html) --- #}
+
+{% endblock %}

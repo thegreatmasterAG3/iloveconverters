@@ -1,0 +1,430 @@
+{# templates/image_tools/tool_image_to_base64.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-11"> {# Slightly wider column #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">IMG→64</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Convert your images (JPG, PNG, GIF, WEBP, SVG etc.) into Base64 encoded strings for embedding.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {# ... messages loop ... #}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        <input class="d-none" type="file" id="imagefileInput" name="imagefile_b64" accept="image/*" required>
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                            {# ... SVG Icon ... #}
+                             <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop Image File Here</p>
+                             <p class="mb-0 text-muted small">(JPG, PNG, GIF, WEBP, SVG, etc.)</p>
+                             <p class="mb-0 text-muted small">or</p>
+                             <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse File</button>
+                        </div>
+
+                        {# --- Preview Area --- #}
+                        <div id="previewContainer" class="mt-3 d-flex flex-wrap gap-3 justify-content-center mb-4">
+                            {# Image preview will be added here by JS #}
+                        </div>
+                        <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No file selected.</div>
+
+
+                        {# --- Conversion Options (same as before) --- #}
+                         <div class="border-top pt-4 mb-4">
+                             <div class="row gy-3">
+                                <div class="col-12">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="data_uri_format" role="switch" id="dataUriCheck" {% if prev_options.data_uri_format != 'off' %}checked{% endif %}>
+                                        <label class="form-check-label" for="dataUriCheck">Include Data URI prefix (`data:...;base64,`)</label>
+                                    </div>
+                                 </div>
+                                 <div class="col-12">
+                                     <div class="form-check form-switch">
+                                         <input class="form-check-input" type="checkbox" name="line_breaks" role="switch" id="lineBreaksCheck" {% if prev_options.line_breaks == 'on' %}checked{% endif %}>
+                                         <label class="form-check-label" for="lineBreaksCheck">Format output with line breaks (every 76 chars)</label>
+                                     </div>
+                                 </div>
+                             </div>
+                        </div>
+
+
+                        {# Convert Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                               {# ... SVG Icon ... #}
+                                Convert to Base64
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Output Section (same as before) --- #}
+                <div id="outputSection" class="mt-5 border-top pt-4">
+                     <h3 class="text-center mb-3">Base64 Result for <span class="text-muted fst-italic">{{ original_filename }}</span></h3>
+                      <div class="position-relative">
+                         <textarea id="base64Output" class="form-control neumorphic-inset font-monospace" rows="10" readonly>{{ base64_string }}</textarea>
+                         <button id="copyButton" class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2" type="button" title="Copy to Clipboard">
+                             {# ... SVG Icon ... #} Copy
+                         </button>
+                     </div>
+                     <div class="text-center mt-3">
+                         <a href="{% url 'image_tools:image_to_base64' %}" class="btn btn-outline-secondary clear-filters-btn">
+                             {# ... SVG Icon ... #} Convert Another Image
+                         </a>
+                     </div>
+                 </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Add these styles to the <style> block in tool_image_to_base64.html */
+
+/* --- Dropzone/File Input Styles --- */
+.drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-main);
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    /* Neumorphic Inset */
+    background-color: var(--bg-color);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                inset -5px -5px 10px var(--shadow-light);
+}
+.drop-zone.dragover {
+    border-color: var(--link-color);
+    background-color: rgba(var(--link-color-rgb), 0.1);
+    box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+}
+/* Style for the browse button inside dropzone */
+#browseButton {
+    background-color: transparent;
+    border: 1px solid var(--muted-text-color);
+    color: var(--muted-text-color);
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+#browseButton:hover {
+    background-color: rgba(var(--text-color-rgb), 0.1);
+    border-color: var(--text-color);
+    color: var(--text-color);
+}
+/* Style for showing selected filename */
+#selectedFileName {
+     transition: color 0.3s ease;
+}
+
+
+/* --- Options Styles (Switches) --- */
+.form-label { /* General label styling */
+     color: var(--text-color);
+     font-weight: 500;
+     transition: color 0.3s ease;
+}
+.form-check-label { /* Label specifically for checkboxes/switches */
+    color: var(--text-color);
+    transition: color 0.3s ease;
+    cursor: pointer; /* Make label clickable */
+}
+.form-switch .form-check-input {
+     background-color: var(--bg-color);
+     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+     background-position: left center;
+     border-radius: 2em;
+     width: 2.75em;
+     height: 1.5em;
+     margin-top: 0.1em;
+     box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+     border: none;
+     cursor: pointer;
+     transition: background-color 0.3s ease, background-position .15s ease-in-out, box-shadow 0.3s ease, border-color 0.3s ease;
+     -webkit-appearance: none;
+     appearance: none;
+}
+body.dark-mode .form-switch .form-check-input {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:checked {
+     background-position: right center;
+     border-color: transparent;
+     background-color: var(--link-color);
+     box-shadow: none;
+     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:focus { /* Focus style for switch */
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); /* Keep base shadow on focus */
+      /* Ensure background image rule exists for focus state if needed */
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+}
+body.dark-mode .form-switch .form-check-input:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:checked:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+
+
+/* --- Submit Button Styles --- */
+.btn-submit-tool {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--link-color);
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-submit-tool:hover {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+}
+.btn-submit-tool:active {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+}
+.btn-submit-tool:disabled {
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    opacity: 0.6;
+    cursor: not-allowed;
+    color: var(--muted-text-color);
+}
+.btn-submit-tool:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+}
+
+/* --- Include Preview Styles --- */
+.preview-item { position: relative; border-radius: var(--radius-small); overflow: hidden; box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); background-color: var(--bg-color); transition: box-shadow 0.3s ease, background-color 0.3s ease; }
+    .preview-image { display: block; width: 100px; height: 100px; object-fit: cover; }
+    .preview-remove-btn { position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 50%; background-color: rgba(0, 0, 0, 0.6); color: white; border: none; font-size: 12px; font-weight: bold; line-height: 18px; text-align: center; cursor: pointer; opacity: 0.8; transition: opacity 0.2s ease; }
+    .preview-remove-btn:hover { opacity: 1; }
+
+/* --- Output/Download Section Styles --- */
+ /* Style the output textarea */
+#base64Output {
+    background-color: var(--card-bg-color); /* Match card */
+    border-radius: var(--radius-small);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                inset -3px -3px 6px var(--shadow-light);
+    border: none;
+    color: var(--muted-text-color); /* Muted color for output */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    font-size: 0.9em;
+    word-break: break-all; /* Wrap long string */
+}
+#base64Output:focus {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+    box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                inset -3px -3px 6px var(--shadow-light);
+}
+/* Style the copy button */
+#copyButton {
+    opacity: 0.7;
+    transition: opacity 0.2s ease;
+}
+#copyButton:hover {
+    opacity: 1;
+}
+#copyButton.copied {
+    background-color: #198754; /* Bootstrap success green */
+    border-color: #198754;
+    color: white;
+}
+ /* Style the Download button */
+.btn-success {
+    padding: 0.75rem 1.25rem;
+}
+/* Style the Convert More button */
+.clear-filters-btn {
+    background-color: transparent;
+    border: 1px solid var(--muted-text-color);
+    color: var(--muted-text-color);
+    border-radius: var(--radius-small);
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.clear-filters-btn:hover {
+    background-color: rgba(var(--text-color-rgb), 0.1);
+    border-color: var(--text-color);
+    color: var(--text-color);
+}
+
+    /* Output Textarea Styling */
+    #base64Output {
+        background-color: var(--card-bg-color); /* Match card */
+        border-radius: var(--radius-small);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                   inset -3px -3px 6px var(--shadow-light);
+        border: none;
+        color: var(--muted-text-color); /* Muted color for output */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        font-size: 0.9em;
+        word-break: break-all; /* Wrap long string */
+    }
+    #base64Output:focus {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                    inset -3px -3px 6px var(--shadow-light);
+    }
+    /* Copy Button Style */
+    #copyButton {
+         opacity: 0.7;
+         transition: opacity 0.2s ease;
+    }
+    #copyButton:hover {
+         opacity: 1;
+    }
+    #copyButton.copied {
+        background-color: #198754; /* Bootstrap success green */
+        border-color: #198754;
+        color: white;
+    }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS adapted for single file input 'imagefile_b64', no preview, copy button #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('imagefileInput'); // Correct ID
+    const browseButton = document.getElementById('browseButton');
+    const previewContainer = document.getElementById('previewContainer'); // Target for previews
+    const previewPlaceholder = document.getElementById('previewPlaceholder'); // Placeholder text
+    const convertButton = document.getElementById('convertButton');
+    const dropZoneText = document.getElementById('dropZoneText'); // Original dropzone text p tag
+    let currentFile = null; // Store single file
+
+    // --- Copy Button Logic (Keep this) ---
+    const copyButton = document.getElementById('copyButton');
+    const base64Output = document.getElementById('base64Output');
+    if (copyButton && base64Output) { /* ... copy logic from previous step ... */
+         copyButton.addEventListener('click', () => {
+            if (navigator.clipboard) {
+                 navigator.clipboard.writeText(base64Output.value).then(() => {
+                    copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    copyButton.classList.add('copied');
+                    setTimeout(() => {
+                         copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg> Copy';
+                         copyButton.classList.remove('copied');
+                    }, 2000);
+                 }).catch(err => { console.error('Failed to copy: ', err); alert('Failed to copy.'); });
+            } else { /* Fallback execCommand */ }
+        });
+    }
+
+    // --- File Handling Logic with Preview ---
+    const updateUI = () => {
+        previewContainer.innerHTML = ''; // Clear previews
+        if (currentFile) {
+            createPreviewElement(currentFile); // Create preview for the single file
+            previewPlaceholder.style.display = 'none'; // Hide placeholder
+            dropZoneText.textContent = "Replace file by dropping or browsing"; // Change text
+            convertButton.disabled = false;
+        } else {
+            previewPlaceholder.style.display = 'block'; // Show placeholder
+            dropZoneText.textContent = "Drag & Drop Image File Here"; // Reset text
+            convertButton.disabled = true;
+        }
+        // Update hidden input
+        try {
+            const dataTransfer = new DataTransfer();
+            if (currentFile) dataTransfer.items.add(currentFile);
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    const createPreviewElement = (file) => {
+        // Only preview actual image types the browser can render
+        if (!file.type.startsWith('image/')) {
+            console.warn("Cannot preview non-image file:", file.name);
+             // Show filename instead of preview for non-renderable images like TIFF/BMP sometimes
+             const p = document.createElement('p');
+             p.textContent = `File selected: ${file.name}`;
+             p.classList.add('text-center', 'my-3');
+             const removeBtn = document.createElement('button'); /* ... create remove button ... */
+             removeBtn.classList.add('preview-remove-btn'); removeBtn.innerHTML = '×'; removeBtn.type = 'button'; removeBtn.setAttribute('aria-label', `Remove ${file.name}`); removeBtn.onclick = handleRemoveFile;
+             const item = document.createElement('div'); item.classList.add('preview-item-alt', 'p-2', 'd-flex', 'align-items-center', 'gap-2'); item.style.boxShadow='none'; item.style.backgroundColor='transparent'; item.appendChild(p); item.appendChild(removeBtn);
+             previewContainer.appendChild(item);
+             return; // Stop here for non-images
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const previewItem = document.createElement('div');
+            previewItem.classList.add('preview-item');
+            const img = document.createElement('img');
+            img.classList.add('preview-image');
+            img.src = e.target.result;
+            img.alt = `Preview of ${file.name}`;
+            previewItem.appendChild(img);
+            const removeBtn = document.createElement('button');
+            removeBtn.classList.add('preview-remove-btn');
+            removeBtn.innerHTML = '×';
+            removeBtn.type = 'button';
+            removeBtn.setAttribute('aria-label', `Remove ${file.name}`);
+            removeBtn.onclick = handleRemoveFile;
+            previewItem.appendChild(removeBtn);
+            previewContainer.appendChild(previewItem); // Append the preview
+        }
+         reader.readAsDataURL(file);
+    };
+
+    const handleRemoveFile = () => {
+        currentFile = null;
+        fileInput.value = ''; // Important to clear the actual input
+        updateUI();
+    };
+
+    const handleFiles = (files) => {
+        if (files.length === 0) { handleRemoveFile(); return; }
+        const file = files[0]; // Only handle the first file
+        const allowedExt = ['.jpg', '.jpeg', '.png', '.webp', '.bmp', '.gif', '.tiff', '.svg'];
+        const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+
+        if (!file.type.startsWith('image/') && !allowedExt.includes(fileExt)) {
+             alert(`Please select a valid image file. Allowed extensions: ${allowedExt.join(', ')}`);
+             handleRemoveFile();
+             return;
+         }
+        currentFile = file;
+        updateUI();
+    };
+
+    // Drag/Drop/Browse listeners
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    updateUI(); // Initial state
+});
+</script>
+{% endblock %}

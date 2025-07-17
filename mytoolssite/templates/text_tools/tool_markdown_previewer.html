@@ -1,0 +1,197 @@
+{# templates/text_tools/tool_markdown_previewer.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container-fluid py-4 px-md-4"> {# Use fluid container for wider layout #}
+    <div class="text-center mb-4">
+         <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">MD</div>
+         <h1 class="fw-bold">{{ page_title }}</h1>
+         <p class="lead text-muted">Write Markdown on the left and see the rendered HTML preview on the right in real-time.</p>
+    </div>
+
+    {# Display Messages if needed later #}
+    {# {% if messages %} ... {% endif %} #}
+
+    <div class="row g-3">
+        {# --- Markdown Input Column --- #}
+        <div class="col-lg-6">
+            <div class="card h-100 neumorphic"> {# Use neumorphic for card container #}
+                <div class="card-header fw-medium">Markdown Input</div>
+                <div class="card-body p-0"> {# Remove padding to allow textarea fill #}
+                    <textarea class="form-control markdown-textarea"
+                              id="markdownInput"
+                              rows="20"
+                              placeholder="Type your Markdown here..."
+                              aria-label="Markdown Input"></textarea>
+                </div>
+            </div>
+        </div>
+
+        {# --- HTML Preview Column --- #}
+        <div class="col-lg-6">
+             <div class="card h-100 neumorphic">
+                <div class="card-header fw-medium">HTML Preview</div>
+                <div class="card-body preview-pane" id="htmlPreview" aria-live="polite">
+                    {# Preview content appears here #}
+                    <p class="text-muted text-center mt-5">Preview will appear here...</p>
+                </div>
+            </div>
+        </div>
+    </div> {# End row #}
+</div> {# End container #}
+
+{# Specific styles for this page #}
+<style>
+    .markdown-textarea {
+        width: 100%;
+        height: calc(100% - 1px); /* Fill card body height */
+        border: none;
+        background-color: var(--card-bg-color); /* Match card */
+        color: var(--text-color);
+        padding: 1rem;
+        font-family: Consolas, Monaco, 'Andale Mono', 'Ubuntu Mono', monospace;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        resize: none; /* Disable manual resize */
+        border-radius: 0 0 var(--radius-main) var(--radius-main); /* Match bottom card radius */
+        transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; /* Added box-shadow transition */
+        /* Neumorphic inset style */
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+    }
+    .markdown-textarea:focus {
+        outline: 2px solid var(--link-color); /* Keep standard outline */
+        outline-offset: 2px;
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); /* Keep inset shadow */
+        /* background-color: var(--card-bg-color); Don't necessarily need to change bg on focus */
+    }
+    /* --- FIX: Placeholder text color --- */
+    .markdown-textarea::placeholder {
+         color: var(--muted-text-color);
+         opacity: 0.7;
+         transition: color 0.3s ease, opacity 0.3s ease;
+    }
+    /* --- END FIX --- */
+
+
+    .card-header { /* Style card headers */
+        background-color: rgba(var(--text-color-rgb, 52, 73, 94), 0.05); /* Subtle header bg */
+        color: var(--text-color);
+        border-bottom: 1px solid var(--shadow-dark);
+        border-radius: var(--radius-main) var(--radius-main) 0 0 !important; /* Match top card radius */
+        padding: 0.75rem 1.25rem;
+        font-size: 0.9rem;
+        font-weight: 500; /* Reduced boldness slightly */
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    body.dark-mode .card-header {
+         /* Define --shadow-light-rgb if not already done in :root/body.dark-mode */
+         /* Assuming --shadow-light in dark mode is #373c45 -> 55, 60, 69 */
+         --shadow-light-rgb: 55, 60, 69;
+         background-color: rgba(var(--shadow-light-rgb), 0.3); /* Darker subtle bg */
+         border-bottom-color: var(--shadow-light);
+    }
+
+
+    .preview-pane {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        overflow-y: auto; /* Add scroll if content exceeds height */
+        /* Calculate height based on header padding/border - adjust 58px if header height changes */
+        /* Let card height control this naturally for now */
+        /* height: calc(100% - 58px); */
+         font-size: 1rem;
+         line-height: 1.7;
+         padding: 1.25rem; /* Add padding to preview pane */
+    }
+    /* Markdown elements styling (match blog post detail) */
+    .preview-pane h1, .preview-pane h2, .preview-pane h3, .preview-pane h4, .preview-pane h5, .preview-pane h6 { color: var(--text-color); margin-top: 1.5em; margin-bottom: 0.75em; font-weight: 600; transition: color 0.3s ease;}
+    .preview-pane p { margin-bottom: 1.25rem; color: var(--text-color); transition: color 0.3s ease;}
+    .preview-pane a { color: var(--link-color); text-decoration: none; transition: color 0.3s ease; }
+    .preview-pane a:hover { color: var(--link-hover-color); text-decoration: underline; }
+    .preview-pane code:not([class*="language-"]) { background-color: rgba(var(--muted-text-color-rgb, 90, 106, 126), 0.1); color: var(--text-color); padding: 0.2em 0.4em; border-radius: 3px; font-size: 0.85em; transition: background-color 0.3s ease, color 0.3s ease;}
+    .preview-pane pre { padding: 1em; border-radius: var(--radius-small); overflow-x: auto; background-color: var(--bg-color); /* Use main bg for code blocks */ box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light); margin-bottom: 1.25rem; transition: background-color 0.3s ease, box-shadow 0.3s ease;}
+    .preview-pane pre code { background-color: transparent !important; padding: 0; font-size: 0.9em; color: var(--text-color); /* Use text color for code */ transition: color 0.3s ease;}
+    .preview-pane blockquote { border-left: 4px solid var(--border-color); padding-left: 1rem; margin-left: 0; margin-right: 0; color: var(--muted-text-color); font-style: italic; transition: color 0.3s ease, border-color 0.3s ease; }
+    .preview-pane ul, .preview-pane ol { padding-left: 2em; margin-bottom: 1rem; color: var(--text-color); transition: color 0.3s ease;}
+    .preview-pane li { margin-bottom: 0.5em; }
+    .preview-pane img { max-width: 100%; height: auto; border-radius: var(--radius-small); }
+    .preview-pane table { width: 100%; margin-bottom: 1rem; border-collapse: collapse; color: var(--text-color); transition: color 0.3s ease;}
+    .preview-pane th, .preview-pane td { border: 1px solid var(--border-color); padding: 0.5rem 0.75rem; transition: border-color 0.3s ease; }
+    .preview-pane thead th { background-color: rgba(var(--text-color-rgb), 0.05); font-weight: 600; transition: background-color 0.3s ease; }
+    body.dark-mode .preview-pane thead th { background-color: rgba(var(--shadow-light-rgb), 0.3); }
+    .preview-pane hr { border-top-color: var(--border-color); margin: 2rem 0; transition: border-color 0.3s ease; }
+
+    /* --- Highlight.js Theme Overrides for Dark Mode --- */
+    body.dark-mode .hljs { color: #c9d1d9; background: #22272e;} /* Dark background, light text */
+    body.dark-mode .hljs-comment, body.dark-mode .hljs-quote { color: #8b949e; }
+    body.dark-mode .hljs-variable, body.dark-mode .hljs-template-variable, body.dark-mode .hljs-tag, body.dark-mode .hljs-name, body.dark-mode .hljs-selector-id, body.dark-mode .hljs-selector-class, body.dark-mode .hljs-regexp, body.dark-mode .hljs-link, body.dark-mode .hljs-meta { color: #ff7b72; } /* Reddish */
+    body.dark-mode .hljs-number, body.dark-mode .hljs-literal, body.dark-mode .hljs-type, body.dark-mode .hljs-params, body.dark-mode .hljs-built_in, body.dark-mode .hljs-builtin-name { color: #79c0ff; } /* Blue */
+    body.dark-mode .hljs-string, body.dark-mode .hljs-symbol, body.dark-mode .hljs-bullet, body.dark-mode .hljs-subst, body.dark-mode .hljs-section, body.dark-mode .hljs-selector-attr, body.dark-mode .hljs-selector-pseudo, body.dark-mode .hljs-addition { color: #a5d6ff; } /* Light Blue */
+    body.dark-mode .hljs-keyword, body.dark-mode .hljs-selector-tag, body.dark-mode .hljs-attribute { color: #ffa657; } /* Orange */
+    body.dark-mode .hljs-emphasis { font-style: italic; }
+    body.dark-mode .hljs-strong { font-weight: bold; }
+
+</style>
+{% endblock %}
+
+{% block extra_js %}
+{# --- Include Marked.js and Highlight.js via CDN --- #}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{# Choose a highlight.js theme CSS (e.g., default, github, atom-one-dark) #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      media="(prefers-color-scheme: dark)"> {# Load dark theme conditionally #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)"> {# Load light theme conditionally #}
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+{# Optional: Load languages if needed #}
+
+
+{# --- Live Preview Logic --- #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const markdownInput = document.getElementById('markdownInput');
+    const htmlPreview = document.getElementById('htmlPreview');
+
+    // Configure Marked.js
+    marked.setOptions({
+        gfm: true, breaks: true, sanitize: false, smartLists: true, smartypants: true,
+        highlight: function (code, lang) {
+            const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+            return hljs.highlight(code, { language }).value;
+        }
+    });
+
+    // Function to update the preview
+    const updatePreview = () => {
+        if (markdownInput && htmlPreview) {
+            const markdownText = markdownInput.value;
+            // Show placeholder if input is empty
+            if (markdownText.trim() === '') {
+                htmlPreview.innerHTML = '<p class="text-muted text-center mt-5">Preview will appear here...</p>';
+            } else {
+                const html = marked.parse(markdownText);
+                htmlPreview.innerHTML = html;
+                 // Re-highlight after parsing (might be needed depending on how marked/hljs interact)
+                 htmlPreview.querySelectorAll('pre code').forEach((block) => {
+                     try { // Add try-catch just in case
+                         hljs.highlightElement(block);
+                     } catch (e) { console.error("Highlighting error:", e); }
+                 });
+            }
+        }
+    };
+
+    if (markdownInput) {
+        markdownInput.addEventListener('input', updatePreview);
+        markdownInput.addEventListener('paste', () => setTimeout(updatePreview, 0)); // Handle paste
+        updatePreview(); // Initial render
+    }
+
+});
+</script>
+{# --- Theme toggle inherited from base --- #}
+{% endblock %}

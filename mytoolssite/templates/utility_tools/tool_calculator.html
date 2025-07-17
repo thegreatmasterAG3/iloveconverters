@@ -1,0 +1,541 @@
+{# templates/utility_tools/tool_calculator.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <div class="row justify-content-center">
+        <div class="col-lg-6 col-md-8 col-sm-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">Calc</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Perform basic and scientific calculations directly in your browser.</p>
+            </div>
+
+            {# --- Calculator Wrapper --- #}
+            <div class="card p-3 p-md-4" id="calculator">
+
+                {# Display Screen - Add tabindex for keyboard focus if desired #}
+                <input type="text" id="calcDisplay" class="form-control form-control-lg text-end neumorphic-inset font-monospace fs-2 mb-3" readonly value="0" tabindex="-1"> {# tabindex -1 prevents direct tab focus #}
+
+                {# Mode Switcher #}
+                <div class="btn-group w-100 mb-3" role="group" aria-label="Calculator Mode">
+                    <input type="radio" class="btn-check" name="calc_mode" id="modeSimple" value="simple" autocomplete="off" checked>
+                    <label class="btn btn-outline-primary neumorphic-radio" for="modeSimple">Simple</label>
+
+                    <input type="radio" class="btn-check" name="calc_mode" id="modeScientific" value="scientific" autocomplete="off">
+                    <label class="btn btn-outline-primary neumorphic-radio" for="modeScientific">Scientific</label>
+                </div>
+
+                {# --- Button Grids --- #}
+                <div id="calculatorButtons">
+                    {# Scientific Buttons (Initially hidden) #}
+                    <div class="row g-2 mb-2 d-none" id="scientificButtons">
+                        {# Row 1 #}
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="inv">Inv</button></div> {# Placeholder for Inv functionality #}
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="deg">Deg</button></div> {# Placeholder for Deg/Rad toggle #}
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="sin">sin</button></div>
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="cos">cos</button></div>
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="tan">tan</button></div>
+                         {# Row 2 #}
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="pow">xʸ</button></div>
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="log">log</button></div>
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="ln">ln</button></div>
+                        <div class="col"><button class="btn btn-calc btn-num w-100" data-value="(">(</button></div>
+                        <div class="col"><button class="btn btn-calc btn-num w-100" data-value=")">)</button></div>
+                         {# Row 3 #}
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="sqrt">√</button></div>
+                        <div class="col"><button class="btn btn-calc btn-clear w-100" id="btnClearSci">C</button></div> {# Separate Clear for layout #}
+                        <div class="col"><button class="btn btn-calc btn-op w-100" data-operator="backspaceSci">DEL</button></div> {# Separate DEL for layout #}
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="percent">%</button></div>
+                        <div class="col"><button class="btn btn-calc btn-op w-100" data-operator="divideSci">÷</button></div> {# Separate divide for layout #}
+                         {# Row 4 - Merged with Standard 789 #}
+                         {# Row 5 - Merged with Standard 456 #}
+                         {# Row 6 - Merged with Standard 123 #}
+                         {# Row 7 #}
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="square">x²</button></div>
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="reciprocal">¹/x</button></div>
+                        <div class="col"><button class="btn btn-calc btn-func w-100" data-func="toggleSign">+/-</button></div>
+                        <div class="col"><button class="btn btn-calc btn-num w-100" data-value="0Sci">0</button></div> {# Separate 0 for layout #}
+                        <div class="col"><button class="btn btn-calc btn-num w-100" data-value=".Sci">.</button></div> {# Separate . for layout #}
+                        {# Add more here: asin, acos, atan, n!, etc. #}
+                    </div>
+
+                    {# Standard Buttons (Some may be hidden/replaced in Sci mode via layout/JS) #}
+                    <div class="row g-2 mb-2" id="standardButtonsTopRow">
+                        <div class="col-6" id="btnClearStdContainer"><button class="btn btn-calc btn-clear w-100" id="btnClearStd">C</button></div>
+                        <div class="col-3" id="btnDelStdContainer"><button class="btn btn-calc btn-op w-100" data-operator="backspaceStd">DEL</button></div>
+                        <div class="col-3" id="btnDivideStdContainer"><button class="btn btn-calc btn-op w-100" data-operator="divideStd">÷</button></div>
+                    </div>
+                     <div class="row g-2 mb-2">
+                        <div class="col-3"><button class="btn btn-calc btn-num w-100" data-value="7">7</button></div>
+                        <div class="col-3"><button class="btn btn-calc btn-num w-100" data-value="8">8</button></div>
+                        <div class="col-3"><button class="btn btn-calc btn-num w-100" data-value="9">9</button></div>
+                        <div class="col-3"><button class="btn btn-calc btn-op w-100" data-operator="multiply">×</button></div>
+                    </div>
+                     <div class="row g-2 mb-2">
+                        <div class="col-3"><button class="btn btn-calc btn-num w-100" data-value="4">4</button></div>
+                        <div class="col-3"><button class="btn btn-calc btn-num w-100" data-value="5">5</button></div>
+                        <div class="col-3"><button class="btn btn-calc btn-num w-100" data-value="6">6</button></div>
+                        <div class="col-3"><button class="btn btn-calc btn-op w-100" data-operator="subtract">−</button></div>
+                    </div>
+                     <div class="row g-2 mb-2">
+                        <div class="col-3"><button class="btn btn-calc btn-num w-100" data-value="1">1</button></div>
+                        <div class="col-3"><button class="btn btn-calc btn-num w-100" data-value="2">2</button></div>
+                        <div class="col-3"><button class="btn btn-calc btn-num w-100" data-value="3">3</button></div>
+                        <div class="col-3"><button class="btn btn-calc btn-op w-100" data-operator="add">+</button></div>
+                    </div>
+                    <div class="row g-2">
+                        <div class="col-3" id="btnToggleSignStdContainer"><button class="btn btn-calc btn-func w-100" data-func="toggleSignStd">+/-</button></div> {# Moved +/- here #}
+                        <div class="col-3" id="btnZeroStdContainer"><button class="btn btn-calc btn-num w-100" data-value="0Std">0</button></div>
+                        <div class="col-3" id="btnDecimalStdContainer"><button class="btn btn-calc btn-num w-100" data-value=".Std">.</button></div>
+                        <div class="col-3"><button class="btn btn-calc btn-equals w-100" id="btnEquals">=</button></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Specific styles for the calculator #}
+<style>
+    /* Styles from previous step */
+    #calculator { max-width: 400px; margin-left: auto; margin-right: auto;}
+    #calcDisplay { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; height: auto; margin-bottom: 1rem; overflow-x: auto; text-align: right; font-size: 2rem; }
+    #calcDisplay:focus { outline: none; box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);}
+    .btn-calc { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); border: none; color: var(--text-color); font-size: 1.1rem; font-weight: 500; padding: 0.8rem 0.5rem; transition: all 0.15s ease-out; min-height: 55px; display: flex; align-items: center; justify-content: center; }
+    .btn-calc:hover { color: var(--text-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); transform: translateY(-2px); }
+    .btn-calc:active { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); transform: translateY(1px); }
+    .btn-calc:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); }
+    .btn-calc.btn-op, .btn-calc.btn-func { color: var(--accent-primary); font-weight: bold; }
+    .btn-calc.btn-equals { background-color: var(--link-color); color: #fff; font-weight: bold; box-shadow: 3px 3px 6px #1a5ad6, -3px -3px 6px #389bff, inset 1px 1px 2px rgba(255,255,255,0.3), inset -1px -1px 2px rgba(0,0,0,0.2); }
+    .btn-calc.btn-equals:hover { background-color: #1e60ff; box-shadow: 4px 4px 8px #1a5ad6, -4px -4px 8px #389bff, inset 1px 1px 2px rgba(255,255,255,0.3), inset -1px -1px 2px rgba(0,0,0,0.2); transform: translateY(-2px); color: #fff; }
+    .btn-calc.btn-equals:active { background-color: #1e60ff; box-shadow: inset 3px 3px 6px #1a5ad6, inset -3px -3px 6px #389bff; transform: translateY(1px); color: #fff; }
+    .btn-calc.btn-clear { color: var(--accent-security); font-weight: bold; }
+    .neumorphic-radio { /* ... Styles from custom.css or previous response ... */ background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); border: 1px solid transparent; color: var(--muted-text-color); transition: all 0.2s ease-out; padding: .5rem 1rem; margin-bottom: 0;}
+    .btn-check:checked + .neumorphic-radio { color: var(--link-color); background-color: var(--bg-color); border-color: transparent; box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .neumorphic-radio:hover { color: var(--text-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-check:checked + .neumorphic-radio:hover { color: var(--link-color); }
+    .btn-check:focus-visible + .neumorphic-radio { outline: 2px solid var(--link-color); outline-offset: 2px; z-index: 1; }
+    .btn-group > .btn-check:checked + .neumorphic-radio { z-index: 1; }
+
+     /* Ensure Scientific buttons fit well */
+     #scientificButtons .col { padding: 0.2rem; } /* Reduce padding between sci buttons slightly */
+     #scientificButtons .btn { padding: 0.6rem 0.3rem; font-size: 0.9rem; min-height: 45px;} /* Smaller sci buttons */
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JavaScript for Calculator Logic with Keyboard Support and Sci Functions #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const display = document.getElementById('calcDisplay');
+    const buttonsContainer = document.getElementById('calculatorButtons');
+    const modeRadios = document.querySelectorAll('input[name="calc_mode"]');
+    const scientificButtonsDiv = document.getElementById('scientificButtons');
+    // Get references to specific buttons that might change based on mode
+    const btnClearStdContainer = document.getElementById('btnClearStdContainer');
+    const btnDelStdContainer = document.getElementById('btnDelStdContainer');
+    const btnDivideStdContainer = document.getElementById('btnDivideStdContainer');
+    const btnToggleSignStdContainer = document.getElementById('btnToggleSignStdContainer');
+    const btnZeroStdContainer = document.getElementById('btnZeroStdContainer');
+    const btnDecimalStdContainer = document.getElementById('btnDecimalStdContainer');
+
+
+    let currentInput = '0';
+    let firstOperand = null;
+    let operator = null;
+    let waitingForSecondOperand = false;
+    let isErrorState = false;
+    let memoryValue = 0; // For potential M+, M-, MR buttons later
+    let parenthesisOpen = 0; // Track open parentheses
+
+    // --- Update Display ---
+    function updateDisplay() {
+        const maxLength = 18; // Or adjust based on input field width
+        let displayValue = currentInput;
+        if (isErrorState) {
+            displayValue = currentInput; // Show error message as is
+        } else if (displayValue.length > maxLength) {
+            try {
+                const num = parseFloat(displayValue);
+                if (Math.abs(num) > 1e-6 && (Math.abs(num) < 1e-6 || Math.abs(num) >= Math.pow(10, maxLength - 6))) {
+                     displayValue = num.toExponential(maxLength - 8); // Use scientific notation
+                } else {
+                     // If not suitable for scientific, might need truncation or different handling
+                     displayValue = displayValue.substring(0, maxLength);
+                }
+            } catch (e) { displayValue = displayValue.substring(0, maxLength); }
+        }
+        display.value = displayValue;
+    }
+
+    // --- Input Digit ---
+    function inputDigit(digit) {
+        if (isErrorState) return;
+        if (waitingForSecondOperand) {
+            currentInput = digit;
+            waitingForSecondOperand = false;
+        } else {
+            // Prevent exceeding reasonable length limits
+            if (currentInput.length >= 25) return;
+            currentInput = currentInput === '0' ? digit : currentInput + digit;
+        }
+        updateDisplay();
+    }
+
+    // --- Input Decimal ---
+    function inputDecimal() {
+        if (isErrorState) return;
+        if (waitingForSecondOperand) {
+            currentInput = '0.';
+            waitingForSecondOperand = false;
+            updateDisplay();
+            return;
+        }
+        if (!currentInput.includes('.')) {
+            currentInput += '.';
+            updateDisplay();
+        }
+    }
+
+    // --- Handle Operator ---
+    function handleOperator(nextOperator) {
+        if (isErrorState) return;
+        const inputValue = parseFloat(currentInput);
+
+        if (operator && waitingForSecondOperand) {
+            operator = nextOperator; // Change pending operator
+            console.log("Operator changed:", operator);
+            return;
+        }
+
+        if (firstOperand === null) {
+            if(!isNaN(inputValue)){
+                 firstOperand = inputValue;
+            } else {
+                 // Handle case where operator pressed after invalid input (e.g. after '(' )
+                 console.log("Cannot set first operand from non-numeric input");
+                 return; // Or show error?
+            }
+        } else if (operator && !waitingForSecondOperand) {
+            if(isNaN(inputValue)){
+                 console.log("Cannot calculate with non-numeric second operand");
+                 return; // Or show error?
+            }
+            const result = calculate(firstOperand, inputValue, operator);
+            if (result === 'Error') { showError(); return; }
+            currentInput = String(result);
+            firstOperand = result;
+            updateDisplay();
+        }
+
+        waitingForSecondOperand = true;
+        operator = nextOperator;
+        console.log("Operand 1:", firstOperand, "Operator:", operator);
+    }
+
+    // --- Calculation Logic ---
+    function calculate(num1, num2, op) {
+        try {
+            // Precision handling (simple approach)
+            const precision = 1e12; // Adjust as needed
+            num1 = Math.round(num1 * precision) / precision;
+            num2 = Math.round(num2 * precision) / precision;
+
+            let result;
+            switch (op) {
+                case 'add': result = num1 + num2; break;
+                case 'subtract': result = num1 - num2; break;
+                case 'multiply': result = num1 * num2; break;
+                case 'divide':
+                    if (num2 === 0) return 'Error';
+                    result = num1 / num2; break;
+                case 'pow': result = Math.pow(num1, num2); break;
+                default: return num2;
+            }
+            // Round result again to handle potential float issues
+            return Math.round(result * precision) / precision;
+        } catch (e) { return 'Error'; }
+    }
+
+    // --- Scientific Functions ---
+    function handleFunction(func) {
+         if (isErrorState && func !== 'clear' && func !== 'backspace') return;
+         try {
+             const inputValue = parseFloat(currentInput);
+             let result;
+
+             // Functions operating on the current input
+             if (['sqrt', 'square', 'cube', 'reciprocal', 'sin', 'cos', 'tan', 'log', 'ln', 'factorial', 'toggleSign', 'percent'].includes(func)) {
+                 if (isNaN(inputValue) && func !== 'percent') return; // Most need a valid number
+
+                 switch(func) {
+                     case 'sqrt':
+                         if (inputValue < 0) return showError("Invalid Input");
+                         result = Math.sqrt(inputValue); break;
+                     case 'square': result = Math.pow(inputValue, 2); break;
+                     case 'cube': result = Math.pow(inputValue, 3); break;
+                     case 'reciprocal':
+                         if (inputValue === 0) return showError("Cannot divide by zero");
+                         result = 1 / inputValue; break;
+                     case 'sin': result = Math.sin(inputValue * Math.PI / 180); break; // Assuming Deg input for now
+                     case 'cos': result = Math.cos(inputValue * Math.PI / 180); break;
+                     case 'tan': result = Math.tan(inputValue * Math.PI / 180); break;
+                     case 'log': // Base 10
+                         if (inputValue <= 0) return showError("Invalid Input");
+                         result = Math.log10(inputValue); break;
+                     case 'ln': // Natural
+                         if (inputValue <= 0) return showError("Invalid Input");
+                         result = Math.log(inputValue); break;
+                     case 'factorial':
+                         if (inputValue < 0 || !Number.isInteger(inputValue)) return showError("Invalid Input");
+                         if (inputValue === 0) result = 1; else {
+                              result = 1; for(let i=2; i<=inputValue; i++) result *=i;
+                              if (!Number.isFinite(result)) return showError("Overflow");
+                         } break;
+                     case 'toggleSign': result = inputValue * -1; break;
+                     case 'percent':
+                        // If pending operation, calculate percentage of first operand
+                        if (firstOperand !== null && operator) {
+                             const percentValue = firstOperand * (inputValue / 100);
+                             currentInput = String(percentValue); // Show the percentage value
+                             updateDisplay();
+                             // Don't clear state yet, let user press equals or next op
+                             return;
+                        } else { // Otherwise, just divide current input by 100
+                            result = inputValue / 100;
+                        }
+                        break;
+                     default: return;
+                 }
+                 currentInput = String(result);
+                 waitingForSecondOperand = false; // Result replaces current input
+                 updateDisplay();
+             }
+             // Functions that set state or act as operators
+             else if (func === 'pow') {
+                  handleOperator('pow'); // Needs a second operand
+             }
+              // Handle placeholder buttons
+             else if (func === 'inv' || func === 'deg') {
+                  console.warn(`Function '${func}' not implemented yet.`);
+             }
+
+         } catch(e) { showError(); console.error(e); }
+    }
+
+    // --- Handle Constants (like PI, E) ---
+    function handleConstant(constName) {
+         if (isErrorState) return;
+         let value;
+         switch(constName) {
+              case 'PI': value = Math.PI; break;
+              case 'E': value = Math.E; break;
+              default: return;
+         }
+         currentInput = String(value);
+         waitingForSecondOperand = false;
+         updateDisplay();
+    }
+
+    // --- Handle Parentheses ---
+    function inputParenthesis(paren) {
+         if (isErrorState) return;
+         // Basic logic: just append. Proper evaluation needs complex parsing (RPN, shunting-yard)
+         // For a simple implementation, this might just be visual
+         currentInput = currentInput === '0' ? paren : currentInput + paren;
+         if (paren === '(') parenthesisOpen++;
+         else if (paren === ')') parenthesisOpen--;
+         // Could add validation later to prevent invalid sequences like '))' or '5('
+         updateDisplay();
+    }
+
+    // --- Handle Equals ---
+    function handleEquals() {
+        if (isErrorState || waitingForSecondOperand && operator) return; // Don't do anything if waiting for 2nd operand
+
+        // If there's a pending operation and a valid current number
+        if (operator && firstOperand !== null) {
+             const inputValue = parseFloat(currentInput);
+             if(isNaN(inputValue)) {
+                 // Handle cases like '5 * (' - invalid for direct calc
+                 console.log("Equals pressed with non-numeric current input");
+                 return; // Or show error?
+             }
+            const result = calculate(firstOperand, inputValue, operator);
+             if (result === 'Error') { showError(); return; }
+            currentInput = String(result);
+            firstOperand = null; // Calculation complete, reset first operand
+            operator = null; // Reset operator
+            waitingForSecondOperand = false;
+            updateDisplay();
+        }
+        // If no operator, just keep the current number
+    }
+
+    // --- Reset ---
+    function resetCalculator() {
+        currentInput = '0'; firstOperand = null; operator = null;
+        waitingForSecondOperand = false; isErrorState = false; parenthesisOpen = 0;
+        updateDisplay(); console.log("Calculator Reset");
+    }
+
+    // --- Backspace ---
+    function backspace() {
+         if (isErrorState) { resetCalculator(); return; }
+         if (waitingForSecondOperand) return; // Don't delete if waiting
+         const deletedChar = currentInput.slice(-1);
+         currentInput = currentInput.slice(0, -1);
+         if (deletedChar === '(') parenthesisOpen--;
+         else if (deletedChar === ')') parenthesisOpen++; // This logic is tricky
+         if (currentInput === '' || currentInput === '-') { currentInput = '0'; }
+         updateDisplay();
+    }
+
+     // --- Show Error ---
+     function showError(message = "Error") {
+         currentInput = message; isErrorState = true; updateDisplay();
+     }
+
+    // --- Event Listener for Buttons ---
+    buttonsContainer.addEventListener('click', (event) => {
+        const { target } = event;
+        if (!target.matches('#calculatorButtons button')) return;
+
+        if (isErrorState && !target.matches('.btn-clear')) {
+             resetCalculator();
+             if (!target.matches('.btn-num') && target.dataset.value !== '.') return; // Don't process op/func right after error clear
+        }
+
+        const value = target.dataset.value;
+        const op = target.dataset.operator;
+        const func = target.dataset.func;
+        const constant = target.dataset.const;
+
+        if (value !== undefined) { // Digit, decimal, or parenthesis
+             if (value === '.' || value === '.Sci') inputDecimal();
+             else if (value === '(' || value === ')') inputParenthesis(value);
+             else inputDigit(value.replace('Sci','').replace('Std','')); // Remove suffix if any
+        } else if (op !== undefined) { // Operator or backspace
+             const baseOp = op.replace('Sci','').replace('Std',''); // Get base operator name
+             if (baseOp === 'backspace') backspace();
+             else handleOperator(baseOp);
+        } else if (func !== undefined) { // Function
+             const baseFunc = func.replace('Std','');
+             handleFunction(baseFunc);
+        } else if (constant !== undefined) { // Constant
+             handleConstant(constant);
+        } else if (target.id === 'btnEquals') { // Equals
+            handleEquals();
+        } else if (target.matches('.btn-clear')) { // Clear (matches by class)
+            resetCalculator();
+        }
+    });
+
+     // --- Keyboard Support ---
+     document.addEventListener('keydown', (event) => {
+         const key = event.key;
+         let handled = true; // Assume we handle it, prevent default if true
+
+         // Find button matching the key to simulate click style (optional)
+         let targetButton = null;
+
+         if (key >= '0' && key <= '9') {
+             inputDigit(key);
+             targetButton = buttonsContainer.querySelector(`button[data-value="${key}"], button[data-value="${key}Sci"], button[data-value="${key}Std"]`);
+         } else if (key === '.') {
+             inputDecimal();
+             targetButton = buttonsContainer.querySelector(`button[data-value="."], button[data-value=".Sci"], button[data-value=".Std"]`);
+         } else if (key === '+') {
+             handleOperator('add');
+             targetButton = buttonsContainer.querySelector('button[data-operator="add"]');
+         } else if (key === '-') {
+             handleOperator('subtract');
+              targetButton = buttonsContainer.querySelector('button[data-operator="subtract"]');
+         } else if (key === '*') {
+             handleOperator('multiply');
+              targetButton = buttonsContainer.querySelector('button[data-operator="multiply"]');
+         } else if (key === '/') {
+             handleOperator('divide');
+             targetButton = buttonsContainer.querySelector('button[data-operator="divideStd"], button[data-operator="divideSci"]');
+         } else if (key === 'Enter' || key === '=') {
+             handleEquals();
+              targetButton = document.getElementById('btnEquals');
+         } else if (key === 'Backspace') {
+             backspace();
+              targetButton = buttonsContainer.querySelector('button[data-operator="backspaceStd"], button[data-operator="backspaceSci"]');
+         } else if (key === 'Escape') {
+             resetCalculator();
+             targetButton = buttonsContainer.querySelector('.btn-clear');
+         } else if (key === '(') {
+             inputParenthesis('(');
+              targetButton = buttonsContainer.querySelector('button[data-value="("]');
+         } else if (key === ')') {
+             inputParenthesis(')');
+             targetButton = buttonsContainer.querySelector('button[data-value=")"]');
+         } else if (key === '%') {
+             handleFunction('percent');
+              targetButton = buttonsContainer.querySelector('button[data-func="percent"]');
+         }
+         // Add more key mappings for scientific functions if desired (e.g., 's' for sin)
+         else {
+             handled = false; // Key not handled by calculator
+         }
+
+         if (handled) {
+             event.preventDefault(); // Prevent default action (e.g., '/' opening find)
+             // Simulate button press style (optional)
+             if(targetButton) {
+                  targetButton.classList.add('active'); // Add Bootstrap's active class or your own
+                  setTimeout(() => targetButton.classList.remove('active'), 100); // Remove after short delay
+             }
+         }
+     });
+
+
+    // --- Mode Switcher Logic ---
+    function switchMode(mode) {
+        const isScientific = mode === 'scientific';
+        scientificButtonsDiv.classList.toggle('d-none', !isScientific);
+
+        // Show/Hide specific standard buttons based on mode
+        // Use specific IDs added in HTML to avoid selecting sci buttons
+        if (btnClearStdContainer) btnClearStdContainer.classList.toggle('d-lg-none', isScientific); // Hide C on large screen in Sci mode
+        if (btnDelStdContainer) btnDelStdContainer.classList.toggle('d-lg-none', isScientific); // Hide DEL
+        if (btnDivideStdContainer) btnDivideStdContainer.classList.toggle('d-lg-none', isScientific); // Hide /
+        if (btnToggleSignStdContainer) btnToggleSignStdContainer.classList.toggle('d-lg-none', isScientific); // Hide +/-
+        if (btnZeroStdContainer) btnZeroStdContainer.classList.toggle('d-lg-none', isScientific); // Hide 0
+        if (btnDecimalStdContainer) btnDecimalStdContainer.classList.toggle('d-lg-none', isScientific); // Hide .
+
+        // Reset calculator state when switching mode
+        resetCalculator();
+    }
+
+    modeRadios.forEach(radio => {
+        radio.addEventListener('change', (event) => switchMode(event.target.value));
+    });
+
+    // Initial Setup
+    updateDisplay();
+    // Set initial visibility based on default checked radio
+    switchMode(document.querySelector('input[name="calc_mode"]:checked').value);
+
+});
+</script>
+{% endblock %}
+
+
+
+
+
+
+
+
+
+
+

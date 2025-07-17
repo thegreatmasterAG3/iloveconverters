@@ -1,0 +1,346 @@
+{# templates/image_tools/tool_webp_to_jpg.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">W→JPG</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Convert modern WebP images to the standard JPG format. Specify background color for transparency.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        {# Unique name 'webpfile', accept only webp #}
+                        <input class="d-none" type="file" id="webpfileInput" name="webpfile" accept=".webp,image/webp" required>
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cloud-arrow-up-fill mb-3 text-muted" viewBox="0 0 16 16"><path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z"/></svg>
+                             <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop WebP File Here</p>
+                             <p class="mb-0 text-muted small">(Select one .webp file)</p>
+                             <p class="mb-0 text-muted small">or</p>
+                             <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse File</button>
+                        </div>
+
+                        {# Preview Area #}
+                        <div id="previewContainer" class="mt-3 d-flex flex-wrap gap-3 justify-content-center mb-4"></div>
+                        <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No file selected.</div>
+
+                        {# --- Conversion Options --- #}
+                        <div class="border-top pt-4 mb-4">
+                             <h5 class="text-center mb-3">Conversion Options</h5>
+                             <div class="row g-3 justify-content-center">
+                                <div class="col-md-6">
+                                     <label for="qualityRange" class="form-label fw-medium">JPG Quality: <span id="qualityValue">{{ prev_options.quality|default:"90" }}</span></label>
+                                     <input type="range" class="form-range" id="qualityRange" name="quality" min="10" max="95" value="{{ prev_options.quality|default:"90" }}" step="5">
+                                     <div class="form-text">Lower value = smaller file size, lower quality.</div>
+                                </div>
+                                <div class="col-md-6">
+                                     <label for="bgColorInput" class="form-label fw-medium">Background Color (for transparency):</label>
+                                     <input type="color" class="form-control form-control-color neumorphic-inset" id="bgColorInput" name="bg_color" value="#{{ prev_options.bg_color|default:'ffffff' }}" title="Choose background color">
+                                     <div class="form-text">Default is white (#ffffff).</div>
+                                </div>
+                             </div>
+                        </div>
+                        {# --- END: Conversion Options --- #}
+
+
+                        {# Convert Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                               <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-arrow-repeat me-2" viewBox="0 0 16 16"><use xlink:href="#icon-repeat"/></svg> {# Define icon-repeat if needed #}
+                                Convert to JPG
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Download Section --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic" id="resultsCard">
+                    <h3 class="mb-3 text-success">Conversion Complete!</h3>
+                     {% if original_filename %} <p class="text-muted small mb-3">Original file: {{ original_filename }}</p> {% endif %}
+                    <p class="text-muted mb-4">Your JPG file is ready.</p>
+
+                     {# Preview Result JPG #}
+                     {% if result_image_b64 %}
+                     <div class="qr-code-container mb-3 d-inline-block p-3 bg-white rounded">
+                        <img src="data:image/jpeg;base64,{{ result_image_b64 }}" alt="Converted JPG Preview" class="img-fluid" style="max-height: 250px;">
+                    </div>
+                    <br/>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'image_tools:webp_to_jpg' %}">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_w2j_jpg" value="true">
+                         <button type="submit" class="btn btn-success btn-lg mb-3">
+                             <svg class="bi bi-download me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><use xlink:href="#icon-download"/></svg>
+                             Download {{ download_filename|default:"JPG" }}
+                         </button>
+                    </form>
+                    <a href="{% url 'image_tools:webp_to_jpg' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                        <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><use xlink:href="#icon-back-arrow"/></svg>
+                        Convert Another WebP
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Re-use styles from other tools or custom.css */
+    .drop-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-main);
+        cursor: pointer;
+        transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        background-color: var(--bg-color);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+    }
+    .drop-zone.dragover {
+        border-color: var(--link-color);
+        background-color: rgba(var(--link-color-rgb), 0.1);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+    }
+    .preview-item {
+        position: relative;
+        border-radius: var(--radius-small);
+        overflow: hidden;
+        box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        background-color: var(--bg-color);
+        transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    }
+    .preview-image {
+        display: block;
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+    .preview-remove-btn {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 18px;
+        text-align: center;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+    .preview-remove-btn:hover {
+        opacity: 1;
+    }
+    #browseButton {
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out;
+    }
+    #browseButton:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+
+    /* --- Form Control & Option Styles --- */
+    .form-label.fw-medium {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+    }
+    /* Style for the options section heading */
+    #uploadCard .border-top h5 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+    .form-text {
+        color: var(--muted-text-color);
+        transition: color 0.3s ease;
+        font-size: 0.8em;
+    }
+    /* Style Range Slider */
+    .form-range { padding: 0; cursor: pointer;}
+    .form-range::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+    .form-range::-moz-range-track { width: 100%; height: 8px; cursor: pointer; background: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+    .form-range::-webkit-slider-thumb { height: 20px; width: 20px; border-radius: 50%; background: var(--bg-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); cursor: pointer; margin-top: -6px; -webkit-appearance: none; }
+    .form-range::-moz-range-thumb { height: 20px; width: 20px; border-radius: 50%; background: var(--bg-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); cursor: pointer; border: none; }
+    .form-range:focus { outline: none; }
+    .form-range:focus::-webkit-slider-thumb { outline: 2px solid var(--link-color); outline-offset: 2px; }
+    .form-range:focus::-moz-range-thumb { outline: 2px solid var(--link-color); outline-offset: 2px; }
+    /* Style Color Picker */
+    .form-control-color { min-height: calc(1.5em + .75rem + 2px); width: 100%; max-width: 100px; background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; padding: 0.2rem 0.3rem; cursor: pointer; transition: background-color 0.3s ease, box-shadow 0.3s ease;}
+    .form-control-color:focus { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); }
+
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+
+    /* --- Success/Download Buttons --- */
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+
+    /* --- Results Heading --- */
+     #resultsCard h3 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+
+    /* --- Result Image Preview --- */
+    .qr-code-container { /* Re-use white background container */
+        background-color: #fff !important;
+        display: inline-block;
+        padding: 1rem;
+        border-radius: var(--radius-small);
+        box-shadow: var(--bs-box-shadow-sm);
+    }
+    #resultsCard img { /* Result image styling */
+         max-width: 100%;
+         height: auto;
+         display: block;
+         max-height: 250px;
+         width: auto;
+         margin-left: auto;
+         margin-right: auto;
+    }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS adapted for single file input 'webpfile', quality slider, preview #}
+{# JS adapted for single file input 'webpfile', quality slider, preview #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('webpfileInput'); // Correct ID
+    const browseButton = document.getElementById('browseButton');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const convertButton = document.getElementById('convertButton');
+    const dropZoneText = document.getElementById('dropZoneText');
+    let currentFile = null; // Store single file
+
+    // --- Define allowed types directly in JavaScript ---
+    const allowedMimes = ['image/webp'];
+    const allowedExts = ['.webp'];
+
+    // --- Quality Range ---
+    const qualityRange = document.getElementById('qualityRange');
+    const qualityValue = document.getElementById('qualityValue');
+    if (qualityRange && qualityValue) {
+        qualityRange.oninput = function() {
+            qualityValue.textContent = this.value;
+        }
+        // Set initial display value
+        qualityValue.textContent = qualityRange.value;
+    }
+
+    // --- File Handling & UI Update ---
+    const updateUI = () => {
+        previewContainer.innerHTML = ''; // Clear previews
+        if (currentFile) {
+            createPreviewElement(currentFile);
+            previewPlaceholder.style.display = 'none';
+            dropZoneText.textContent = "Replace file by dropping or browsing";
+            convertButton.disabled = false;
+        } else {
+            previewPlaceholder.style.display = 'block';
+            dropZoneText.textContent = "Drag & Drop WebP File Here";
+            convertButton.disabled = true;
+        }
+        try { // Update hidden input
+            const dataTransfer = new DataTransfer();
+            if (currentFile) dataTransfer.items.add(currentFile);
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    const createPreviewElement = (file) => {
+        // Preview WebP if browser supports it
+        if (!file.type.startsWith('image/webp') && !file.name.toLowerCase().endsWith('.webp')) {
+             console.warn("Cannot preview non-WebP file:", file.name);
+             // Show filename instead if preview fails?
+             const p = document.createElement('p');
+             p.textContent = `File selected: ${file.name}`;
+             p.classList.add('text-center', 'my-3');
+             const removeBtn = document.createElement('button');
+             removeBtn.classList.add('preview-remove-btn'); removeBtn.innerHTML = '×'; removeBtn.type = 'button'; removeBtn.setAttribute('aria-label', `Remove ${file.name}`); removeBtn.onclick = handleRemoveFile;
+             const item = document.createElement('div'); item.classList.add('preview-item-alt', 'p-2', 'd-flex', 'align-items-center', 'gap-2'); item.style.boxShadow='none'; item.style.backgroundColor='transparent'; item.appendChild(p); item.appendChild(removeBtn);
+             previewContainer.appendChild(item);
+             return;
+         }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const item = document.createElement('div'); item.classList.add('preview-item');
+            const img = document.createElement('img'); img.classList.add('preview-image'); img.src = e.target.result; img.alt = `Preview`; item.appendChild(img);
+            const btn = document.createElement('button'); btn.classList.add('preview-remove-btn'); btn.innerHTML = '×'; btn.type = 'button'; btn.onclick = handleRemoveFile; item.appendChild(btn);
+            previewContainer.appendChild(item);
+        }
+         reader.readAsDataURL(file);
+    };
+
+    const handleRemoveFile = () => {
+        currentFile = null; fileInput.value = ''; updateUI();
+    };
+
+    const handleFiles = (files) => {
+        if (files.length === 0) { handleRemoveFile(); return; }
+        const file = files[0];
+        const fileNameParts = file.name.split('.');
+        const fileExt = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+
+        // Use the JavaScript arrays for validation
+        if (!allowedMimes.includes(file.type.toLowerCase()) && !allowedExts.includes(fileExt)) {
+             alert(`Please select a valid WebP file (.webp).`);
+             handleRemoveFile();
+             return;
+         }
+        currentFile = file;
+        updateUI();
+    };
+
+    // Drag/Drop/Browse listeners
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    updateUI(); // Initial state
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

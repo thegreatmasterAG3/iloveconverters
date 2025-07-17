@@ -1,0 +1,327 @@
+{# templates/image_tools/tool_ico_converter.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">→ICO</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Convert your image (PNG, JPG etc.) into a multi-size ICO file for website favicons.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        {# Unique name 'imagefile_ico', single file #}
+                        <input class="d-none" type="file" id="imagefileInput" name="imagefile_ico" accept="image/*" required>
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cloud-arrow-up-fill mb-3 text-muted" viewBox="0 0 16 16"><use xlink:href="#icon-cloud-arrow-up"/></svg> {# Define this icon #}
+                            <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop Image File Here</p>
+                            <p class="mb-0 text-muted small">(PNG, JPG, BMP, GIF etc.)</p>
+                            <p class="mb-0 text-muted small">or</p>
+                            <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse File</button>
+                        </div>
+
+                        {# Preview Area #}
+                        <div id="previewContainer" class="mt-3 d-flex flex-wrap gap-3 justify-content-center mb-4"></div>
+                        <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No file selected.</div>
+
+                        {# --- Conversion Options --- #}
+<div class="border-top pt-4 mb-4">
+     <h5 class="text-center mb-3">ICO Sizes to Include</h5>
+     <div class="row g-2 justify-content-center">
+        {% for size in ico_sizes %}
+            <div class="col-auto">
+                 <div class="form-check">
+                     {# --- MODIFIED CONDITION --- #}
+                     <input class="form-check-input" type="checkbox" name="ico_sizes" value="{{ size }}" id="size{{ size }}"
+                         {% if prev_options %}
+                             {% if size|stringformat:"s" in prev_options.ico_sizes %}checked{% endif %}
+                         {% elif size in default_sizes %}
+                              checked
+                         {% endif %}>
+                     {# --- END MODIFIED CONDITION --- #}
+                     <label class="form-check-label" for="size{{ size }}">
+                         {{ size }}x{{ size }}
+                     </label>
+                 </div>
+             </div>
+        {% endfor %}
+     </div>
+     <div class="form-text text-center mt-2">Select the icon sizes to include in the .ico file (multiple sizes recommended). Defaults: 16, 32, 48.</div>
+</div>
+{# --- END: Conversion Options --- #}
+
+
+                        {# Convert Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-explicit-fill me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M2.5 0A2.5 2.5 0 0 0 0 2.5v11A2.5 2.5 0 0 0 2.5 16h11a2.5 2.5 0 0 0 2.5-2.5v-11A2.5 2.5 0 0 0 13.5 0zM4.326 10.88H10.5V12h-7V4.002h6.438v1.12H5.57v2.135h3.867v1.12H5.57V10.88z"/></svg>
+                                Create ICO
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Download Section --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic" id="resultsCard">
+                    <h3 class="mb-3 text-success">Conversion Complete!</h3>
+                    {% if original_filename %} <p class="text-muted small mb-3">Original file: {{ original_filename }}</p> {% endif %}
+                    <p class="text-muted mb-3">Your multi-size favicon (.ico) file is ready.</p>
+                    {# ICO Preview (using first size) #}
+                    <div class="ico-preview-container mb-3 d-inline-block p-2 neumorphic-inset">
+                         <img src="data:image/x-icon;base64,{{ generated_ico_b64 }}" alt="ICO Preview" style="width: 32px; height: 32px; image-rendering: pixelated;">
+                         <img src="data:image/x-icon;base64,{{ generated_ico_b64 }}" alt="ICO Preview" style="width: 16px; height: 16px; image-rendering: pixelated;">
+                    </div>
+                    <br/>
+                    <form method="post" action="{% url 'image_tools:ico_converter' %}">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_ico" value="true">
+                         <button type="submit" class="btn btn-success btn-lg mb-3">
+                             <svg class="bi bi-download me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><use xlink:href="#icon-download"/></svg>
+                             Download {{ download_filename|default:"favicon.ico" }}
+                         </button>
+                    </form>
+                    <a href="{% url 'image_tools:ico_converter' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                        <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><use xlink:href="#icon-back-arrow"/></svg>
+                        Convert Another Image
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Define needed icons if not in base #}
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+     <symbol id="icon-cloud-arrow-up" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M7.646 5.146a.5.5 0 0 1 .708 0l2 2a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708z"/><path d="M4.406 3.342A5.53 5.53 0 0 1 8 2c2.69 0 4.923 2 5.166 4.579C14.758 6.804 16 8.137 16 9.773 16 11.569 14.502 13 12.687 13H3.781C1.708 13 0 11.366 0 9.318c0-1.763 1.266-3.223 2.942-3.593.143-.863.698-1.723 1.464-2.383zm.653.757c-.757.653-1.153 1.44-1.153 2.056v.448l-.445.049C2.064 6.805 1 7.952 1 9.318 1 10.785 2.23 12 3.781 12h8.906C13.98 12 15 10.988 15 9.773c0-1.216-1.02-2.228-2.313-2.228h-.5v-.5C12.188 4.825 10.328 3 8 3a4.53 4.53 0 0 0-2.941 1.1z"/></symbol>
+     <symbol id="icon-download" viewBox="0 0 16 16"> <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/> </symbol>
+     <symbol id="icon-back-arrow" viewBox="0 0 16 16"> <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/> </symbol>
+     {# Include clipboard/check icons if not in base.html #}
+     <symbol id="icon-clipboard" viewBox="0 0 16 16"><use xlink:href="#clipboard"/></symbol>
+     <symbol id="icon-check" viewBox="0 0 16 16"><use xlink:href="#check-lg"/></symbol>
+</svg>
+
+{# Styles specific to this page #}
+<style>
+    /* --- Dropzone/Preview Styles --- */
+    .drop-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-main);
+        cursor: pointer;
+        transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        background-color: var(--bg-color);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+    }
+    .drop-zone.dragover {
+        border-color: var(--link-color);
+        background-color: rgba(var(--link-color-rgb), 0.1);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+    }
+    .preview-item { /* Image preview in upload form */
+        position: relative;
+        border-radius: var(--radius-small);
+        overflow: hidden;
+        box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        background-color: var(--bg-color);
+        transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    }
+    .preview-image {
+        display: block;
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+    .preview-remove-btn {
+        position: absolute; top: 2px; right: 2px; width: 20px; height: 20px; border-radius: 50%; background-color: rgba(0, 0, 0, 0.6); color: white; border: none; font-size: 12px; font-weight: bold; line-height: 18px; text-align: center; cursor: pointer; opacity: 0.8; transition: opacity 0.2s ease;
+    }
+    .preview-remove-btn:hover { opacity: 1; }
+    #browseButton {
+        background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); transition: all 0.2s ease-out;
+    }
+    #browseButton:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color);
+    }
+    #selectedFileName { /* Not used if preview shown */ }
+
+    /* --- Form Control & Option Styles --- */
+    .form-label.fw-medium {
+        color: var(--text-color); transition: color 0.3s ease;
+    }
+    /* Options Section Heading */
+    #uploadCard .border-top h5 {
+        color: var(--text-color); transition: color 0.3s ease; font-weight: 600;
+    }
+    .form-text {
+        color: var(--muted-text-color); transition: color 0.3s ease; font-size: 0.8em;
+    }
+    /* Checkbox Styling */
+     .form-check { margin-bottom: 0.3rem; } /* Spacing for checkbox list */
+     .form-check-input { /* uses default neumorphic style from custom.css */ }
+     .form-check-label { /* uses default style from custom.css */ }
+
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+
+    /* --- Success/Download Buttons --- */
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+
+    /* --- Results Heading --- */
+     #resultsCard h3 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+
+     /* --- Loading Overlay Styles --- */
+     #loadingOverlay .spinner-border { color: var(--link-color) !important; width: 3rem; height: 3rem; }
+     #loadingOverlay p { color: var(--muted-text-color); transition: color 0.3s ease; }
+
+     /* --- ICO Preview Container --- */
+    .ico-preview-container {
+        background-color: var(--card-bg-color); /* Match result card bg */
+        border-radius: var(--radius-small);
+        box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); /* Inset style */
+        display: inline-flex;
+        gap: 0.5rem;
+        align-items: center;
+        padding: 0.5rem;
+        border: 1px solid var(--border-color); /* Subtle border */
+         transition: background-color 0.3s ease, box-shadow 0.3s ease, border-color 0.3s ease;
+    }
+    .ico-preview-container img {
+        background-color: #fff; /* Ensure white bg behind potentially transparent icon */
+        border: 1px solid var(--border-color);
+        image-rendering: pixelated; /* Keep small icons sharp */
+        vertical-align: middle;
+    }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for single file input 'imagefile_ico', preview #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const uploadCard = document.getElementById('uploadCard');
+    const loadingOverlay = document.getElementById('loadingOverlay'); // If you add loading
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('imagefileInput'); // Correct ID
+    const browseButton = document.getElementById('browseButton');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const convertButton = document.getElementById('convertButton');
+    const dropZoneText = document.getElementById('dropZoneText');
+    let currentFile = null; // Store single file
+
+    // --- Define allowed types ---
+    const allowedMimes = ['image/png', 'image/jpeg', 'image/bmp', 'image/gif', 'image/tiff']; // Common input types
+    const allowedExts = ['.png', '.jpg', '.jpeg', '.bmp', '.gif', '.tiff'];
+
+    // --- File Handling & UI Update ---
+    const updateUI = () => { /* ... same as single file inputs ... */
+        previewContainer.innerHTML = '';
+        if (currentFile) {
+            createPreviewElement(currentFile); // Show preview
+            previewPlaceholder.style.display = 'none';
+            dropZoneText.textContent = "Replace file by dropping or browsing";
+            convertButton.disabled = false;
+        } else {
+            previewPlaceholder.style.display = 'block';
+            dropZoneText.textContent = "Drag & Drop Image File Here";
+            convertButton.disabled = true;
+        }
+        try { const dataTransfer = new DataTransfer(); if (currentFile) dataTransfer.items.add(currentFile); fileInput.files = dataTransfer.files; }
+        catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    const createPreviewElement = (file) => { /* ... same image preview logic ... */
+         if (!file.type.startsWith('image/')) { return; }
+         const reader = new FileReader();
+         reader.onload = function(e) {
+            const item = document.createElement('div'); item.classList.add('preview-item');
+            const img = document.createElement('img'); img.classList.add('preview-image'); img.src = e.target.result; img.alt = `Preview`; item.appendChild(img);
+            const btn = document.createElement('button'); btn.classList.add('preview-remove-btn'); btn.innerHTML = '×'; btn.type = 'button'; btn.onclick = handleRemoveFile; item.appendChild(btn);
+            previewContainer.appendChild(item); // Append the single preview
+         }
+         reader.readAsDataURL(file);
+     };
+
+    const handleRemoveFile = () => { /* ... same as single file remove ... */
+        currentFile = null; fileInput.value = ''; updateUI();
+    };
+
+    const handleFiles = (files) => { /* Adapted for allowed types */
+        if (files.length === 0) { handleRemoveFile(); return; }
+        const file = files[0];
+        const fileNameParts = file.name.split('.');
+        const fileExt = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+        if (!allowedMimes.includes(file.type.toLowerCase()) && !allowedExts.includes(fileExt)) {
+             alert(`Please select a valid image file (PNG, JPG, BMP, GIF, TIFF recommended).`);
+             handleRemoveFile(); return;
+         }
+        currentFile = file; updateUI();
+    };
+
+    // --- Event Listeners ---
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    // --- Form Submission with Loading (optional) ---
+    form.addEventListener('submit', function(event) {
+        if (!currentFile) { event.preventDefault(); alert("Please select an image file."); return; }
+
+        // Check if at least one size checkbox is checked
+        const checkedSizes = form.querySelectorAll('input[name="ico_sizes"]:checked');
+        if (checkedSizes.length === 0) {
+             event.preventDefault();
+             alert("Please select at least one icon size to include.");
+             // Optionally focus the first checkbox
+             const firstCheckbox = form.querySelector('input[name="ico_sizes"]');
+             if (firstCheckbox) firstCheckbox.focus();
+             return;
+        }
+
+        // Show loading
+        if (uploadCard && loadingOverlay && convertButton) {
+            uploadCard.style.display = 'none'; loadingOverlay.style.display = 'block'; convertButton.disabled = true;
+        } else { console.error("Loading elements not found."); }
+    });
+
+    // Initial state
+    updateUI();
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

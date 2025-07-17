@@ -1,0 +1,335 @@
+{# templates/image_tools/tool_jpg_to_webp.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">J→Wp</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Convert JPG/JPEG images to the modern, efficient WebP format.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        {# Unique name 'jpgfiles_j2w', multiple #}
+                        <input class="d-none" type="file" id="jpgfilesInput" name="jpgfiles_j2w" accept=".jpg,.jpeg,image/jpeg" multiple required>
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                            {# ... cloud icon ... #}
+                            <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop JPG/JPEG Files Here</p>
+                            <p class="mb-0 text-muted small">(Select one or more files)</p>
+                            <p class="mb-0 text-muted small">or</p>
+                            <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse Files</button>
+                        </div>
+
+                        {# Preview Area #}
+                        <div id="previewContainer" class="mt-3 d-flex flex-wrap gap-3 justify-content-center mb-4"></div>
+                        <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No files selected.</div>
+
+                        {# --- Conversion Options --- #}
+                        <div class="border-top pt-4 mb-4">
+                             <h5 class="text-center mb-3">WebP Options</h5>
+                             <div class="row g-3 justify-content-center">
+                                <div class="col-md-8" id="qualitySection"> {# Div to toggle based on lossless #}
+                                     <label for="qualityRange" class="form-label fw-medium">Quality: <span id="qualityValue">{{ prev_options.quality|default:"80" }}</span></label>
+                                     <input type="range" class="form-range" id="qualityRange" name="quality" min="1" max="100" value="{{ prev_options.quality|default:"80" }}" step="1">
+                                     <div class="form-text">Lower value = smaller file size (lossy mode only).</div>
+                                </div>
+                                 <div class="col-md-8">
+                                     <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="lossless" role="switch" id="losslessCheck" {% if prev_options.lossless == 'on' %}checked{% endif %}>
+                                        <label class="form-check-label" for="losslessCheck">Lossless Compression</label>
+                                         <div class="form-text">(Ignores Quality setting. Larger file, perfect quality).</div>
+                                     </div>
+                                 </div>
+                             </div>
+                        </div>
+                        {# --- END: Conversion Options --- #}
+
+                        {# Convert Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                               <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-repeat me-2" viewBox="0 0 16 16"><use xlink:href="#icon-repeat"/></svg> {# Define icon-repeat #}
+                                Convert to WebP
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {# --- End Upload Form Section --- #}
+
+                {# --- Loading Indicator --- #}
+                <div id="loadingOverlay" class="text-center py-5" style="display: none;">
+                     <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"><span class="visually-hidden">Loading...</span></div>
+                     <p class="mt-3 text-muted">Converting your image(s) to WebP...</p>
+                 </div>
+                {# --- End Loading Indicator --- #}
+
+            {% else %}
+                {# --- Download Section --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic" id="resultsCard">
+                    <h3 class="mb-3 text-success">Conversion Complete!</h3>
+                    {% if original_filenames %} <p class="text-muted small mb-3">Converted {{ original_filenames|length }} file{{ original_filenames|length|pluralize }}.</p> {% endif %}
+                    <p class="text-muted mb-4">Your WebP {% if is_zip %}archive{% else %}file{% endif %} is ready.</p>
+                    <form method="post" action="{% url 'image_tools:jpg_to_webp' %}">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_j2w" value="true">
+                         <button type="submit" class="btn btn-success btn-lg mb-3">
+                             <svg class="bi bi-download me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><use xlink:href="#icon-download"/></svg>
+                             Download {{ download_filename|default:"File" }}
+                         </button>
+                    </form>
+                    <a href="{% url 'image_tools:jpg_to_webp' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                        <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><use xlink:href="#icon-back-arrow"/></svg>
+                        Convert More JPGs
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Define needed icons if not in base #}
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+     <symbol id="icon-repeat" viewBox="0 0 16 16">
+         <path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.5a.5.5 0 0 1 0-1h3.5a.5.5 0 0 1 .5.5v3.5a.5.5 0 0 1-1 0V6.118A5.002 5.002 0 0 0 8 3zM3.5 12.5a.5.5 0 0 1 .5-.5h3.5a.5.5 0 0 1 0 1H4v1.882a5.002 5.002 0 0 0 8.051-.078.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.5a.5.5 0 0 1 .5.5z"/>
+    </symbol>
+     {# Include download, back-arrow etc. if not in base.html #}
+</svg>
+
+{# Styles specific to this page #}
+<style>
+    /* Re-use styles from previous tools or custom.css */
+    .drop-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-main);
+        cursor: pointer;
+        transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        background-color: var(--bg-color);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+    }
+    .drop-zone.dragover {
+        border-color: var(--link-color);
+        background-color: rgba(var(--link-color-rgb), 0.1);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+    }
+    .preview-item {
+        position: relative;
+        border-radius: var(--radius-small);
+        overflow: hidden;
+        box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        background-color: var(--bg-color);
+        transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    }
+    .preview-image {
+        display: block;
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+    .preview-remove-btn {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 18px;
+        text-align: center;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+    .preview-remove-btn:hover {
+        opacity: 1;
+    }
+    #browseButton {
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out;
+    }
+    #browseButton:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+    /* Form Control & Option Styles */
+    .form-label.fw-medium {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+    }
+    .form-text {
+        color: var(--muted-text-color);
+        transition: color 0.3s ease;
+        font-size: 0.8em;
+    }
+    /* Style Range Slider */
+    .form-range { padding: 0; cursor: pointer;}
+    .form-range::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+    .form-range::-moz-range-track { width: 100%; height: 8px; cursor: pointer; background: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+    .form-range::-webkit-slider-thumb { height: 20px; width: 20px; border-radius: 50%; background: var(--bg-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); cursor: pointer; margin-top: -6px; -webkit-appearance: none; }
+    .form-range::-moz-range-thumb { height: 20px; width: 20px; border-radius: 50%; background: var(--bg-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); cursor: pointer; border: none; }
+    .form-range:focus { outline: none; }
+    .form-range:focus::-webkit-slider-thumb { outline: 2px solid var(--link-color); outline-offset: 2px; }
+    .form-range:focus::-moz-range-thumb { outline: 2px solid var(--link-color); outline-offset: 2px; }
+    /* Style Checkbox/Switch */
+    .form-check-input { /* uses default from custom.css */ }
+    .form-check-label { /* uses default from custom.css */ }
+    .form-switch .form-check-input { /* uses default from custom.css */ }
+    /* Style Options Section Heading */
+    #uploadCard .border-top h5 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+
+    /* Submit Button Styles */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+
+    /* Success/Download Buttons */
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+
+    /* Results Heading */
+    #resultsCard h3 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+
+    /* Loading Overlay Styles */
+    #loadingOverlay .spinner-border { color: var(--link-color) !important; width: 3rem; height: 3rem; }
+    #loadingOverlay p { color: var(--muted-text-color); transition: color 0.3s ease; }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for multi-file input 'jpgfiles_j2w', preview, quality slider, lossless toggle #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const uploadCard = document.getElementById('uploadCard');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('jpgfilesInput'); // Correct ID
+    const browseButton = document.getElementById('browseButton');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const convertButton = document.getElementById('convertButton');
+    const dropZoneText = document.getElementById('dropZoneText');
+    let selectedFiles = [];
+
+    // --- Options Refs ---
+    const qualitySection = document.getElementById('qualitySection');
+    const qualityRange = document.getElementById('qualityRange');
+    const qualityValue = document.getElementById('qualityValue');
+    const losslessCheck = document.getElementById('losslessCheck');
+
+    // --- Allowed Types ---
+    const allowedMimes = ['image/jpeg', 'image/jpg'];
+    const allowedExts = ['.jpg', '.jpeg'];
+
+    // --- Quality Range Display ---
+    if (qualityRange && qualityValue) {
+        qualityRange.oninput = function() { qualityValue.textContent = this.value; }
+        qualityValue.textContent = qualityRange.value; // Initial value
+    }
+
+    // --- Toggle Quality based on Lossless ---
+    const toggleQualitySection = () => {
+        if (losslessCheck && qualitySection) {
+            qualitySection.style.display = losslessCheck.checked ? 'none' : 'block';
+            if(qualityRange) qualityRange.disabled = losslessCheck.checked; // Disable range if lossless
+        }
+    }
+    if (losslessCheck) {
+        losslessCheck.addEventListener('change', toggleQualitySection);
+    }
+
+    // --- File Handling & UI Update ---
+    const updateUI = () => { /* ... same as multi-file preview logic ... */
+        previewContainer.innerHTML = '';
+        if (selectedFiles.length > 0) {
+            selectedFiles.forEach((file, index) => createPreviewElement(file, index));
+            previewPlaceholder.style.display = 'none';
+            convertButton.disabled = false;
+            dropZoneText.textContent = `Add more files or drop here... (${selectedFiles.length} selected)`;
+        } else {
+            previewPlaceholder.style.display = 'block';
+            convertButton.disabled = true;
+            dropZoneText.textContent = "Drag & Drop JPG/JPEG Files Here";
+        }
+        try { const dt = new DataTransfer(); selectedFiles.forEach(f => dt.items.add(f)); fileInput.files = dt.files; }
+        catch (e) { console.error("DataTransfer error:", e); }
+    };
+    const createPreviewElement = (file, index) => { /* ... same as multi-file preview logic ... */
+        if (!file.type.startsWith('image/')) return;
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const item = document.createElement('div'); item.classList.add('preview-item');
+            const img = document.createElement('img'); img.classList.add('preview-image'); img.src = e.target.result; img.alt = `Preview`; item.appendChild(img);
+            const btn = document.createElement('button'); btn.classList.add('preview-remove-btn'); btn.innerHTML = '×'; btn.type = 'button'; btn.dataset.index = index; btn.onclick = handleRemoveFile; item.appendChild(btn);
+            previewContainer.appendChild(item);
+        }
+        reader.readAsDataURL(file);
+    };
+    const handleRemoveFile = (event) => { /* ... same as multi-file preview logic ... */
+        const idx = parseInt(event.target.dataset.index, 10); if (!isNaN(idx)) { selectedFiles.splice(idx, 1); updateUI(); }
+    };
+    const handleFiles = (files) => { /* Adapted for JPG */
+        const newFiles = Array.from(files).filter(file => {
+             const fnParts = file.name.split('.'); const ext = fnParts.length > 1 ? '.' + fnParts.pop().toLowerCase() : '';
+             return allowedMimes.includes(file.type.toLowerCase()) || allowedExts.includes(ext);
+        });
+        if (newFiles.length === 0 && files.length > 0) { alert('Please select only JPG/JPEG files.'); return; }
+        selectedFiles.push(...newFiles); updateUI();
+    };
+
+    // --- Event Listeners ---
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    // --- Form Submission with Loading ---
+    form.addEventListener('submit', function(event) {
+        if (selectedFiles.length === 0) { event.preventDefault(); alert("Please select at least one JPG file."); return; }
+        if (uploadCard && loadingOverlay && convertButton) {
+            uploadCard.style.display = 'none'; loadingOverlay.style.display = 'block'; convertButton.disabled = true;
+        } else { console.error("Loading elements not found."); }
+    });
+
+    // Initial state
+    updateUI();
+    toggleQualitySection(); // Set initial visibility of quality section
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

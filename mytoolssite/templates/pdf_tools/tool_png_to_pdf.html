@@ -1,0 +1,372 @@
+{# templates/pdf_tools/tool_png_to_pdf.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">PNG→P</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Upload one or more PNG images to convert them into a single PDF document.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        {# Changed name and accept attributes #}
+                        <input class="d-none" type="file" id="pngfilesInput" name="pngfiles" accept=".png,image/png" multiple required>
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cloud-arrow-up-fill mb-3 text-muted" viewBox="0 0 16 16"><path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z"/></svg>
+                             <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop PNG files here</p>
+                             <p class="mb-0 text-muted small">or</p>
+                             <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse Files</button>
+                        </div>
+
+                        {# Preview Area #}
+                        <div id="previewContainer" class="mt-3 d-flex flex-wrap gap-3 justify-content-center mb-4"></div>
+                        <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No files selected.</div>
+
+                        {# Conversion Options (Same as JPG->PDF) #}
+                        <div class="border-top pt-4 mb-4">
+                            <div class="row g-4">
+                                <div class="col-12 mb-3">
+                                    <label class="form-label d-block mb-2 fw-medium">Page orientation</label>
+                                    <div class="option-btn-group d-flex flex-wrap gap-2">
+                                        <input type="radio" class="btn-check" name="orientation" id="orientationP" value="P" {% if prev_options.orientation != 'L' %}checked{% endif %}>
+                                        <label class="btn btn-option flex-fill" for="orientationP"><svg class="option-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M17 2H7C5.9 2 5 2.9 5 4V20C5 21.1 5.9 22 7 22H17C18.1 22 19 21.1 19 20V4C19 2.9 18.1 2 17 2ZM17 20H7V4H17V20Z"></path></svg><span class="option-text">Portrait</span></label>
+                                        <input type="radio" class="btn-check" name="orientation" id="orientationL" value="L" {% if prev_options.orientation == 'L' %}checked{% endif %}>
+                                        <label class="btn btn-option flex-fill" for="orientationL"><svg class="option-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M21 6H3C1.9 6 1 6.9 1 8V16C1 17.1 1.9 18 3 18H21C22.1 18 23 17.1 23 16V8C23 6.9 22.1 6 21 6ZM21 16H3V8H21V16Z"></path></svg><span class="option-text">Landscape</span></label>
+                                        <input type="radio" class="btn-check d-none" name="orientation" id="orientationAuto" value="Auto" {% if prev_options.orientation == 'Auto' %}checked{% endif %}> {# Keep Auto option, handled in backend #}
+                                    </div>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label for="pageSizeSelect" class="form-label fw-medium">Page size</label>
+                                    <select class="form-select neumorphic-inset" id="pageSizeSelect" name="page_size">
+                                        <option value="Fit" {% if prev_options.page_size == 'Fit' %}selected{% endif %}>Fit (Same page size as image)</option> {# Fit might be less predictable with fpdf2 #}
+                                        <option value="A4" {% if not prev_options.page_size or prev_options.page_size == 'A4' %}selected{% endif %}>A4 (297x210 mm)</option>
+                                        <option value="Letter" {% if prev_options.page_size == 'Letter' %}selected{% endif %}>US Letter (215.9x279.4 mm)</option>
+                                    </select>
+                                </div>
+                                <div class="col-12 mb-3">
+                                    <label class="form-label d-block mb-2 fw-medium">Margin</label>
+                                    <div class="option-btn-group d-flex flex-wrap gap-2">
+                                        <input type="radio" class="btn-check" name="margin_size" id="marginNone" value="0" {% if prev_options.margin_size == '0' %}checked{% endif %}>
+                                        <label class="btn btn-option flex-fill" for="marginNone"><svg class="option-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V6H20V18Z M6 8H18V16H6V8Z"></path></svg><span class="option-text">No margin</span></label>
+                                        <input type="radio" class="btn-check" name="margin_size" id="marginSmall" value="10" {% if not prev_options.margin_size or prev_options.margin_size == '10' %}checked{% endif %}>
+                                        <label class="btn btn-option flex-fill" for="marginSmall"><svg class="option-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V6H20V18Z M8 8H16V16H8V8Z"></path></svg><span class="option-text">Small</span></label>
+                                        <input type="radio" class="btn-check" name="margin_size" id="marginBig" value="20" {% if prev_options.margin_size == '20' %}checked{% endif %}>
+                                        <label class="btn btn-option flex-fill" for="marginBig"><svg class="option-icon" width="24" height="24" viewBox="0 0 24 24" fill="currentColor"><path d="M20 4H4C2.9 4 2 4.9 2 6V18C2 19.1 2.9 20 4 20H20C21.1 20 22 19.1 22 18V6C22 4.9 21.1 4 20 4ZM20 18H4V6H20V18Z M10 10H14V14H10V10Z"></path></svg><span class="option-text">Big</span></label>
+                                    </div>
+                                </div>
+                                 {# Removed Merge Checkbox - implied for multi-file upload #}
+                            </div>
+                        </div>
+
+                        {# Convert Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-arrow-repeat me-2" viewBox="0 0 16 16"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.5a.5.5 0 0 1 0-1h3.5a.5.5 0 0 1 .5.5v3.5a.5.5 0 0 1-1 0V6.118A5.002 5.002 0 0 0 8 3zM3.5 12.5a.5.5 0 0 1 .5-.5h3.5a.5.5 0 0 1 0 1H4v1.882a5.002 5.002 0 0 0 8.051-.078.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.5a.5.5 0 0 1 .5.5z"/></svg>
+                                Convert Now
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Download Section --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic" id="resultsCard">
+                    <h3 class="mb-3 text-success">Conversion Complete!</h3>
+                     {% if original_filenames %}
+                        <p class="text-muted small mb-3">Converted {{ original_filenames|length }} file{{ original_filenames|length|pluralize }} to PDF.</p>
+                    {% endif %}
+                    <p class="text-muted mb-4">Your PDF file is ready for download.</p>
+                    <form method="post" action="{% url 'pdf_tools:png_to_pdf' %}">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_p2p_pdf" value="true">
+                         <button type="submit" class="btn btn-success btn-lg mb-3">
+                             <svg class="bi bi-download me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg>
+                             Download {{ download_filename|default:"PDF" }}
+                         </button>
+                    </form>
+                    <a href="{% url 'pdf_tools:png_to_pdf' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                         <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                        Convert More PNGs
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Styles are mostly the same as JPG->PDF #}
+<style>
+    /* --- Dropzone/Preview Styles --- */
+    .drop-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-main);
+        cursor: pointer;
+        transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        background-color: var(--bg-color);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+    }
+    .drop-zone.dragover {
+        border-color: var(--link-color);
+        background-color: rgba(var(--link-color-rgb), 0.1);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+    }
+    .preview-item {
+        position: relative;
+        border-radius: var(--radius-small);
+        overflow: hidden;
+        box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        background-color: var(--bg-color);
+        transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    }
+    .preview-image {
+        display: block;
+        width: 100px;
+        height: 100px;
+        object-fit: cover;
+    }
+    .preview-remove-btn {
+        position: absolute;
+        top: 2px;
+        right: 2px;
+        width: 20px;
+        height: 20px;
+        border-radius: 50%;
+        background-color: rgba(0, 0, 0, 0.6);
+        color: white;
+        border: none;
+        font-size: 12px;
+        font-weight: bold;
+        line-height: 18px;
+        text-align: center;
+        cursor: pointer;
+        opacity: 0.8;
+        transition: opacity 0.2s ease;
+    }
+    .preview-remove-btn:hover {
+        opacity: 1;
+    }
+    #browseButton {
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out;
+    }
+    #browseButton:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+
+    /* --- Form Control & Option Styles --- */
+    .form-label.fw-medium {
+         color: var(--text-color);
+         transition: color 0.3s ease;
+    }
+    /* Style for the options section heading */
+    #uploadCard .border-top h5 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+    .form-text {
+        color: var(--muted-text-color);
+        transition: color 0.3s ease;
+        font-size: 0.8em;
+    }
+    /* Style select boxes */
+    .form-select.neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right .75rem center;
+        background-size: 16px 12px;
+        appearance: none;
+         height: auto; /* Reset height */
+    }
+    body.dark-mode .form-select.neumorphic-inset {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+    .form-select.neumorphic-inset:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+     select.neumorphic-inset optgroup { font-weight: bold; font-style: italic; color: var(--muted-text-color); background-color: var(--bg-color); }
+     select.neumorphic-inset option { background-color: var(--card-bg-color); color: var(--text-color); }
+     /* Option Button Styling (Radio Buttons) */
+    .option-btn-group .btn-option { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); border: 1px solid transparent; color: var(--muted-text-color); padding: .75rem 1rem; text-align: center; transition: all 0.2s ease-out; display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 80px; cursor: pointer; }
+    .option-btn-group .option-icon { width: 24px; height: 24px; margin-bottom: 0.5rem; opacity: 0.7; transition: opacity 0.2s ease-out, fill 0.3s ease; fill: currentColor; }
+    .option-btn-group .option-text { font-size: 0.9rem; line-height: 1.2; font-weight: 500;}
+    .option-btn-group .btn-check:checked + .btn-option { color: var(--link-color); background-color: var(--bg-color); border-color: var(--link-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .option-btn-group .btn-check:checked + .btn-option .option-icon { opacity: 1; }
+    .option-btn-group .btn-option:hover { color: var(--text-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .option-btn-group .btn-check:checked + .btn-option:hover { color: var(--link-color); }
+    .option-btn-group .btn-check:focus-visible + .btn-option { outline: 2px solid var(--link-color); outline-offset: 2px; }
+    .form-check-input { /* uses default */ }
+    .form-check-label { /* uses default */ }
+
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+
+    /* --- Success/Download Buttons --- */
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+
+     /* --- Results Heading --- */
+     #resultsCard h3 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+
+    /* --- Loading Overlay Styles --- */
+     #loadingOverlay .spinner-border { color: var(--link-color) !important; width: 3rem; height: 3rem; }
+     #loadingOverlay p { color: var(--muted-text-color); transition: color 0.3s ease; }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# Use same JS as JPG->PDF for multi-file preview/handling #}
+{# JS for multi-file input 'pngfiles', preview, loading indicator #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const uploadCard = document.getElementById('uploadCard');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('pngfilesInput'); // Use correct ID
+    const browseButton = document.getElementById('browseButton');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const convertButton = document.getElementById('convertButton');
+    const dropZoneText = document.getElementById('dropZoneText');
+    let selectedFiles = []; // Array for multiple files
+
+    // --- Define allowed types ---
+    const allowedMimes = ['image/png'];
+    const allowedExts = ['.png'];
+
+    // --- File Handling & UI Update ---
+    const updateUI = () => {
+        previewContainer.innerHTML = '';
+        if (selectedFiles.length > 0) {
+            selectedFiles.forEach((file, index) => {
+                createPreviewElement(file, index);
+            });
+            previewPlaceholder.style.display = 'none';
+            convertButton.disabled = false;
+            dropZoneText.textContent = `Add more files or drop here... (${selectedFiles.length} selected)`;
+        } else {
+            previewPlaceholder.style.display = 'block';
+            convertButton.disabled = true;
+            dropZoneText.textContent = "Drag & Drop PNG files here";
+        }
+        try {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    // --- Create Preview ---
+    const createPreviewElement = (file, index) => {
+        if (!file.type.startsWith('image/png')) { console.warn("Cannot preview non-PNG file:", file.name); return; }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const item = document.createElement('div'); item.classList.add('preview-item');
+            const img = document.createElement('img'); img.classList.add('preview-image'); img.src = e.target.result; img.alt = `Preview`; item.appendChild(img);
+            const btn = document.createElement('button'); btn.classList.add('preview-remove-btn'); btn.innerHTML = '×'; btn.type = 'button'; btn.dataset.index = index; btn.onclick = handleRemoveFile; item.appendChild(btn);
+            previewContainer.appendChild(item);
+        }
+         reader.readAsDataURL(file);
+    };
+
+    // --- Remove File ---
+    const handleRemoveFile = (event) => {
+        const indexToRemove = parseInt(event.target.dataset.index, 10);
+        if (!isNaN(indexToRemove)) {
+            selectedFiles.splice(indexToRemove, 1);
+            updateUI();
+        }
+    };
+
+    // --- Handle Added Files ---
+    const handleFiles = (files) => {
+        const newFiles = Array.from(files).filter(file => {
+             const fileNameParts = file.name.split('.');
+             const fileExt = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+             return allowedMimes.includes(file.type.toLowerCase()) || allowedExts.includes(fileExt);
+        });
+        if (newFiles.length === 0 && files.length > 0) {
+             alert('Please select only PNG files.'); return;
+        }
+        selectedFiles.push(...newFiles);
+        // Could add duplicate check here
+        updateUI();
+    };
+
+    // --- Event Listeners ---
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    // --- Form Submission with Loading ---
+    form.addEventListener('submit', function(event) {
+        if (selectedFiles.length === 0) { // Check if files are selected
+            event.preventDefault();
+            alert("Please select at least one PNG file.");
+            return;
+        }
+        // Show loading
+        if (uploadCard && loadingOverlay && convertButton) {
+            uploadCard.style.display = 'none';
+            loadingOverlay.style.display = 'block';
+            convertButton.disabled = true;
+        } else { console.error("Loading elements not found."); }
+    });
+
+    // Initial state
+    updateUI();
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

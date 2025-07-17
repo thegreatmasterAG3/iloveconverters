@@ -1,0 +1,203 @@
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container px-4 py-2"> {# Reduced top padding #}
+    <h1 class="pb-2 border-bottom text-center mb-4">{{ page_title }} ✨</h1> {# Reduced bottom margin #}
+    <p class="text-center lead mb-4">Explore tools powered by Artificial Intelligence for advanced tasks.</p>
+
+    <!-- ================== Filter Section for AI Tools ================== -->
+    <div class="container mb-4" id="sticky-filter-section"> {# Re-use sticky ID #}
+        <!-- Row for Search and Mobile Filter Button -->
+        <div class="row justify-content-center align-items-center mb-3">
+            <div class="col">
+                <input type="search" id="tool-search-input" class="form-control form-control-lg" placeholder="Search AI tools..." aria-label="Search AI tools">
+            </div>
+            <div class="col-auto d-lg-none">
+                <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFiltersAi" aria-controls="offcanvasFiltersAi">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-filter" viewBox="0 0 16 16"><path d="M6 10.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h7a.5.5 0 0 1 0 1h-7a.5.5 0 0 1-.5-.5m-2-3a.5.5 0 0 1 .5-.5h11a.5.5 0 0 1 0 1h-11a.5.5 0 0 1-.5-.5"/></svg>
+                    Filter Categories
+                </button>
+            </div>
+        </div>
+
+        <!-- Inline Category Filters Container (Hidden on small screens) -->
+        <div class="row justify-content-center gy-3 d-none d-lg-flex" id="inline-filters-container">
+             <div class="col-12 col-lg text-center text-lg-start">
+                <span class="me-3 fw-bold">Category:</span>
+                {# --- Add relevant category checkboxes for AI tools --- #}
+                {# Fewer categories might apply to AI tools initially #}
+                <div class="form-check form-check-inline"><input class="form-check-input category-filter-checkbox" type="checkbox" id="filterCatPdfInlineAi" value="pdf"><label class="form-check-label" for="filterCatPdfInlineAi">PDF</label></div>
+                <div class="form-check form-check-inline"><input class="form-check-input category-filter-checkbox" type="checkbox" id="filterCatImageInlineAi" value="image"><label class="form-check-label" for="filterCatImageInlineAi">Image</label></div>
+                <div class="form-check form-check-inline"><input class="form-check-input category-filter-checkbox" type="checkbox" id="filterCatTextInlineAi" value="text"><label class="form-check-label" for="filterCatTextInlineAi">Text</label></div>
+                <div class="form-check form-check-inline"><input class="form-check-input category-filter-checkbox" type="checkbox" id="filterCatUtilityInlineAi" value="utility"><label class="form-check-label" for="filterCatUtilityInlineAi">Utility</label></div>
+                <div class="form-check form-check-inline"><input class="form-check-input category-filter-checkbox" type="checkbox" id="filterCatGeneratorInlineAi" value="generator"><label class="form-check-label" for="filterCatGeneratorInlineAi">Generator</label></div>
+                {# Add other relevant categories like audio, video if applicable #}
+            </div>
+             <!-- Clear Button (Inline) -->
+             <div class="col-12 col-lg-auto text-center text-lg-end">
+                 <button id="clear-filters-btn-inline-ai" class="btn btn-sm btn-outline-secondary clear-filters-btn" type="button">Clear Categories</button>
+             </div>
+        </div>
+    </div><!-- End Sticky Filter Section -->
+
+    <!-- Offcanvas Filter Menu for AI Tools -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFiltersAi" aria-labelledby="offcanvasFiltersLabelAi">
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabelAi">Filter Categories</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <!-- Category Filters (Offcanvas) -->
+        <div class="mb-3">
+            <h6>Category:</h6>
+             {# --- Add relevant category checkboxes for AI tools --- #}
+            <div class="form-check"><input class="form-check-input category-filter-checkbox" type="checkbox" id="filterCatPdfOffcanvasAi" value="pdf"><label class="form-check-label" for="filterCatPdfOffcanvasAi">PDF</label></div>
+            <div class="form-check"><input class="form-check-input category-filter-checkbox" type="checkbox" id="filterCatImageOffcanvasAi" value="image"><label class="form-check-label" for="filterCatImageOffcanvasAi">Image</label></div>
+            <div class="form-check"><input class="form-check-input category-filter-checkbox" type="checkbox" id="filterCatTextOffcanvasAi" value="text"><label class="form-check-label" for="filterCatTextOffcanvasAi">Text</label></div>
+            <div class="form-check"><input class="form-check-input category-filter-checkbox" type="checkbox" id="filterCatUtilityOffcanvasAi" value="utility"><label class="form-check-label" for="filterCatUtilityOffcanvasAi">Utility</label></div>
+            <div class="form-check"><input class="form-check-input category-filter-checkbox" type="checkbox" id="filterCatGeneratorOffcanvasAi" value="generator"><label class="form-check-label" for="filterCatGeneratorOffcanvasAi">Generator</label></div>
+            {# Add other relevant categories like audio, video if applicable #}
+        </div>
+        <!-- Clear Button (Offcanvas) -->
+        <div class="d-grid gap-2">
+            <button id="clear-filters-btn-offcanvas-ai" class="btn btn-outline-secondary clear-filters-btn" type="button">Clear Categories</button>
+        </div>
+      </div>
+    </div>
+     <!-- ================== End Filter Section ================== -->
+
+
+    <!-- Tool Listing Section -->
+    <div class="container px-0 py-2" id="tool-list-container">
+        <!-- Row to contain the tool cards -->
+        <div class="row g-4 py-5 row-cols-1 row-cols-md-2 row-cols-lg-3" id="tools-grid">
+            {# --- PASTE ONLY AI TOOL CARDS BELOW (same as before) --- #}
+            <div class="feature col tool-card" data-tool-name="PDF to Text Converter OCR Extract AI" data-tool-categories="pdf text converter utility ai" data-tool-type="ai">
+                <div class="card h-100 shadow-sm border-info"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf icon-ai d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→T</div><h3 class="fs-4 card-title">PDF to Text (OCR) <span class="badge bg-info text-dark ms-1 align-middle">✨ AI</span></h3></div><p class="card-text">Extract text content from PDF files, including scanned PDFs using AI OCR.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Remove Image Background AI Cutout Transparent Artificial Intelligence" data-tool-categories="image utility ai" data-tool-type="ai">
+                <div class="card h-100 shadow-sm border-info"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image icon-ai d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I∅</div><h3 class="fs-4 card-title">Remove Background <span class="badge bg-info text-dark ms-1 align-middle">✨ AI</span></h3></div><p class="card-text">Automatically remove the background from images using AI.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="AI Image Upscaler Enlarger Resolution Artificial Intelligence" data-tool-categories="image utility ai" data-tool-type="ai">
+                <div class="card h-100 shadow-sm border-info"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image icon-ai d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I↑</div><h3 class="fs-4 card-title">AI Image Upscaler <span class="badge bg-info text-dark ms-1 align-middle">✨ AI</span></h3></div><p class="card-text">Increase image resolution and enhance details using AI.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="AI Text Summarizer Artificial Intelligence Summary Generator" data-tool-categories="text utility ai generator" data-tool-type="ai">
+                <div class="card h-100 shadow-sm border-info"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text icon-ai d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Sum</div><h3 class="fs-4 card-title">AI Text Summarizer <span class="badge bg-info text-dark ms-1 align-middle">✨ AI</span></h3></div><p class="card-text">Automatically generate summaries of long texts using AI.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="AI Content Detector Checker Writer Artificial Intelligence Text" data-tool-categories="text utility ai" data-tool-type="ai">
+                <div class="card h-100 shadow-sm border-info"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text icon-ai d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">AI?</div><h3 class="fs-4 card-title">AI Content Detector <span class="badge bg-info text-dark ms-1 align-middle">✨ AI</span></h3></div><p class="card-text">Check if a piece of text was likely written by AI.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            {# --- ADD MORE AI TOOL CARDS HERE AS YOU CREATE THEM --- #}
+
+        </div> <!-- /row #tools-grid -->
+        <!-- Message shown when no tools match filters -->
+        <div id="no-results-message" class="text-center py-5" style="display: none;">
+            <h2>No AI tools found matching your criteria.</h2>
+            <p>Try adjusting your search or filters.</p>
+        </div>
+    </div> <!-- /container #tool-list-container -->
+</div>
+<!-- SVG definitions are in base.html -->
+{% endblock %}
+
+
+{% block extra_js %}
+<!-- JavaScript for Search and Filter (Adapted for AI page) -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('tool-search-input');
+    // Only select CATEGORY checkboxes on this page
+    const categoryCheckboxes = document.querySelectorAll('.category-filter-checkbox');
+    const toolCards = document.querySelectorAll('.tool-card'); // Cards on this page only
+    const noResultsMessage = document.getElementById('no-results-message');
+    const toolsGrid = document.getElementById('tools-grid');
+    const clearFiltersBtns = document.querySelectorAll('.clear-filters-btn');
+    const offcanvasElement = document.getElementById('offcanvasFiltersAi'); // Use the correct ID
+    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
+
+    // Sync checkboxes between inline and offcanvas
+    function syncCheckboxes(sourceCheckbox) {
+        const isCategory = sourceCheckbox.classList.contains('category-filter-checkbox');
+        const value = sourceCheckbox.value;
+        const isChecked = sourceCheckbox.checked;
+
+        if (isCategory) {
+            categoryCheckboxes.forEach(cb => {
+                if (cb.value === value && cb !== sourceCheckbox) {
+                    cb.checked = isChecked;
+                }
+            });
+        }
+    }
+
+    function filterTools() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedCategories = [...new Set(Array.from(categoryCheckboxes)
+                                       .filter(checkbox => checkbox.checked)
+                                       .map(checkbox => checkbox.value))];
+        let visibleCount = 0;
+
+        toolCards.forEach(card => {
+            const toolName = card.dataset.toolName.toLowerCase();
+            const toolCategories = card.dataset.toolCategories ? card.dataset.toolCategories.split(' ') : [];
+            // Removed toolType check - all tools on this page are 'ai' implicitly
+
+            const categoryMatch = selectedCategories.length === 0 || selectedCategories.some(cat => toolCategories.includes(cat));
+            const searchMatch = searchTerm === '' || toolName.includes(searchTerm);
+
+            // Show/Hide Card: Category and Search must match
+            if (categoryMatch && searchMatch) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                 card.style.display = 'none';
+            }
+        });
+
+        // Show/Hide "No Results" message and grid
+        if (visibleCount === 0) {
+            noResultsMessage.style.display = 'block';
+            toolsGrid.style.display = 'none';
+        } else {
+            noResultsMessage.style.display = 'none';
+            toolsGrid.style.display = '';
+        }
+    }
+
+    // --- Event Listeners ---
+    searchInput.addEventListener('input', filterTools);
+
+    // Add listeners to Category checkboxes only, and sync them
+    categoryCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', (event) => {
+            syncCheckboxes(event.target);
+            filterTools();
+        });
+    });
+
+    // Add listeners to ALL clear buttons
+    clearFiltersBtns.forEach(button => {
+        button.addEventListener('click', () => {
+            searchInput.value = '';
+            categoryCheckboxes.forEach(checkbox => checkbox.checked = false); // Uncheck all category boxes
+            filterTools(); // Re-apply filters
+
+            // Optionally close offcanvas if it's open
+             if (offcanvasElement.classList.contains('show')) {
+                 offcanvasInstance.hide();
+             }
+        });
+    });
+
+    // Initial filter run on page load
+     filterTools();
+});
+</script>
+
+{# --- Theme Toggle Script (Inherited from base.html) --- #}
+{# No need to repeat theme toggle JS here #}
+
+{% endblock %}

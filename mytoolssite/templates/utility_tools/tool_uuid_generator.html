@@ -1,0 +1,288 @@
+{# templates/utility_tools/tool_uuid_generator.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-11">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">ID</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Generate universally unique identifiers (UUIDs) version 1 or 4.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {# --- Options Form Section --- #}
+            <div class="card p-4 p-md-5 mb-4" id="optionsCard">
+                <form method="post" action="{% url 'utility_tools:uuid_generator' %}" id="uuidForm">
+                    {% csrf_token %}
+                     <h5 class="text-center mb-4">Options</h5>
+                     <div class="row g-3 justify-content-center align-items-center">
+                        <div class="col-md-3">
+                             <label for="versionSelect" class="form-label fw-medium">Version:</label>
+                             <select class="form-select neumorphic-inset" id="versionSelect" name="version">
+                                <option value="4" {% if prev_version == 4 %}selected{% endif %}>Version 4 (Random)</option>
+                                <option value="1" {% if prev_version == 1 %}selected{% endif %}>Version 1 (Timestamp)</option>
+                                {# Add v3/v5 later if needed #}
+                            </select>
+                        </div>
+                        <div class="col-md-3">
+                            <label for="quantityInput" class="form-label fw-medium">Quantity:</label>
+                            <input type="number" class="form-control neumorphic-inset" id="quantityInput" name="quantity" min="1" max="1000" value="{{ prev_quantity|default:1 }}" required>
+                        </div>
+                         <div class="col-md-3 align-self-center">
+                            <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="uppercase" role="switch" id="uppercaseCheck" value="on" {% if prev_uppercase %}checked{% endif %}>
+                                <label class="form-check-label" for="uppercaseCheck">Uppercase</label>
+                             </div>
+                         </div>
+                         <div class="col-md-3 align-self-center">
+                             <div class="form-check form-switch">
+                                <input class="form-check-input" type="checkbox" name="remove_hyphens" role="switch" id="hyphensCheck" value="on" {% if prev_remove_hyphens %}checked{% endif %}>
+                                <label class="form-check-label" for="hyphensCheck">Remove Hyphens</label>
+                             </div>
+                         </div>
+                     </div>
+
+                    {# Generate Button #}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-submit-tool btn-lg" id="generateButton">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-arrow-repeat me-2" viewBox="0 0 16 16"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.5a.5.5 0 0 1 0-1h3.5a.5.5 0 0 1 .5.5v3.5a.5.5 0 0 1-1 0V6.118A5.002 5.002 0 0 0 8 3zM3.5 12.5a.5.5 0 0 1 .5-.5h3.5a.5.5 0 0 1 0 1H4v1.882a5.002 5.002 0 0 0 8.051-.078.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.5a.5.5 0 0 1 .5.5z"/></svg>
+                            Generate UUID(s)
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {# --- End Input Form Section --- #}
+
+             {# --- Results Section --- #}
+            {% if generated_uuids %}
+            <div class="card p-4 mt-4" id="resultsCard">
+                <h3 class="text-center mb-3">Generated UUID(s)</h3>
+                 <div class="position-relative">
+                    {# Display as list or single textarea #}
+                    <textarea id="uuidOutput" class="form-control neumorphic-inset font-monospace" rows="{{ generated_uuids|length|add:1 }}" readonly>{% for uuid in generated_uuids %}{{ uuid }}{% if not forloop.last %}
+{% endif %}{% endfor %}</textarea> {# is newline #}
+                    <button id="copyButton" class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2" type="button" title="Copy to Clipboard">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg>
+                        Copy All
+                    </button>
+                </div>
+            </div>
+            {% endif %}
+            {# --- End Results Section --- #}
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* --- Form Control & Option Styles --- */
+    .form-label.fw-medium { /* For option labels */
+        color: var(--text-color);
+        transition: color 0.3s ease;
+    }
+    /* Style for the options section heading */
+    #optionsCard h5 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+    /* Style number inputs, selects used for options */
+    input[type="number"].neumorphic-inset,
+    select.neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        height: auto;
+    }
+    /* Hide number spinners */
+    input[type=number].neumorphic-inset { -moz-appearance: textfield; }
+    input[type=number].neumorphic-inset::-webkit-inner-spin-button,
+    input[type=number].neumorphic-inset::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    /* Select arrow styling */
+    select.neumorphic-inset {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right .75rem center;
+        background-size: 16px 12px;
+        appearance: none;
+    }
+    body.dark-mode select.neumorphic-inset {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+    /* Focus styles for inputs/selects */
+    input[type="number"].neumorphic-inset:focus,
+    select.neumorphic-inset:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark),
+                     inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+
+    /* Switch styles */
+    .form-switch .form-check-input {
+         background-color: var(--bg-color);
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+         background-position: left center;
+         border-radius: 2em;
+         width: 2.75em;
+         height: 1.5em;
+         margin-top: 0.1em;
+         box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+         border: none;
+         cursor: pointer;
+         transition: background-color 0.3s ease, background-position .15s ease-in-out, box-shadow 0.3s ease, border-color 0.3s ease;
+         -webkit-appearance: none;
+         appearance: none;
+    }
+    body.dark-mode .form-switch .form-check-input {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+    }
+    .form-switch .form-check-input:checked {
+         background-position: right center;
+         border-color: transparent;
+         background-color: var(--link-color);
+         box-shadow: none;
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+    }
+     /* Focus style for switch */
+     .form-switch .form-check-input:focus {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+    }
+    body.dark-mode .form-switch .form-check-input:focus {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+    }
+    .form-switch .form-check-input:checked:focus {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+        box-shadow: none;
+    }
+    .form-check-label {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        cursor: pointer;
+        vertical-align: middle;
+        padding-left: 0.4em;
+    }
+
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--link-color);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn-submit-tool:hover {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+    .btn-submit-tool:active {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    .btn-submit-tool:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    }
+
+
+    /* --- Results Section --- */
+    #resultsCard h3 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+    #uuidOutput { /* Output Textarea */
+        background-color: var(--card-bg-color); /* Match card */
+        border-radius: var(--radius-small);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        border: none;
+        color: var(--muted-text-color); /* Muted color for output */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        font-size: 0.9em;
+        word-break: break-all; /* Wrap long string */
+        min-height: 150px; /* Give it some height */
+    }
+    #uuidOutput:focus {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    /* Copy Button Style */
+    #copyButton {
+         opacity: 0.7;
+         transition: opacity 0.2s ease;
+    }
+    #copyButton:hover {
+         opacity: 1;
+    }
+    #copyButton.copied {
+        background-color: #198754; /* Bootstrap success green */
+        border-color: #198754;
+        color: white;
+    }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for copy button #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Copy Button Logic ---
+    const copyButton = document.getElementById('copyButton');
+    const outputTextArea = document.getElementById('uuidOutput'); // Target the textarea
+
+    if (copyButton && outputTextArea) {
+        copyButton.addEventListener('click', () => {
+            if (navigator.clipboard && outputTextArea.value) {
+                 navigator.clipboard.writeText(outputTextArea.value).then(() => {
+                    copyButton.innerHTML = '<svg class="bi bi-check-lg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    copyButton.classList.add('copied');
+                    setTimeout(() => {
+                         copyButton.innerHTML = '<svg class="bi bi-clipboard" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg> Copy All';
+                         copyButton.classList.remove('copied');
+                    }, 2000);
+                 }).catch(err => { alert('Failed to copy.'); });
+            } else if (outputTextArea.value) { /* Fallback execCommand */ }
+        });
+    }
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

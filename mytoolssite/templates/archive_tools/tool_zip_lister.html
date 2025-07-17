@@ -1,0 +1,362 @@
+{# templates/archive_tools/tool_zip_lister.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-archive d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">ZIP</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Upload a ZIP archive to view the list of files and folders it contains.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {# --- Upload Form --- #}
+            <div class="card p-4 p-md-5 mb-4" id="uploadCard">
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+                    {# Unique name 'zipfile', single file #}
+                    <input class="d-none" type="file" id="zipfileInput" name="zipfile" accept=".zip,application/zip,application/x-zip-compressed" required>
+
+                    {# Drop Zone #}
+                    <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-file-earmark-zip-fill mb-3 text-muted" viewBox="0 0 16 16"><path d="M5.5 9.438V8.5h1v.938a1 1 0 0 0 .03.243l.4 1.598-.93.62-.93-.62.4-1.598a1 1 0 0 0 .03-.243z"/><path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M6.5 7.5h1v1h-1zm-1 0h1v1h-1zm1 1.75V11h1v-1.75a.75.75 0 0 0-1 0M4.5 9.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm0 1.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm4-3h1v1h-1zm-1 0h1v1h-1zm1 1.75V11h1v-1.75a.75.75 0 0 0-1 0zM8.5 9.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm0 1.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1z"/></svg>
+                        <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop ZIP File Here</p>
+                        <p class="mb-0 text-muted small">(Select one .zip file)</p>
+                        <p class="mb-0 text-muted small">or</p>
+                        <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse File</button>
+                    </div>
+                    <div id="selectedFileName" class="text-center text-muted small mb-3"></div>
+                    <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No file selected.</div>
+
+                    {# No options needed for V1 #}
+
+                    {# Submit Button #}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-submit-tool btn-lg" id="submitButton" disabled>
+                           <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-list-ul me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m-2-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m-2-4a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m-3 1a1 1 0 1 0 0-2 1 1 0 0 0 0 2m0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2m0 4a1 1 0 1 0 0-2 1 1 0 0 0 0 2"/></svg>
+                            List Contents
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {# --- End Upload Form Section --- #}
+
+            {# --- Results Section --- #}
+            {% if zip_contents is not None %} {# Check if the list exists (even if empty) #}
+            <div class="card p-4 mt-4 neumorphic" id="resultsCard">
+                <h3 class="text-center mb-3">Contents of <span class="text-muted fst-italic">{{ original_filename }}</span></h3>
+                {% if zip_contents %}
+                <div class="table-responsive zip-table-container neumorphic-inset p-3"> {# Add inset style #}
+                     <table class="table table-sm table-hover align-middle mb-0">
+                         <thead>
+                             <tr>
+                                 <th scope="col">Name</th>
+                                 <th scope="col" class="text-end">Size</th>
+                             </tr>
+                         </thead>
+                         <tbody>
+                             {% for item in zip_contents %}
+                             <tr>
+                                 <td style="word-break: break-all;"> {# Allow long names to wrap #}
+                                     {% if item.is_dir %}
+                                         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-folder-fill me-1 text-muted" viewBox="0 0 16 16" style="vertical-align: -0.1em;"> <path d="M9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31L.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3"/> </svg>
+                                     {% else %}
+                                         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-file-earmark-text-fill me-1 text-muted" viewBox="0 0 16 16" style="vertical-align: -0.1em;"> <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M4.5 8.5A.5.5 0 0 1 5 8h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h6a.5.5 0 0 1 0 1H5a.5.5 0 0 1-.5-.5m0 2a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 1-.5-.5"/> </svg>
+                                     {% endif %}
+                                     {{ item.name }}
+                                 </td>
+                                 <td class="text-end font-monospace small">
+                                     {% if not item.is_dir %}
+                                         {{ item.size|filesizeformat }}
+                                     {% endif %}
+                                 </td>
+                             </tr>
+                             {% endfor %}
+                         </tbody>
+                     </table>
+                </div>
+                {% else %}
+                    <p class="text-center text-muted">The ZIP file appears to be empty.</p>
+                {% endif %}
+
+                 <div class="text-center mt-4">
+                    <a href="{% url 'archive_tools:zip_viewer' %}" class="btn btn-outline-secondary clear-filters-btn">
+                        <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                        Check Another ZIP
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            {# --- End Results Section --- #}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Re-use styles from other tools or custom.css */
+    .drop-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-main);
+        cursor: pointer;
+        transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        background-color: var(--bg-color);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+    }
+    .drop-zone.dragover {
+        border-color: var(--link-color);
+        background-color: rgba(var(--link-color-rgb), 0.1);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+    }
+    #browseButton {
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out;
+    }
+    #browseButton:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+    #selectedFileName {
+         transition: color 0.3s ease;
+         font-weight: 500;
+    }
+
+    /* Submit Button Styles */
+    .btn-submit-tool {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--link-color);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn-submit-tool:hover {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+    .btn-submit-tool:active {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    .btn-submit-tool:disabled {
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        opacity: 0.6;
+        cursor: not-allowed;
+        color: var(--muted-text-color);
+    }
+    .btn-submit-tool:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    }
+
+    /* Success/Download/Action Buttons */
+    .btn-success { /* Download button, if added later */
+        padding: 0.75rem 1.25rem;
+    }
+    .clear-filters-btn { /* For Check Another button */
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        border-radius: var(--radius-small);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .clear-filters-btn:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+
+    /* Results Heading */
+     #resultsCard h3 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+
+    /* Table styling */
+    .zip-table-container {
+        max-height: 400px; /* Limit height and make scrollable */
+        overflow-y: auto;
+        background-color: var(--card-bg-color); /* Match card background */
+        /* Neumorphic inset applied via class */
+         border-radius: var(--radius-small);
+         transition: background-color 0.3s ease;
+         /* Add neumorphic inset shadow */
+         box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                    inset -3px -3px 6px var(--shadow-light);
+    }
+    .table {
+         color: var(--text-color); /* Ensure text color adapts */
+         transition: color 0.3s ease;
+         margin-bottom: 0; /* Remove default margin */
+         border-color: transparent !important; /* Hide outer bootstrap border */
+         background-color: transparent; /* Ensure table itself is transparent */
+         border-collapse: separate; /* Needed for spacing */
+         border-spacing: 0; /* Reset spacing */
+    }
+     .table th {
+         border-top: none !important; /* Remove bootstrap top border */
+         border-bottom: 1px solid var(--border-color) !important; /* Use theme border */
+         color: var(--muted-text-color);
+         font-weight: 500;
+         font-size: 0.9em;
+         padding: 0.5rem 0.75rem;
+         transition: color 0.3s ease, border-color 0.3s ease;
+         position: sticky; /* Make header sticky */
+         top: 0;
+         background-color: var(--card-bg-color); /* Match container bg */
+         z-index: 1; /* Keep header above scrolling content */
+          transition: background-color 0.3s ease;
+    }
+     .table td {
+         border-top: 1px solid var(--border-color) !important;
+         padding: 0.5rem 0.75rem;
+         vertical-align: middle;
+         transition: border-color 0.3s ease;
+         color: var(--text-color); /* Ensure td text color adapts */
+    }
+    /* Style table rows on hover */
+    .table-hover > tbody > tr:hover > * {
+         background-color: rgba(var(--link-color-rgb), 0.05) !important; /* Subtle hover */
+         color: var(--text-color);
+    }
+    /* Remove bottom border on last row */
+     .table > tbody > tr:last-child > td {
+         border-bottom: none;
+     }
+
+      /* Align icons in table cells nicely */
+      .table td svg.bi {
+          vertical-align: -0.15em; /* Adjust as needed */
+          margin-right: 0.3em;
+          opacity: 0.7;
+      }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for single file input 'zipfile', filename display #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('zipfileInput'); // Correct ID
+    const browseButton = document.getElementById('browseButton');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const selectedFileNameDisplay = document.getElementById('selectedFileName');
+    const submitButton = document.getElementById('submitButton'); // Renamed button ID
+    const dropZoneText = document.getElementById('dropZoneText');
+    let currentFile = null; // Store single file
+
+    // --- File Handling & UI Update ---
+    const updateUI = () => {
+        selectedFileNameDisplay.textContent = '';
+        if (currentFile) {
+            selectedFileNameDisplay.textContent = `Selected: ${currentFile.name}`;
+            dropZoneText.textContent = "Replace file by dropping or browsing";
+            submitButton.disabled = false; // Enable button when file selected
+            previewPlaceholder.style.display = 'none';
+        } else {
+            previewPlaceholder.style.display = 'block';
+            dropZoneText.textContent = "Drag & Drop ZIP File Here";
+            submitButton.disabled = true;
+        }
+        // Update hidden input
+        try {
+            const dataTransfer = new DataTransfer();
+            if (currentFile) dataTransfer.items.add(currentFile);
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    const handleRemoveFile = () => { // Only used internally if validation fails
+        currentFile = null; fileInput.value = ''; updateUI();
+    };
+
+    const handleFiles = (files) => {
+        if (files.length === 0) { handleRemoveFile(); return; }
+        const file = files[0];
+        const allowedMimes = ['application/zip', 'application/x-zip-compressed', 'application/octet-stream']; // Allow generic for zip
+        const allowedExts = ['.zip'];
+        const fileNameParts = file.name.split('.');
+        const fileExt = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+
+        if (!allowedExts.includes(fileExt)) { // Primarily check extension for ZIP
+             alert(`Please select a valid ZIP file (.zip).`);
+             handleRemoveFile();
+             return;
+        }
+         // Optional MIME check warning
+        if (!allowedMimes.includes(file.type.toLowerCase())) {
+             console.warn(`Unexpected MIME type: ${file.type}. Allowing based on extension.`);
+        }
+
+        currentFile = file;
+        updateUI();
+    };
+
+    // Drag/Drop/Browse listeners
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+     // Optional: Show loading on submit
+    form.addEventListener('submit', function(event) {
+        if (!currentFile) {
+            event.preventDefault();
+            alert("Please select a ZIP file.");
+            return;
+        }
+        // Minimal validation passed, show loading if desired
+         const uploadCard = document.getElementById('uploadCard');
+         const loadingOverlay = document.createElement('div'); // Create dynamically
+         loadingOverlay.id = 'loadingOverlay';
+         loadingOverlay.className = 'text-center py-5';
+         loadingOverlay.innerHTML = `
+             <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;">
+                 <span class="visually-hidden">Loading...</span>
+             </div>
+             <p class="mt-3 text-muted">Reading ZIP file contents...</p>`;
+         if (uploadCard) {
+             uploadCard.style.display = 'none';
+             uploadCard.parentNode.insertBefore(loadingOverlay, uploadCard.nextSibling);
+             submitButton.disabled = true;
+         }
+    });
+
+
+    updateUI(); // Initial state
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

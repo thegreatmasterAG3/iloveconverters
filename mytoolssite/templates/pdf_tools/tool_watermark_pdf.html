@@ -1,0 +1,454 @@
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+{# templates/pdf_tools/tool_watermark_pdf.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">P™</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Add a text or image watermark overlay to every page of your PDF document.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form Section --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+
+                        {# --- PDF File Input (Drag & Drop) --- #}
+                        <div class="mb-4">
+                             <label class="form-label fw-medium">1. Upload PDF File:</label>
+                             {# Hidden actual file input #}
+                            <input class="d-none" type="file" id="pdffileInput" name="pdffile_watermark" accept=".pdf,application/pdf" required>
+                             {# Visible Drop Zone #}
+                            <div id="dropZonePdf" class="drop-zone neumorphic-inset text-center p-4 p-md-5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cloud-arrow-up-fill mb-3 text-muted" viewBox="0 0 16 16"><path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z"/></svg>
+                                <p id="dropZoneTextPdf" class="mb-0 text-muted">Drag & Drop PDF File Here</p>
+                                <p class="mb-0 text-muted small">or</p>
+                                <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButtonPdf">Browse File</button>
+                            </div>
+                            <div id="selectedFileNamePdf" class="text-center text-muted small mt-2"></div> {# Show selected PDF filename #}
+                            <div id="previewPlaceholderPdf" class="text-center text-muted mt-3" style="display: block;">No PDF file selected.</div>
+                        </div>
+                         {# --- End PDF File Input --- #}
+
+
+                        {# --- Watermark Options --- #}
+                        <div class="border-top pt-4 mb-4">
+                            <h5 class="mb-3 fw-medium">2. Choose Watermark Type & Options:</h5>
+                            {# Type Selection Radio #}
+                            <div class="mb-3">
+                                 <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="watermark_type" id="typeText" value="text" {% if not prev_options.watermark_type or prev_options.watermark_type == 'text' %}checked{% endif %}>
+                                    <label class="form-check-label" for="typeText">Text Watermark</label>
+                                </div>
+                                <div class="form-check form-check-inline">
+                                    <input class="form-check-input" type="radio" name="watermark_type" id="typeImage" value="image" {% if prev_options.watermark_type == 'image' %}checked{% endif %}>
+                                    <label class="form-check-label" for="typeImage">Image Watermark</label>
+                                </div>
+                            </div>
+
+                            {# --- Text Options (Conditional Display) --- #}
+                            <div id="textOptions" style="display: {% if not prev_options.watermark_type or prev_options.watermark_type == 'text' %}block{% else %}none{% endif %};">
+                                <div class="mb-3">
+                                    <label for="watermarkText" class="form-label">Watermark Text:</label>
+                                    <input type="text" class="form-control neumorphic-inset" id="watermarkText" name="watermark_text" value="{{ prev_options.watermark_text|default:'CONFIDENTIAL' }}" placeholder="e.g., DRAFT, CONFIDENTIAL">
+                                </div>
+                                <div class="row g-3">
+                                    <div class="col-md-4">
+                                         <label for="fontSizeInput" class="form-label">Font Size:</label>
+                                         <input type="number" class="form-control neumorphic-inset" id="fontSizeInput" name="font_size" value="{{ prev_options.font_size|default:'48' }}" min="8" max="200">
+                                    </div>
+                                    <div class="col-md-4">
+                                         <label for="textColorInput" class="form-label">Color:</label>
+                                         <input type="color" class="form-control form-control-color neumorphic-inset" id="textColorInput" name="text_color" value="{{ prev_options.text_color|default:'#888888' }}" title="Choose text color">
+                                    </div>
+                                    <div class="col-md-4">
+                                         <label for="textRotationInput" class="form-label">Rotation (°):</label>
+                                         <input type="number" class="form-control neumorphic-inset" id="textRotationInput" name="rotation" value="{{ prev_options.rotation|default:'45' }}" step="1">
+                                    </div>
+                                    <div class="col-md-12">
+                                         <label for="textOpacityRange" class="form-label">Opacity: <span id="textOpacityValue">{{ prev_options.text_opacity|default:"0.3" }}</span></label>
+                                         <input type="range" class="form-range" id="textOpacityRange" name="text_opacity" min="0.1" max="1.0" value="{{ prev_options.text_opacity|default:"0.3" }}" step="0.05">
+                                    </div>
+                                </div>
+                            </div>
+                            {# --- End Text Options --- #}
+
+                            {# --- Image Options (Conditional Display) --- #}
+                            <div id="imageOptions" class="mt-3" style="display: {% if prev_options.watermark_type == 'image' %}block{% else %}none{% endif %};">
+                                 <div class="mb-3">
+                                    <label for="watermarkImageInput" class="form-label">Watermark Image File:</label>
+                                    {# Standard file input for watermark image #}
+                                    <input class="form-control neumorphic-inset" type="file" id="watermarkImageInput" name="watermark_image" accept="image/png,image/jpeg">
+                                    <div class="form-text">Select a PNG (recommended for transparency) or JPG image.</div>
+                                </div>
+                                 <div class="row g-3">
+                                     <div class="col-md-6">
+                                          <label for="imageOpacityRange" class="form-label">Opacity: <span id="imageOpacityValue">{{ prev_options.image_opacity|default:"0.3" }}</span></label>
+                                          <input type="range" class="form-range" id="imageOpacityRange" name="image_opacity" min="0.1" max="1.0" value="{{ prev_options.image_opacity|default:"0.3" }}" step="0.05">
+                                     </div>
+                                      <div class="col-md-6">
+                                          <label for="imageScaleInput" class="form-label">Scale (% of Page Width): <span id="imageScaleValue">{{ prev_options.image_scale|default:"80" }}</span></label>
+                                          <input type="range" class="form-range" id="imageScaleInput" name="image_scale" min="10" max="150" value="{{ prev_options.image_scale|default:"80" }}" step="5">
+                                      </div>
+                                 </div>
+                            </div>
+                             {# --- End Image Options --- #}
+                        </div>
+                        {# --- END: Options --- #}
+
+                        {# Add Watermark Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled> {# Disabled initially by JS #}
+                               <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-droplet-fill me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M8 16a6 6 0 0 0 6-6c0-1.655-1.122-2.904-2.432-4.362C10.254 4.176 8.75 2.503 8 0c-.75.001-2.254 1.676-3.568 3.074C3.122 7.096 2 8.345 2 10a6 6 0 0 0 6 6"/></svg>
+                                Add Watermark
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {# --- End Upload Form Section --- #}
+
+                {# --- Loading Indicator --- #}
+                <div id="loadingOverlay" class="text-center py-5" style="display: none;">
+                    <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"><span class="visually-hidden">Loading...</span></div>
+                    <p class="mt-3 text-muted">Adding watermark to your PDF, please wait...</p>
+                </div>
+                {# --- End Loading Indicator --- #}
+
+            {% else %}
+                {# --- Download Section (Remains the Same) --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic" id="resultsCard">
+                     <h3 class="mb-3 text-success">Watermark Added!</h3>
+                      {% if original_filename %} <p class="text-muted small mb-3">Original file: {{ original_filename }}</p> {% endif %}
+                     <p class="text-muted mb-4">Your watermarked PDF file is ready.</p>
+                     <form method="post" action="{% url 'pdf_tools:add_watermark' %}">
+                          {% csrf_token %}
+                          <input type="hidden" name="download_watermarked" value="true">
+                          <button type="submit" class="btn btn-success btn-lg mb-3">
+                              <svg class="bi bi-download me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><use xlink:href="#icon-download"/></svg>
+                              Download {{ download_filename|default:"Watermarked PDF" }}
+                          </button>
+                     </form>
+                     <a href="{% url 'pdf_tools:add_watermark' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                         <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><use xlink:href="#icon-back-arrow"/></svg>
+                         Watermark Another PDF
+                     </a>
+                 </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Icon definitions if not in base #}
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="icon-download" viewBox="0 0 16 16"> <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/> </symbol>
+    <symbol id="icon-back-arrow" viewBox="0 0 16 16"> <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/> </symbol>
+</svg>
+
+{# Styles specific to this page #}
+<style>
+    /* --- Dropzone Styles --- */
+    .drop-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-main);
+        cursor: pointer;
+        transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        background-color: var(--bg-color);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+    }
+    .drop-zone.dragover {
+        border-color: var(--link-color);
+        background-color: rgba(var(--link-color-rgb), 0.1);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+    }
+    #browseButtonPdf { /* Specific ID for this page's browse button */
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out;
+    }
+    #browseButtonPdf:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+    #selectedFileNamePdf {
+         transition: color 0.3s ease;
+         font-weight: 500;
+         color: var(--muted-text-color); /* Ensure muted color in both modes */
+    }
+    #dropZonePdf p { /* Ensure text inside dropzone adapts */
+        color: var(--muted-text-color);
+        transition: color 0.3s ease;
+    }
+     #dropZonePdf svg { /* Ensure icon inside dropzone adapts */
+        color: var(--muted-text-color);
+        transition: color 0.3s ease;
+    }
+
+    /* --- Form Control & Option Styles --- */
+    .form-label, /* Target all labels */
+    .form-label.fw-medium {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 500; /* Make labels slightly bolder */
+    }
+     /* Style for the options section heading */
+    #uploadCard .border-top h5 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+    .form-text {
+        color: var(--muted-text-color);
+        transition: color 0.3s ease;
+        font-size: 0.8em;
+    }
+    /* Style text, number, file inputs */
+    .neumorphic-inset,
+    input[type="text"].neumorphic-inset,
+    input[type="number"].neumorphic-inset,
+    input[type="file"].neumorphic-inset,
+    select.neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        height: auto;
+    }
+    input[type="file"].neumorphic-inset { padding: 0.6rem 1rem; }
+    input[type=number].neumorphic-inset::-webkit-inner-spin-button,
+    input[type=number].neumorphic-inset::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"].neumorphic-inset { -moz-appearance: textfield; }
+    .neumorphic-inset::placeholder { color: var(--muted-text-color); opacity: 0.7; transition: color 0.3s ease, opacity 0.3s ease; }
+    /* Focus */
+    .neumorphic-inset:focus,
+    input[type="text"].neumorphic-inset:focus,
+    input[type="number"].neumorphic-inset:focus,
+    input[type="file"].neumorphic-inset:focus,
+    select.neumorphic-inset:focus {
+        background-color: var(--bg-color);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+        color: var(--text-color);
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        border: none;
+    }
+    /* File Input Button */
+    input[type="file"].neumorphic-inset::file-selector-button { color: var(--link-color); background-color: transparent; border: 1px solid var(--link-color); padding: 0.375rem .75rem; border-radius: var(--radius-small); margin-right: 1rem; transition: all .15s ease-in-out; cursor: pointer;}
+    input[type="file"].neumorphic-inset:hover::file-selector-button { background-color: rgba(var(--link-color-rgb), 0.1); }
+    /* Color Picker */
+    .form-control-color { min-height: calc(1.5em + .75rem + 2px); width: 100%; max-width: 100px; background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; padding: 0.2rem 0.3rem; cursor: pointer; transition: background-color 0.3s ease, box-shadow 0.3s ease; }
+    .form-control-color:focus { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); }
+     /* Range Slider */
+     .form-range { padding: 0; cursor: pointer;}
+     .form-range::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+     .form-range::-moz-range-track { width: 100%; height: 8px; cursor: pointer; background: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+     .form-range::-webkit-slider-thumb { height: 20px; width: 20px; border-radius: 50%; background: var(--bg-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); cursor: pointer; margin-top: -6px; -webkit-appearance: none; }
+     .form-range::-moz-range-thumb { height: 20px; width: 20px; border-radius: 50%; background: var(--bg-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); cursor: pointer; border: none; }
+     .form-range:focus { outline: none; }
+     .form-range:focus::-webkit-slider-thumb { outline: 2px solid var(--link-color); outline-offset: 2px; }
+     .form-range:focus::-moz-range-thumb { outline: 2px solid var(--link-color); outline-offset: 2px; }
+    /* Standard Radio/Checkboxes/Switches */
+    .form-check-input { background-color: var(--bg-color); border-color: transparent; box-shadow: inset 1px 1px 3px var(--shadow-dark), inset -1px -1px 3px var(--shadow-light); transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; margin-top: 0.15em; vertical-align: top; width: 1.15em; height: 1.15em; cursor: pointer;}
+    .form-check-input:checked { background-color: var(--link-color); border-color: transparent; box-shadow: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");}
+    .form-check-input:focus { border-color: transparent; outline: 2px solid var(--link-color); outline-offset: 1px; box-shadow: inset 1px 1px 3px var(--shadow-dark), inset -1px -1px 3px var(--shadow-light); }
+    .form-check-input:checked:focus { box-shadow: none; background-color: var(--link-color); }
+    .form-check-label { color: var(--text-color); padding-left: 0.4em; transition: color 0.3s ease; cursor: pointer; vertical-align: middle; }
+    .form-switch .form-check-input { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); background-position: left center; border-radius: 2em; width: 2.75em; height: 1.5em; margin-top: 0.1em; box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); border: none; transition: background-color 0.3s ease, background-position .15s ease-in-out, box-shadow 0.3s ease, border-color 0.3s ease; -webkit-appearance: none; appearance: none; }
+    body.dark-mode .form-switch .form-check-input { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); }
+    .form-switch .form-check-input:checked { background-position: right center; border-color: transparent; background-color: var(--link-color); box-shadow: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e"); }
+    .form-switch .form-check-input:focus { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); }
+    body.dark-mode .form-switch .form-check-input:focus { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); }
+    .form-switch .form-check-input:checked:focus { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e"); box-shadow: none; }
+    .form-check-input:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: inset 1px 1px 2px var(--shadow-dark), inset -1px -1px 2px var(--shadow-light); }
+    .form-switch .form-check-input:disabled { box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+    .form-check-input:disabled:checked { background-color: var(--muted-text-color); border-color: transparent; box-shadow: none; }
+    .form-switch .form-check-input:disabled:checked { background-color: var(--muted-text-color); }
+    .form-check-input:disabled ~ .form-check-label { opacity: 0.6; cursor: not-allowed; }
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+
+    /* --- Success/Download Buttons --- */
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+
+     /* --- Results Heading --- */
+     #resultsCard h3 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+
+     /* --- Loading Overlay Styles --- */
+     #loadingOverlay .spinner-border { color: var(--link-color) !important; width: 3rem; height: 3rem; }
+     #loadingOverlay p { color: var(--muted-text-color); transition: color 0.3s ease; }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for file input, options toggle, slider display, loading #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const uploadCard = document.getElementById('uploadCard');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const fileInput = document.getElementById('pdffileInput'); // Main PDF input
+    const dropZone = document.getElementById('dropZonePdf');
+    const browseButton = document.getElementById('browseButtonPdf');
+    const selectedFileNameDisplay = document.getElementById('selectedFileNamePdf');
+    const previewPlaceholder = document.getElementById('previewPlaceholderPdf'); // Use correct ID if needed
+    const convertButton = document.getElementById('convertButton');
+    const dropZoneText = document.getElementById('dropZoneTextPdf');
+
+    const watermarkTypeText = document.getElementById('typeText');
+    const watermarkTypeImage = document.getElementById('typeImage');
+    const textOptionsDiv = document.getElementById('textOptions');
+    const imageOptionsDiv = document.getElementById('imageOptions');
+    const watermarkImageInput = document.getElementById('watermarkImageInput'); // Watermark image input
+
+    const textOpacityRange = document.getElementById('textOpacityRange');
+    const textOpacityValue = document.getElementById('textOpacityValue');
+    const imageOpacityRange = document.getElementById('imageOpacityRange');
+    const imageOpacityValue = document.getElementById('imageOpacityValue');
+    const imageScaleRange = document.getElementById('imageScaleInput');
+    const imageScaleValue = document.getElementById('imageScaleValue');
+
+    let currentPdfFile = null;
+
+    // --- File Handling & UI Update (for main PDF) ---
+    const updateMainPdfUI = () => {
+        selectedFileNameDisplay.textContent = '';
+        if (currentPdfFile) {
+            selectedFileNameDisplay.textContent = `Selected: ${currentPdfFile.name}`;
+            if(dropZoneText) dropZoneText.textContent = "Replace file by dropping or browsing";
+            if(convertButton) convertButton.disabled = false;
+            if(previewPlaceholder) previewPlaceholder.style.display = 'none';
+        } else {
+            if(previewPlaceholder) previewPlaceholder.style.display = 'block';
+            if(dropZoneText) dropZoneText.textContent = "Drag & Drop PDF File Here";
+            if(convertButton) convertButton.disabled = true;
+        }
+        // Update hidden input (important!)
+        try {
+            const dataTransfer = new DataTransfer();
+            if (currentPdfFile) dataTransfer.items.add(currentPdfFile);
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    const handleMainPdfRemove = () => {
+        currentPdfFile = null; fileInput.value = ''; updateMainPdfUI();
+    };
+
+    const handleMainPdfFiles = (files) => {
+        if (files.length === 0) { handleMainPdfRemove(); return; }
+        const file = files[0];
+        const allowedMimes = ['application/pdf']; const allowedExts = ['.pdf'];
+        const fileNameParts = file.name.split('.'); const fileExt = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+        if (!allowedMimes.includes(file.type.toLowerCase()) && !allowedExts.includes(fileExt)) { alert(`Please select a valid PDF file.`); handleMainPdfRemove(); return; }
+        currentPdfFile = file; updateMainPdfUI();
+    };
+
+
+    // --- Toggle Options Visibility ---
+    const toggleOptions = () => {
+        if (watermarkTypeText && watermarkTypeImage && textOptionsDiv && imageOptionsDiv) {
+            textOptionsDiv.style.display = watermarkTypeText.checked ? 'block' : 'none';
+            imageOptionsDiv.style.display = watermarkTypeImage.checked ? 'block' : 'none';
+            // Make image input required only if image type is selected
+            if (watermarkImageInput) watermarkImageInput.required = watermarkTypeImage.checked;
+        }
+    };
+
+    // --- Slider Value Display ---
+    function setupSliderDisplay(rangeEl, valueEl) {
+        if(rangeEl && valueEl) {
+            valueEl.textContent = rangeEl.value; // Initial value
+            rangeEl.addEventListener('input', () => { valueEl.textContent = rangeEl.value; });
+        }
+    }
+    setupSliderDisplay(textOpacityRange, textOpacityValue);
+    setupSliderDisplay(imageOpacityRange, imageOpacityValue);
+    setupSliderDisplay(imageScaleRange, imageScaleValue);
+
+
+    // --- Event Listeners ---
+    // PDF File Input
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleMainPdfFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleMainPdfFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    // Option Toggles
+    if (watermarkTypeText) watermarkTypeText.addEventListener('change', toggleOptions);
+    if (watermarkTypeImage) watermarkTypeImage.addEventListener('change', toggleOptions);
+
+    // --- Form Submission with Loading ---
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!currentPdfFile) { // Check PDF file
+                event.preventDefault(); alert("Please select a PDF file."); return;
+            }
+            if(watermarkTypeImage && watermarkTypeImage.checked && !watermarkImageInput.files.length){
+                event.preventDefault(); alert("Please select a watermark image file."); return;
+            }
+
+            // Show loading
+            if (uploadCard && loadingOverlay && convertButton) {
+                uploadCard.style.display = 'none'; loadingOverlay.style.display = 'block'; convertButton.disabled = true;
+            } else { console.error("Loading elements not found."); }
+        });
+    }
+
+    // Initial state
+    updateMainPdfUI();
+    toggleOptions(); // Set initial visibility
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

@@ -1,0 +1,299 @@
+{# templates/utility_tools/tool_timezone_converter.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12"> {# Wider column for form layout #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">TZ</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Convert dates and times between different world timezones.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {# --- Input Form --- #}
+            <div class="card p-4 p-md-5" id="converterCard">
+                <form method="post" action="{% url 'utility_tools:timezone_converter' %}" id="tzForm">
+                    {% csrf_token %}
+
+                    <div class="row g-3 align-items-center mb-4">
+                        {# Date & Time Input #}
+                        <div class="col-md-5">
+                            <label for="datetimeInput" class="form-label fw-medium">Source Date & Time:</label>
+                            <input type="text"
+                                   class="form-control neumorphic-inset"
+                                   id="datetimeInput"
+                                   name="datetime_input"
+                                   value="{{ datetime_input }}"
+                                   placeholder="YYYY-MM-DD HH:MM"
+                                   required
+                                   pattern="\d{4}-\d{2}-\d{2} \d{2}:\d{2}(:\d{2})?" {# Basic pattern validation #}
+                                   title="Enter date and time as YYYY-MM-DD HH:MM or YYYY-MM-DD HH:MM:SS">
+                            <div class="form-text">Format: YYYY-MM-DD HH:MM (24-hour)</div>
+                            {# Could use <input type="datetime-local"> but browser support/UI varies #}
+                        </div>
+
+                         {# Source Timezone #}
+                         <div class="col-md-7">
+                             <label for="sourceTzSelect" class="form-label fw-medium">From Timezone:</label>
+                             <select class="form-select neumorphic-inset" id="sourceTzSelect" name="source_tz" required>
+                                 <option value="" disabled {% if not source_tz %}selected{% endif %}>Select Source Zone...</option>
+                                 {% for tz in timezones %}
+                                     <option value="{{ tz }}" {% if tz == source_tz %}selected{% endif %}>{{ tz }}</option>
+                                 {% endfor %}
+                             </select>
+                         </div>
+                    </div>
+
+                     <div class="row g-3 align-items-center mb-4">
+                         {# Target Timezone #}
+                         <div class="col-md-7 offset-md-5"> {# Align with source timezone select #}
+                             <label for="targetTzSelect" class="form-label fw-medium">To Timezone:</label>
+                              <select class="form-select neumorphic-inset" id="targetTzSelect" name="target_tz" required>
+                                 <option value="" disabled {% if not target_tz %}selected{% endif %}>Select Target Zone...</option>
+                                 {% for tz in timezones %}
+                                     <option value="{{ tz }}" {% if tz == target_tz %}selected{% endif %}>{{ tz }}</option>
+                                 {% endfor %}
+                             </select>
+                         </div>
+                     </div>
+
+
+                    {# Convert Button #}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-arrow-left-right me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path fill-rule="evenodd" d="M1 11.5a.5.5 0 0 0 .5.5h11.793l-3.147 3.146a.5.5 0 0 0 .708.708l4-4a.5.5 0 0 0 0-.708l-4-4a.5.5 0 0 0-.708.708L13.293 11H1.5a.5.5 0 0 0-.5.5m14-7a.5.5 0 0 1-.5.5H2.707l3.147 3.146a.5.5 0 1 1-.708.708l-4-4a.5.5 0 0 1 0-.708l4-4a.5.5 0 1 1 .708.708L2.707 4H14.5a.5.5 0 0 1 .5.5"/></svg>
+                            Convert Time
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {# --- End Input Form Section --- #}
+
+            {# --- Results Section --- #}
+            {% if converted_time_str %}
+            <div class="card p-4 mt-4 text-center neumorphic" id="resultsCard">
+                <h3 class="mb-3">Converted Time</h3>
+                 <p class="lead display-6 converted-time-output">{{ converted_time_str }}</p>
+                 {# You could add original time display here too if needed #}
+                 {# <p class="text-muted mt-3">Original: {{ datetime_input }} ({{ source_tz }})</p> #}
+            </div>
+            {% endif %}
+            {# --- End Results Section --- #}
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Styles specific to Time Zone Converter page */
+
+/* Re-use styles from custom.css where applicable */
+
+/* Form Labels */
+.form-label.fw-medium {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+    font-weight: 500 !important; /* Ensure boldness */
+    display: block; /* Ensure it takes full width if needed */
+    margin-bottom: 0.5rem;
+}
+/* Form Help Text */
+.form-text {
+     color: var(--muted-text-color);
+     transition: color 0.3s ease;
+     font-size: 0.8em;
+}
+
+/* Input[type=text] and Select Styling (Neumorphic Inset) */
+input[type="text"].neumorphic-inset,
+select.neumorphic-inset {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                inset -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--text-color);
+    padding: 0.75rem 1rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    height: auto; /* Let padding define height */
+}
+select.neumorphic-inset { /* Specific styles for select dropdown arrow */
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right .75rem center;
+    background-size: 16px 12px;
+    appearance: none;
+}
+body.dark-mode select.neumorphic-inset {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+/* Focus styles for inputs/selects */
+input[type="text"].neumorphic-inset:focus,
+select.neumorphic-inset:focus {
+     background-color: var(--bg-color);
+     box-shadow: inset 6px 6px 12px var(--shadow-dark),
+                 inset -6px -6px 12px var(--shadow-light);
+     color: var(--text-color);
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     border: none;
+}
+/* Placeholder text style */
+input[type="text"].neumorphic-inset::placeholder {
+     color: var(--muted-text-color);
+     opacity: 0.7;
+     transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+/* Submit Button Styles */
+.btn-submit-tool {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--link-color);
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-submit-tool:hover {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+}
+.btn-submit-tool:active {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+}
+.btn-submit-tool:disabled { /* Although not used here, keep for consistency */
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    opacity: 0.6;
+    cursor: not-allowed;
+    color: var(--muted-text-color);
+}
+.btn-submit-tool:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+}
+
+/* Result Display Styles */
+#resultsCard {
+    /* Uses .card default neumorphic style */
+}
+#resultsCard h3 {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+    font-weight: 600;
+}
+.converted-time-output {
+    color: var(--link-color); /* Highlight result */
+    font-weight: 500;
+    transition: color 0.3s ease;
+    word-break: break-word; /* Wrap long timezone names */
+    font-size: clamp(1.5rem, 4vw, 2.5rem); /* Responsive font size */
+    line-height: 1.2;
+}
+/* Muted text within results card */
+#resultsCard .text-muted {
+    color: var(--muted-text-color) !important; /* Ensure override */
+    transition: color 0.3s ease;
+}
+
+/* Style for select dropdown options (browser dependent) */
+select.neumorphic-inset option {
+    background-color: var(--bg-color); /* Try to style dropdown options */
+    color: var(--text-color);
+}
+/* Dark mode specific option styling might be needed if above doesn't work well */
+body.dark-mode select.neumorphic-inset option {
+     background-color: var(--bg-color);
+     color: var(--text-color);
+}
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# Add JS for select2 or other dropdown enhancements if needed #}
+{# JS for Time Zone Converter - Currently minimal, only for potential future enhancements #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('tzForm');
+    const dateTimeInput = document.getElementById('datetimeInput');
+    const sourceTzSelect = document.getElementById('sourceTzSelect');
+    const targetTzSelect = document.getElementById('targetTzSelect');
+    const convertButton = document.getElementById('convertButton');
+
+    // --- Optional: Initialize Select2 for better dropdowns ---
+    // Check if jQuery and Select2 are loaded before using
+    // if (typeof jQuery !== 'undefined' && jQuery.fn.select2) {
+    //      console.log("Initializing Select2 for timezones...");
+    //      const select2Options = {
+    //          theme: "bootstrap-5", // Use Bootstrap 5 theme
+    //          width: '100%', // Ensure it takes full width
+    //          placeholder: $(this).data('placeholder'),
+    //          // dropdownParent: $('#converterCard') // May need if inside complex containers
+    //      };
+    //      $('#sourceTzSelect').select2(select2Options);
+    //      $('#targetTzSelect').select2(select2Options);
+    // } else {
+    //      console.log("Select2 not found, using standard dropdowns.");
+    // }
+
+
+    // --- Optional: Client-side validation or default setting ---
+    // Could try to guess user's local timezone and select it?
+    // try {
+    //    const userTz = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    //    if(userTz && sourceTzSelect.querySelector(`option[value="${userTz}"]`)) {
+    //         // Select only if not already set by POST repopulation
+    //         if (!sourceTzSelect.value || sourceTzSelect.value === "UTC") {
+    //             sourceTzSelect.value = userTz;
+    //             console.log(`Set source timezone to user's detected zone: ${userTz}`);
+    //         }
+    //    }
+    // } catch(e) {
+    //      console.warn("Could not detect user timezone:", e);
+    // }
+
+    // Basic check to enable button (though required fields handle this mostly)
+    function checkFormValidity() {
+        if(dateTimeInput && sourceTzSelect && targetTzSelect && convertButton) {
+            const isDateTimeValid = dateTimeInput.value.trim().length > 0; // Basic check
+            const isSourceTzValid = sourceTzSelect.value !== '';
+            const isTargetTzValid = targetTzSelect.value !== '';
+            convertButton.disabled = !(isDateTimeValid && isSourceTzValid && isTargetTzValid);
+        }
+    }
+
+    if (dateTimeInput) dateTimeInput.addEventListener('input', checkFormValidity);
+    if (sourceTzSelect) sourceTzSelect.addEventListener('change', checkFormValidity);
+    if (targetTzSelect) targetTzSelect.addEventListener('change', checkFormValidity);
+
+    // Initial check
+    checkFormValidity();
+
+});
+
+
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

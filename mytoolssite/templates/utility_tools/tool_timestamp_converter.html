@@ -1,0 +1,371 @@
+{# templates/utility_tools/tool_timestamp_converter.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">TS</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Convert Unix timestamps to human-readable dates and vice-versa.</p>
+            </div>
+
+            {# --- Input Form Section --- #}
+            <div class="card p-4 p-md-5 mb-4" id="inputCard">
+                <form method="post" action="{% url 'utility_tools:timestamp_converter' %}" id="timestampForm">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="timestamp_input" class="form-label fw-medium">Timestamp or Date String:</label>
+                        <input type="text"
+                               class="form-control neumorphic-inset font-monospace"
+                               id="timestamp_input"
+                               name="timestamp_input"
+                               value="{{ input_value }}" {# Repopulate input #}
+                               placeholder="e.g., 1678886400 or YYYY-MM-DD HH:MM:SS"
+                               required>
+                         <div class="form-text">Enter a Unix timestamp (seconds or ms) or a date (YYYY-MM-DD HH:MM:SS - assumed UTC).</div>
+                    </div>
+
+                    {# --- Timestamp Unit Option --- #}
+                    <div class="mb-3">
+                        <label class="form-label fw-medium d-block mb-2">Input Timestamp Unit:</label>
+                        <div class="btn-group w-100" role="group" aria-label="Timestamp unit">
+                            <input type="radio" class="btn-check" name="timestamp_unit" id="unitSeconds" value="s" autocomplete="off" {% if input_unit == 's' or not input_unit %}checked{% endif %}>
+                            <label class="btn btn-outline-primary neumorphic-radio" for="unitSeconds">Seconds (s)</label>
+
+                            <input type="radio" class="btn-check" name="timestamp_unit" id="unitMillis" value="ms" autocomplete="off" {% if input_unit == 'ms' %}checked{% endif %}>
+                            <label class="btn btn-outline-primary neumorphic-radio" for="unitMillis">Milliseconds (ms)</label>
+
+                            {# Add microseconds later if needed #}
+                            <!-- <input type="radio" class="btn-check" name="timestamp_unit" id="unitMicros" value="us" autocomplete="off">
+                            <label class="btn btn-outline-primary neumorphic-radio" for="unitMicros">Microseconds (µs)</label> -->
+                        </div>
+                         <div class="form-text">Select the unit if your input is a numeric timestamp. Ignored if input is a date string.</div>
+                    </div>
+
+
+                    <div class="d-flex justify-content-end gap-2">
+                         <button type="button" class="btn btn-outline-secondary clear-filters-btn" id="nowButton">Use Current Time</button>
+                         <button type="submit" class="btn btn-submit-tool" id="convertButton">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-arrow-repeat me-1" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.5a.5.5 0 0 1 0-1h3.5a.5.5 0 0 1 .5.5v3.5a.5.5 0 0 1-1 0V6.118A5.002 5.002 0 0 0 8 3zM3.5 12.5a.5.5 0 0 1 .5-.5h3.5a.5.5 0 0 1 0 1H4v1.882a5.002 5.002 0 0 0 8.051-.078.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.5a.5.5 0 0 1 .5.5z"/></svg>
+                             Convert
+                         </button>
+                    </div>
+                </form>
+            </div>
+            {# --- End Input Form Section --- #}
+
+            {# --- Results Section --- #}
+            {% if results %} {# Display section only if results exist #}
+            <div class="card p-4 mt-4" id="resultsCard">
+                <h3 class="text-center mb-4">Conversion Results</h3>
+
+                {% if results.error %}
+                     <div class="alert alert-danger text-center" role="alert">
+                         {{ results.error }}
+                     </div>
+                {% else %}
+                     <div class="row g-3">
+                         {# Input Value Display #}
+                         <div class="col-12">
+                             <label class="form-label small text-muted">Your Input:</label>
+                             <input type="text" class="form-control neumorphic-inset font-monospace result-display" value="{{ results.input_value }}" readonly>
+                         </div>
+
+                         {# Timestamp Result #}
+                         <div class="col-md-6">
+                             <label class="form-label small text-muted">Unix Timestamp (Seconds):</label>
+                             <input type="text" class="form-control neumorphic-inset font-monospace result-display" value="{{ results.timestamp }}" readonly>
+                         </div>
+
+                         {# UTC Date Result #}
+                         <div class="col-md-6">
+                             <label class="form-label small text-muted">UTC Date & Time:</label>
+                             <input type="text" class="form-control neumorphic-inset font-monospace result-display" value="{{ results.utc_date }}" readonly>
+                         </div>
+
+                         {# Local Date Result (Populated by JS) #}
+                         <div class="col-12">
+                             <label class="form-label small text-muted">Your Local Date & Time:</label>
+                             <input type="text" class="form-control neumorphic-inset font-monospace result-display" id="localDateOutput" value="Calculating..." readonly>
+                             <div class="form-text">Based on your browser's time zone.</div>
+                         </div>
+                     </div>
+                     {# Hidden field with timestamp for JS #}
+                     <input type="hidden" id="resultTimestamp" value="{{ results.timestamp }}">
+                {% endif %}
+
+                 <div class="text-center mt-4">
+                     <button type="button" class="btn btn-outline-secondary clear-filters-btn" id="clearResultsButton">Clear Results</button>
+                 </div>
+
+            </div>
+            {% endif %}
+            {# --- End Results Section --- #}
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* --- Input Form Styles --- */
+    .form-label.fw-medium { /* Input label */
+        color: var(--text-color);
+        transition: color 0.3s ease;
+    }
+    .form-text { /* Helper text */
+        color: var(--muted-text-color);
+        transition: color 0.3s ease;
+        font-size: 0.8em;
+    }
+    /* Text input for timestamp/date */
+    input[type="text"].neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        height: auto;
+    }
+    input[type="text"].neumorphic-inset:focus {
+        background-color: var(--bg-color);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+        color: var(--text-color);
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        border: none;
+    }
+    input[type="text"].neumorphic-inset::placeholder {
+        color: var(--muted-text-color);
+        opacity: 0.7;
+        transition: color 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* Neumorphic Radio Buttons (Unit Selection) */
+    .neumorphic-radio {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        border: 1px solid transparent;
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        padding: .5rem 1rem;
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+    .btn-check:checked + .neumorphic-radio {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        border-color: transparent;
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    .neumorphic-radio:hover {
+        color: var(--text-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+    .btn-check:checked + .neumorphic-radio:hover {
+         color: var(--link-color);
+    }
+    .btn-check:focus-visible + .neumorphic-radio {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         z-index: 1;
+    }
+    .btn-group > .btn-check:checked + .neumorphic-radio {
+         z-index: 1;
+    }
+
+    /* --- Action Buttons --- */
+    .btn-submit-tool { /* Convert Button */
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--link-color);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn-submit-tool:hover {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+    .btn-submit-tool:active {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    .btn-submit-tool:disabled {
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        opacity: 0.6;
+        cursor: not-allowed;
+        color: var(--muted-text-color);
+    }
+     .btn-submit-tool:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    }
+
+    .clear-filters-btn { /* Re-using class for Now & Clear buttons */
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        border-radius: var(--radius-small);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        padding: 0.375rem 0.75rem; /* Match btn-sm */
+        font-size: 0.875rem; /* Match btn-sm */
+    }
+    .clear-filters-btn:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+
+    /* --- Results Section Styles --- */
+    #resultsCard h3 { /* Results heading */
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+    /* Result display inputs */
+    .result-display {
+        background-color: var(--card-bg-color); /* Match card bg */
+        opacity: 0.9;
+        cursor: text;
+        font-size: 0.95em;
+         /* Apply inset neumorphic look */
+         border-radius: var(--radius-small);
+         box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                    inset -3px -3px 6px var(--shadow-light);
+         border: none;
+         color: var(--text-color); /* Use main text color for results */
+         padding: 0.5rem 0.75rem; /* Adjust padding */
+         transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    }
+     .result-display:focus { /* Subtle focus for readonly */
+         outline: 1px solid var(--link-color);
+         outline-offset: 1px;
+         box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+     }
+     /* Label above result input */
+     .result-display-label { /* If you add a specific class to result labels */
+         color: var(--muted-text-color);
+         font-size: 0.85em;
+         display: block;
+         margin-bottom: 0.25rem;
+         transition: color 0.3s ease;
+     }
+     /* Ensure small labels above result fields adapt */
+      #resultsCard .form-label.small {
+          color: var(--muted-text-color);
+          transition: color 0.3s ease;
+      }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('timestampForm');
+    const inputField = document.getElementById('timestamp_input');
+    const convertButton = document.getElementById('convertButton');
+    const nowButton = document.getElementById('nowButton');
+    const clearResultsButton = document.getElementById('clearResultsButton');
+    const resultsCard = document.getElementById('resultsCard');
+    const localDateOutput = document.getElementById('localDateOutput');
+    const resultTimestampInput = document.getElementById('resultTimestamp'); // Hidden input
+
+    // Enable button only when input has value
+    const toggleConvertButton = () => {
+        if(convertButton && inputField){
+            convertButton.disabled = inputField.value.trim() === '';
+        }
+    }
+
+    if (inputField) {
+        inputField.addEventListener('input', toggleConvertButton);
+    }
+
+    // Get Current Time button
+    if(nowButton && inputField){
+        nowButton.addEventListener('click', () => {
+            const nowSeconds = Math.floor(Date.now() / 1000);
+            inputField.value = nowSeconds;
+            toggleConvertButton(); // Enable convert button
+            // Optionally submit form immediately?
+            // form.submit();
+        });
+    }
+
+    // Clear Results button
+    if(clearResultsButton && resultsCard && inputField) {
+        clearResultsButton.addEventListener('click', () => {
+            resultsCard.style.display = 'none'; // Hide results
+            inputField.value = ''; // Clear input
+            // Reset radio buttons to default (seconds) if needed
+            const secondsRadio = document.getElementById('unitSeconds');
+            if (secondsRadio) secondsRadio.checked = true;
+            toggleConvertButton(); // Disable convert button
+            // You might want to clear session data via an AJAX call or on next POST
+        });
+    } else if (resultsCard) {
+        // Ensure results card is hidden on initial load if no results passed
+        {% if not results %}
+            resultsCard.style.display = 'none';
+        {% endif %}
+    }
+
+    // --- Convert timestamp to local time using JS ---
+    if (localDateOutput && resultTimestampInput && resultTimestampInput.value) {
+        try {
+            const timestampSeconds = parseInt(resultTimestampInput.value, 10);
+            if (!isNaN(timestampSeconds)) {
+                // Multiply by 1000 for JavaScript Date object (expects milliseconds)
+                const dateObject = new Date(timestampSeconds * 1000);
+
+                // Format nicely (example: YYYY-MM-DD HH:MM:SS) - adjust as needed
+                const year = dateObject.getFullYear();
+                const month = String(dateObject.getMonth() + 1).padStart(2, '0'); // Month is 0-indexed
+                const day = String(dateObject.getDate()).padStart(2, '0');
+                const hours = String(dateObject.getHours()).padStart(2, '0');
+                const minutes = String(dateObject.getMinutes()).padStart(2, '0');
+                const seconds = String(dateObject.getSeconds()).padStart(2, '0');
+
+                // Get timezone offset abbreviation (this is tricky and varies by browser/OS)
+                // Intl.DateTimeFormat is more reliable but complex
+                const timezoneString = dateObject.toLocaleTimeString('en-us',{timeZoneName:'short'}).split(' ')[2];
+
+                localDateOutput.value = `${year}-${month}-${day} ${hours}:${minutes}:${seconds} (${timezoneString})`;
+            } else {
+                 localDateOutput.value = "Invalid timestamp for local conversion.";
+            }
+        } catch (e) {
+             console.error("Error converting timestamp to local date:", e);
+             localDateOutput.value = "Error displaying local time.";
+        }
+    } else if (localDateOutput) {
+        // Hide if no timestamp was provided (e.g., on error)
+         localDateOutput.value = "";
+         // Hide the parent container or label if desired
+    }
+
+
+    // Initial state
+    toggleConvertButton();
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

@@ -1,0 +1,362 @@
+{# templates/archive_tools/tool_rar_extractor.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-archive d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">Rar↓</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Upload a RAR archive to view and download individual files inside.</p>
+                 <p class="small text-warning">Note: Requires server support for RAR format. May not work with encrypted or multi-volume archives.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not extraction_done %}
+                {# --- Upload Form Section --- #}
+                <div class="card p-4 p-md-5 mb-4 position-relative" id="uploadCard">
+                     <div id="loadingOverlay" class="loading-overlay justify-content-center align-items-center" style="display: none;">
+                         <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+                         <p class="text-muted mt-2">Processing RAR file...</p>
+                     </div>
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        {# Unique name 'rarfile_extract', accept rar #}
+                        <input class="d-none" type="file" id="rarfileInput" name="rarfile_extract" accept=".rar,application/vnd.rar,application/x-rar-compressed,application/octet-stream" required>
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-file-earmark-zip-fill mb-3 text-muted" viewBox="0 0 16 16"> <path d="M5.5 9.438V8.5h1v.938a1 1 0 0 0 .03.243l.4 1.598-.93.62-.93-.62.4-1.598a1 1 0 0 0 .03-.243z"/> <path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M6.5 7.5h1v1h-1zm-1 0h1v1h-1zm1 1.75V11h1v-1.75a.75.75 0 0 0-1 0M4.5 9.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm0 1.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm4-3h1v1h-1zm-1 0h1v1h-1zm1 1.75V11h1v-1.75a.75.75 0 0 0-1 0zM8.5 9.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm0 1.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1z"/> </svg>
+                             <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop RAR File Here</p>
+                             <p class="mb-0 text-muted small">or</p>
+                             <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse File</button>
+                        </div>
+                        <div id="selectedFileName" class="text-center text-muted small mb-3"></div>
+                        <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No file selected.</div>
+
+                        {# Submit Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="extractButton" disabled>
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-list-ul me-2" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M5 11.5a.5.5 0 0 1 .5-.5h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m-2-4A.5.5 0 0 1 3.5 7h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5m-2-4A.5.5 0 0 1 1.5 3h9a.5.5 0 0 1 0 1h-9a.5.5 0 0 1-.5-.5"/></svg>
+                                List Contents
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Results Section --- #}
+                <div class="card p-4 mt-4 neumorphic" id="resultsCard">
+                    <h3 class="text-center mb-3">Contents of <span class="text-muted fst-italic">{{ original_filename|default:"Archive" }}</span></h3>
+
+                    {% if file_list %}
+                        <ul class="list-group list-group-flush file-list-display">
+                             {% for item in file_list %}
+                                {% comment %} RAR library might not consistently add trailing slash for dirs {% endcomment %}
+                                {# Basic check: No download link if it looks like a common dir pattern #}
+                                {% if item|slice:"-1:" == "/" or '.' not in item|slice:"-5:" %} {# Heuristic for folder #}
+                                    <li class="list-group-item is-folder">
+                                        <svg class="bi bi-folder me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M.54 3.87.5 3a2 2 0 0 1 2-2h3.672a2 2 0 0 1 1.414.586l.828.828A2 2 0 0 0 9.828 3h3.982a2 2 0 0 1 1.992 2.181l-.637 7A2 2 0 0 1 13.174 14H2.826a2 2 0 0 1-1.991-1.819l-.637-7a1.99 1.99 0 0 1 .342-1.31zM2.19 4a1 1 0 0 0-.996.819l.637 7a1 1 0 0 0 .99.981h10.348a1 1 0 0 0 .99-.981l.637-7A1 1 0 0 0 13.81 4H2.19zm4.69-1.707A1 1 0 0 0 6.172 2H2.5a1 1 0 0 0-1 .981l.006.139C1.72 3.042 1.95 3 2.19 3h5.396l-.707-.707z"/></svg>
+                                        <span>{{ item }}</span>
+                                    </li>
+                                {% else %}
+                                     <li class="list-group-item is-file">
+                                        <svg class="bi bi-file-earmark-text me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zm0 2.5a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z"/><path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/></svg>
+                                        {# Ensure path is encoded correctly for URL #}
+                                         <a href="{% url 'archive_tools:download_rar_entry' internal_path=item|urlencode:"" %}" class="text-decoration-none file-link" title="Download {{ item }}">
+                                            {{ item }}
+                                        </a>
+                                     </li>
+                                {% endif %}
+                             {% endfor %}
+                        </ul>
+                    {% elif not messages %}
+                        <p class="text-center text-warning">The archive appears to be empty or no files could be listed.</p>
+                    {% endif %}
+
+                    <div class="text-center mt-4">
+                        <a href="{% url 'archive_tools:rar_extractor' %}" class="btn btn-outline-secondary clear-filters-btn">
+                            <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                            Check Another RAR
+                        </a>
+                    </div>
+                </div>
+            {% endif %}
+            {# --- End Results Section --- #}
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* --- Dropzone/File Input Styles --- */
+    .drop-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-main);
+        cursor: pointer;
+        transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        /* Neumorphic Inset */
+        background-color: var(--bg-color);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+    }
+    .drop-zone.dragover {
+        border-color: var(--link-color);
+        background-color: rgba(var(--link-color-rgb), 0.1);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+    }
+    #browseButton {
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out;
+    }
+    #browseButton:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+    /* Style for showing selected filename */
+    #selectedFileName {
+         transition: color 0.3s ease;
+         font-weight: 500;
+         color: var(--muted-text-color); /* Use muted color */
+    }
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--link-color);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn-submit-tool:hover {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+    .btn-submit-tool:active {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    .btn-submit-tool:disabled {
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        opacity: 0.6;
+        cursor: not-allowed;
+        color: var(--muted-text-color);
+    }
+    .btn-submit-tool:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    }
+
+    /* --- Results Section Styles --- */
+     /* Style results heading */
+     #resultsCard h3 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+     /* Style filename inside results heading */
+     #resultsCard h3 .text-muted {
+        color: var(--muted-text-color) !important; /* Needs important to override */
+        transition: color 0.3s ease;
+        font-style: italic;
+     }
+    /* Style file list container (UL) */
+    .file-list-display {
+        max-height: 400px;
+        overflow-y: auto;
+        background-color: var(--bg-color); /* Match page background */
+        border-radius: var(--radius-small);
+        /* Neumorphic inset */
+        box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                    inset -3px -3px 6px var(--shadow-light);
+        padding: 0.5rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        list-style: none; /* Remove default list bullets */
+        margin-bottom: 0; /* Remove default ul margin */
+    }
+    /* Style individual list items */
+    .file-list-display .list-group-item {
+        background-color: transparent; /* Items are transparent */
+        border: none; /* Remove default borders */
+        border-bottom: 1px solid var(--border-color); /* Separator */
+        color: var(--text-color);
+        padding: 0.6rem 0.25rem; /* Adjusted padding */
+        display: flex;
+        align-items: center;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .file-list-display .list-group-item:last-child {
+        border-bottom: none;
+    }
+    /* Style folder items */
+    .file-list-display .list-group-item.is-folder span {
+        font-weight: 500;
+        color: var(--muted-text-color); /* Dim folder names */
+        word-break: break-all;
+    }
+     .file-list-display .list-group-item.is-folder .bi-folder {
+        color: var(--link-color); /* Color folder icon */
+        flex-shrink: 0; /* Prevent icon from shrinking */
+        margin-right: 0.5rem; /* Space after icon */
+        vertical-align: -0.15em;
+     }
+    /* Style file items */
+    .file-list-display .list-group-item.is-file .bi-file-earmark-text {
+        color: var(--muted-text-color); /* Muted file icon */
+         flex-shrink: 0;
+         margin-right: 0.5rem; /* Space after icon */
+         vertical-align: -0.15em;
+     }
+    /* Style file download link */
+    .file-list-display .list-group-item a.file-link {
+        color: var(--text-color); /* Use main text color for link */
+        text-decoration: none;
+        transition: color 0.2s ease;
+        word-break: break-all;
+        flex-grow: 1; /* Allow link to take available space */
+        /* margin-left: 0.5rem; */ /* Removed as icon has margin-right */
+    }
+    .file-list-display .list-group-item a.file-link:hover {
+        color: var(--link-color); /* Link color on hover */
+        text-decoration: underline;
+    }
+
+    /* --- "Check Another" Button Styles --- */
+    .clear-filters-btn { /* Re-using class */
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        border-radius: var(--radius-small);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .clear-filters-btn:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+
+    /* --- Loading Overlay --- */
+    .loading-overlay {
+        position: absolute; inset: 0;
+        background-color: rgba(var(--card-bg-color-rgb, 255, 255, 255), 0.8);
+        z-index: 10; display: flex; flex-direction: column;
+        border-radius: var(--radius-main); backdrop-filter: blur(2px);
+        transition: background-color 0.3s ease;
+        justify-content: center; align-items: center; /* Center content */
+    }
+    body.dark-mode .loading-overlay {
+        background-color: rgba(var(--card-bg-color-rgb-dark, 49, 53, 63), 0.8);
+    }
+    .loading-overlay .spinner-border { width: 3rem; height: 3rem; color: var(--link-color); }
+    .loading-overlay p { color: var(--muted-text-color); font-weight: 500; transition: color 0.3s ease; }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS adapted for single file input 'rarfile_extract', loading spinner #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('rarfileInput'); // Correct ID
+    const browseButton = document.getElementById('browseButton');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const selectedFileNameDisplay = document.getElementById('selectedFileName');
+    const convertButton = document.getElementById('extractButton'); // Correct ID
+    const dropZoneText = document.getElementById('dropZoneText');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    let currentFile = null; // Store single file
+
+    // --- File Handling & UI Update ---
+    const updateUI = () => {
+        selectedFileNameDisplay.textContent = '';
+        if (currentFile) {
+            selectedFileNameDisplay.textContent = `Selected: ${currentFile.name}`;
+            dropZoneText.textContent = "Replace file by dropping or browsing";
+            convertButton.disabled = false;
+            previewPlaceholder.style.display = 'none';
+        } else {
+            previewPlaceholder.style.display = 'block';
+            dropZoneText.textContent = "Drag & Drop RAR File Here";
+            convertButton.disabled = true;
+        }
+        try { // Update hidden input
+            const dataTransfer = new DataTransfer();
+            if (currentFile) dataTransfer.items.add(currentFile);
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    const handleRemoveFile = () => {
+        currentFile = null; fileInput.value = ''; updateUI();
+    };
+
+    const handleFiles = (files) => {
+        if (files.length === 0) { handleRemoveFile(); return; }
+        const file = files[0];
+        const allowedMimes = ['application/vnd.rar', 'application/x-rar-compressed', 'application/octet-stream']; // Allow octet-stream for RAR often
+        const allowedExts = ['.rar'];
+        const fileNameParts = file.name.split('.');
+        const fileExt = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+
+        // Primary check based on extension for RAR
+        if (!allowedExts.includes(fileExt)) {
+             alert(`Please select a valid RAR file (.rar extension).`);
+             handleRemoveFile(); return;
+        }
+        // Optional warning based on MIME
+        if (!allowedMimes.includes(file.type.toLowerCase()) && file.type) { // Check if file.type exists
+             console.warn(`Warning: File MIME type (${file.type}) is not typical for RAR.`);
+         }
+        currentFile = file;
+        updateUI();
+    };
+
+    // Drag/Drop/Browse listeners
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    // --- Loading Indicator on Submit ---
+    if (form && loadingOverlay && convertButton) {
+        form.addEventListener('submit', () => {
+            if (currentFile) {
+                loadingOverlay.style.display = 'flex';
+                convertButton.disabled = true;
+            }
+        });
+    }
+
+    updateUI(); // Initial state
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

@@ -1,0 +1,154 @@
+{# templates/utility_tools/tool_base64_encoder_decoder.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12"> {# Wider column #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">64</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Encode plain text to Base64 or decode Base64 back to plain text (using UTF-8).</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {# --- Input/Output Form --- #}
+            <form method="post" action="{% url 'utility_tools:base64_encoder_decoder' %}" id="base64Form">
+                {% csrf_token %}
+                <div class="row g-4">
+                    {# Input Text Area #}
+                    <div class="col-md-6">
+                        <div class="card p-3 h-100">
+                             <label for="text_input" class="form-label fw-medium mb-2">Input Text:</label>
+                             <textarea class="form-control neumorphic-inset font-monospace flex-grow-1"
+                                      id="text_input"
+                                      name="text_input"
+                                      rows="12"
+                                      placeholder="Paste text to encode or Base64 to decode..."
+                                      required>{{ text_input }}</textarea>
+                        </div>
+                    </div>
+
+                    {# Output Text Area #}
+                     <div class="col-md-6">
+                         <div class="card p-3 h-100">
+                             <label for="processed_text_output" class="form-label fw-medium mb-2">Output Text:</label>
+                             <div class="position-relative flex-grow-1">
+                                <textarea class="form-control neumorphic-inset font-monospace h-100"
+                                          id="processed_text_output"
+                                          readonly>{{ processed_text|default:"" }}</textarea>
+                                <button id="copyButton" class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2 {% if not processed_text %}d-none{% endif %}" type="button" title="Copy to Clipboard">
+                                     <svg class="bi bi-clipboard" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg>
+                                    Copy
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                </div> {# End row for text areas #}
+
+                {# --- Action Buttons --- #}
+                 <div class="my-4 text-center">
+                    <button type="submit" name="encode_submit" class="btn btn-submit-tool m-1" id="encodeButton">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-right-square-fill me-1" viewBox="0 0 16 16"><path d="M0 14a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V2a2 2 0 0 0-2-2H2a2 2 0 0 0-2 2zm4.5-6.5h5.793L8.146 5.354a.5.5 0 1 1 .708-.708l3 3a.5.5 0 0 1 0 .708l-3 3a.5.5 0 0 1-.708-.708L10.293 8.5H4.5a.5.5 0 0 1 0-1"/></svg>
+                        Encode to Base64
+                    </button>
+                     <button type="submit" name="decode_submit" class="btn btn-submit-tool m-1" id="decodeButton">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-arrow-left-square-fill me-1" viewBox="0 0 16 16"><path d="M16 14a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2V2a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2zm-4.5-6.5H5.707l2.147-2.146a.5.5 0 1 0-.708-.708l-3 3a.5.5 0 0 0 0 .708l3 3a.5.5 0 0 0 .708-.708L5.707 8.5H11.5a.5.5 0 0 0 0-1"/></svg>
+                         Decode from Base64
+                     </button>
+                    <button type="button" class="btn btn-outline-secondary clear-filters-btn m-1" id="clearTextButton">
+                        Clear Text
+                    </button>
+                 </div>
+                {# --- End Action Buttons --- #}
+            </form>
+             {# --- End Input Form --- #}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Re-use styles */
+    textarea.neumorphic-inset { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; line-height: 1.6; min-height: 250px; /* Taller text areas */ }
+    textarea.neumorphic-inset:focus { background-color: var(--bg-color); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none; }
+    textarea.neumorphic-inset::placeholder { color: var(--muted-text-color); opacity: 0.7; transition: color 0.3s ease, opacity 0.3s ease; }
+    textarea.neumorphic-inset[readonly] { background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.9; }
+    .form-label.fw-medium { color: var(--text-color); transition: color 0.3s ease; }
+    /* Buttons */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+    /* Copy Button */
+    #copyButton { opacity: 0.7; transition: opacity 0.2s ease; }
+    #copyButton:hover { opacity: 1; }
+    #copyButton.copied { background-color: #198754; border-color: #198754; color: white; }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for clear button and copy button #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('base64Form');
+    const clearButton = document.getElementById('clearTextButton');
+    const inputTextArea = document.getElementById('text_input');
+    const outputTextArea = document.getElementById('processed_text_output');
+    const copyButton = document.getElementById('copyButton');
+    //const encodeButton = document.getElementById('encodeButton'); // Not needed for JS logic
+    //const decodeButton = document.getElementById('decodeButton');
+
+    // Clear Text Areas
+    if(clearButton && inputTextArea && outputTextArea) {
+        clearButton.addEventListener('click', () => {
+            inputTextArea.value = '';
+            outputTextArea.value = '';
+            if(copyButton) copyButton.classList.add('d-none'); // Hide copy button
+            inputTextArea.focus();
+        });
+    }
+
+    // Copy Button Logic
+    if (copyButton && outputTextArea) {
+        // Show/Hide copy button based on output content initially
+        if (outputTextArea.value.trim() === '') {
+             copyButton.classList.add('d-none');
+        } else {
+             copyButton.classList.remove('d-none');
+        }
+
+        copyButton.addEventListener('click', () => {
+            if (navigator.clipboard) {
+                 navigator.clipboard.writeText(outputTextArea.value).then(() => {
+                    copyButton.innerHTML = '<svg class="bi bi-check-lg" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    copyButton.classList.add('copied');
+                    setTimeout(() => {
+                         copyButton.innerHTML = '<svg class="bi bi-clipboard" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg> Copy';
+                         copyButton.classList.remove('copied');
+                    }, 2000);
+                 }).catch(err => { alert('Failed to copy.'); });
+            } else { /* Fallback execCommand */ }
+        });
+    }
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

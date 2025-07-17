@@ -1,0 +1,213 @@
+{# templates/core/category_audio.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container px-4 py-2"> {# Reduced top padding #}
+    <h1 class="pb-2 border-bottom text-center mb-4">{{ page_title }}</h1> {# Reduced bottom margin #}
+    <p class="text-center lead mb-4">Tools for converting audio formats, trimming tracks, adjusting volume, and more.</p>
+
+    <!-- ================== Filter Section for Audio Tools ================== -->
+    <div class="container mb-4" id="sticky-filter-section"> {# Re-use sticky ID #}
+        <!-- Row for Search and Mobile Filter Button -->
+        <div class="row justify-content-center align-items-center mb-3">
+            <div class="col">
+                <input type="search" id="tool-search-input" class="form-control form-control-lg" placeholder="Search audio tools..." aria-label="Search audio tools">
+            </div>
+            <div class="col-auto d-lg-none">
+                <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFiltersAudio" aria-controls="offcanvasFiltersAudio">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16"> <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/> </svg>
+                    Filter Type
+                </button>
+            </div>
+        </div>
+
+        <!-- Inline Type Filters Container (Hidden on small screens) -->
+        <div class="row justify-content-center gy-3 d-none d-lg-flex" id="inline-filters-container">
+            <div class="col-12 col-lg text-center text-lg-start">
+                <span class="me-3 fw-bold">Tool Type:</span>
+                 <div class="form-check form-check-inline">
+                    <input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeSimpleInlineAudio" value="simple" checked>
+                    <label class="form-check-label" for="filterTypeSimpleInlineAudio">Simple</label>
+                </div>
+                 <div class="form-check form-check-inline">
+                    <input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeAiInlineAudio" value="ai" checked>
+                    <label class="form-check-label" for="filterTypeAiInlineAudio">AI ✨</label>
+                    {# Add AI checkbox if/when you have AI audio tools #}
+                </div>
+            </div>
+             <!-- Clear Button (Inline) -->
+             <div class="col-12 col-lg-auto text-center text-lg-end">
+                 <button id="clear-filters-btn-inline-audio" class="btn btn-sm btn-outline-secondary clear-filters-btn" type="button">Clear Type Filter</button>
+             </div>
+        </div>
+    </div><!-- End Sticky Filter Section -->
+
+    <!-- Offcanvas Filter Menu for Audio Tools -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFiltersAudio" aria-labelledby="offcanvasFiltersLabelAudio">
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabelAudio">Filter Tool Type</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <!-- Type Filters (Offcanvas) -->
+        <div class="mb-3">
+            <h6>Tool Type:</h6>
+            <div class="form-check"><input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeSimpleOffcanvasAudio" value="simple" checked><label class="form-check-label" for="filterTypeSimpleOffcanvasAudio">Simple</label></div>
+            <div class="form-check"><input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeAiOffcanvasAudio" value="ai" checked><label class="form-check-label" for="filterTypeAiOffcanvasAudio">AI ✨</label></div>
+        </div>
+        <!-- Clear Button (Offcanvas) -->
+        <div class="d-grid gap-2">
+            <button id="clear-filters-btn-offcanvas-audio" class="btn btn-outline-secondary clear-filters-btn" type="button">Clear Type Filter</button>
+        </div>
+      </div>
+    </div>
+    <!-- ================== End Filter Section ================== -->
+
+
+    <!-- Tool Listing Section -->
+    <div class="container px-0 py-2" id="tool-list-container">
+        <!-- Row to contain the tool cards -->
+        <div class="row g-4 py-5 row-cols-1 row-cols-md-2 row-cols-lg-3" id="tools-grid">
+
+            {# --- PASTE ONLY AUDIO TOOL CARDS BELOW --- #}
+
+            <div class="feature col tool-card" data-tool-name="MP3 to WAV Converter Audio Format Simple" data-tool-categories="audio converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">M>W</div><h3 class="fs-4 card-title">MP3 to WAV</h3></div><p class="card-text">Convert MP3 audio files to uncompressed WAV format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="WAV to MP3 Converter Audio Format Simple" data-tool-categories="audio converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">W>M</div><h3 class="fs-4 card-title">WAV to MP3</h3></div><p class="card-text">Convert WAV audio files to the popular MP3 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="M4A to MP3 Converter Audio Format Simple" data-tool-categories="audio converter" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">4A>M</div><h3 class="fs-4 card-title">M4A to MP3</h3></div><p class="card-text">Convert M4A (Apple audio) files to MP3 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="FLAC to MP3 Converter Audio Format Lossless Simple" data-tool-categories="audio converter" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">F>M</div><h3 class="fs-4 card-title">FLAC to MP3</h3></div><p class="card-text">Convert lossless FLAC audio files to MP3 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Cut Trim Audio Editor Ringtone Maker Simple" data-tool-categories="audio utility" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">A✂</div><h3 class="fs-4 card-title">Cut Audio</h3></div><p class="card-text">Trim or cut sections from your audio files (e.g., for ringtones).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Merge Audio Combine Tracks Join Simple" data-tool-categories="audio utility" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">A+A</div><h3 class="fs-4 card-title">Merge Audio</h3></div><p class="card-text">Combine multiple audio tracks into a single file.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Change Audio Volume Increase Decrease Normalize Simple" data-tool-categories="audio utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">A🔊</div><h3 class="fs-4 card-title">Change Audio Volume</h3></div><p class="card-text">Increase or decrease the volume level of audio files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Extract Audio from Video MP4 to MP3 Simple" data-tool-categories="video audio converter utility" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V>A</div><h3 class="fs-4 card-title">Extract Audio from Video</h3></div><p class="card-text">Extract the sound or music from a video file (e.g., MP4 to MP3).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+             {# Add other potential AI audio tools cards here when developed, e.g., AI Voice Changer, AI Noise Reduction #}
+            {# Example AI Placeholder #}
+            <div class="feature col tool-card" data-tool-name="AI Noise Reduction Audio Cleaner Artificial Intelligence" data-tool-categories="audio utility ai" data-tool-type="ai">
+                <div class="card h-100 shadow-sm border-info"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio icon-ai d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">A<0xE2><0x9D><0x8C></div><h3 class="fs-4 card-title">AI Noise Reduction <span class="badge bg-info text-dark ms-1 align-middle">✨ AI</span></h3></div><p class="card-text">Remove background noise from audio recordings using AI.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div> 
+
+            {# --- END AUDIO TOOL CARDS --- #}
+
+        </div> <!-- /row #tools-grid -->
+        <!-- Message shown when no tools match filters -->
+        <div id="no-results-message" class="text-center py-5" style="display: none;">
+            <h2>No audio tools found matching your criteria.</h2>
+            <p>Try adjusting your search or filters.</p>
+        </div>
+    </div> <!-- /container #tool-list-container -->
+</div>
+<!-- SVG definitions are in base.html -->
+{% endblock %}
+
+
+{% block extra_js %}
+<!-- JavaScript for Search and Filter (Adapted for Audio category page) -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('tool-search-input');
+    // Only select TYPE checkboxes on this page
+    const typeCheckboxes = document.querySelectorAll('.type-filter-checkbox');
+    const toolCards = document.querySelectorAll('.tool-card'); // Cards on this page only
+    const noResultsMessage = document.getElementById('no-results-message');
+    const toolsGrid = document.getElementById('tools-grid');
+    const clearFiltersBtns = document.querySelectorAll('.clear-filters-btn');
+    const offcanvasElement = document.getElementById('offcanvasFiltersAudio'); // Use the correct ID
+    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
+
+    // Sync checkboxes between inline and offcanvas
+    function syncCheckboxes(sourceCheckbox) {
+        const isType = sourceCheckbox.classList.contains('type-filter-checkbox');
+        const value = sourceCheckbox.value;
+        const isChecked = sourceCheckbox.checked;
+
+        if (isType) {
+            typeCheckboxes.forEach(cb => {
+                if (cb.value === value && cb !== sourceCheckbox) {
+                    cb.checked = isChecked;
+                }
+            });
+        }
+    }
+
+    function filterTools() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedTypes = [...new Set(Array.from(typeCheckboxes)
+                                       .filter(checkbox => checkbox.checked)
+                                       .map(checkbox => checkbox.value))];
+        let visibleCount = 0;
+
+        toolCards.forEach(card => {
+            const toolName = card.dataset.toolName.toLowerCase();
+            const toolType = card.dataset.toolType;
+            // Category check is implicit - all cards are Audio tools (or related like video->audio)
+
+            const typeMatch = selectedTypes.includes(toolType);
+            const searchMatch = searchTerm === '' || toolName.includes(searchTerm);
+
+            // Show/Hide Card: Type and Search must match
+            if (typeMatch && searchMatch) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                 card.style.display = 'none';
+            }
+        });
+
+        // Show/Hide "No Results" message and grid
+        if (visibleCount === 0) {
+            noResultsMessage.style.display = 'block';
+            toolsGrid.style.display = 'none';
+        } else {
+            noResultsMessage.style.display = 'none';
+            toolsGrid.style.display = '';
+        }
+    }
+
+    // --- Event Listeners ---
+    searchInput.addEventListener('input', filterTools);
+
+    typeCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', (event) => {
+            syncCheckboxes(event.target);
+            filterTools();
+        });
+    });
+
+    clearFiltersBtns.forEach(button => {
+        button.addEventListener('click', () => {
+            searchInput.value = '';
+            typeCheckboxes.forEach(checkbox => checkbox.checked = true);
+            filterTools();
+
+             if (offcanvasElement.classList.contains('show')) {
+                 offcanvasInstance.hide();
+             }
+        });
+    });
+
+    // Initial filter run
+     filterTools();
+});
+</script>
+
+{# --- Theme Toggle Script (Inherited from base.html) --- #}
+
+{% endblock %}

@@ -1,0 +1,625 @@
+{# templates/image_tools/tool_resize_image.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-11"> {# Slightly wider column #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">↔</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Change the dimensions of your images by pixels or percentage.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        <input class="d-none" type="file" id="imagefileInput" name="imagefile" accept="image/*" required> {# Name = imagefile #}
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cloud-arrow-up-fill mb-3 text-muted" viewBox="0 0 16 16"><path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z"/></svg>
+                             <p class="mb-0 text-muted">Drag & Drop Image File Here</p>
+                             <p class="mb-0 text-muted small">(JPG, PNG, GIF, WEBP, BMP, TIFF)</p>
+                             <p class="mb-0 text-muted small">or</p>
+                             <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse File</button>
+                        </div>
+
+                        {# Preview Area #}
+                        <div id="previewContainer" class="mt-3 d-flex flex-wrap gap-3 justify-content-center mb-4"></div>
+                        <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No file selected.</div>
+
+                        {# --- Conversion Options --- #}
+                        <div class="border-top pt-4 mb-4">
+                            <div class="row g-3 align-items-end"> {# Align items end for better baseline #}
+
+                                {# Resize Mode Selection #}
+                                <div class="col-md-12 mb-3">
+                                    <label class="form-label fw-medium d-block mb-2">Resize By:</label>
+                                    <div class="btn-group w-100" role="group" aria-label="Resize mode">
+                                        <input type="radio" class="btn-check" name="resize_mode" id="modePixels" value="pixels" autocomplete="off" checked>
+                                        <label class="btn btn-outline-primary neumorphic-radio" for="modePixels">Pixels</label>
+
+                                        <input type="radio" class="btn-check" name="resize_mode" id="modePercentage" value="percentage" autocomplete="off">
+                                        <label class="btn btn-outline-primary neumorphic-radio" for="modePercentage">Percentage</label>
+                                    </div>
+                                </div>
+
+                                {# Pixel Dimensions (Show/Hide with JS) #}
+                                <div class="col-md-6" id="pixelInputs">
+                                    <label for="target_width" class="form-label fw-medium">Width (px)</label>
+                                    <input type="number" class="form-control neumorphic-inset" id="target_width" name="target_width" min="1" value="200" placeholder="e.g., 1920">
+                                </div>
+                                <div class="col-md-6" id="pixelInputsHeight"> {# Separate ID for aspect ratio logic #}
+                                    <label for="target_height" class="form-label fw-medium">Height (px)</label>
+                                    <input type="number" class="form-control neumorphic-inset" id="target_height" name="target_height" min="1" value="200" placeholder="e.g., 1080">
+                                </div>
+
+                                {# Percentage Input (Show/Hide with JS) #}
+                                <div class="col-md-6 d-none" id="percentageInput"> {# Initially hidden #}
+                                     <label for="percentage" class="form-label fw-medium">Percentage (%)</label>
+                                     <input type="number" class="form-control neumorphic-inset" id="percentage" name="percentage" min="1" max="1000" value="100" placeholder="e.g., 50">
+                                </div>
+
+                                 {# Aspect Ratio Checkbox #}
+                                 <div class="col-md-6 align-self-center" id="aspectRatioDiv"> {# Align self center #}
+                                     <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="aspect_ratio" role="switch" id="aspectRatioCheck" checked>
+                                        <label class="form-check-label" for="aspectRatioCheck">Maintain aspect ratio</label>
+                                     </div>
+                                 </div>
+
+                                {# Output Format #}
+                                <div class="col-md-6">
+                                    <label for="outputFormatSelect" class="form-label fw-medium">Output Format:</label>
+                                    <select class="form-select neumorphic-inset" id="outputFormatSelect" name="output_format">
+                                        <option value="ORIGINAL" selected>Keep Original Format</option>
+                                        <option value="JPEG">JPG</option>
+                                        <option value="PNG">PNG</option>
+                                        <option value="WEBP">WEBP</option>
+                                        {# Add GIF, BMP if needed/supported by logic #}
+                                    </select>
+                                </div>
+
+                                {# Quality Slider (Show/Hide with JS for relevant formats) #}
+                                <div class="col-md-6 d-none" id="qualityDiv"> {# Initially hidden #}
+                                    <label for="qualityRange" class="form-label fw-medium">Quality: <span id="qualityValue">90</span></label>
+                                    <input type="range" class="form-range" id="qualityRange" name="quality" min="10" max="95" value="90" step="5">
+                                    <div class="form-text">For JPG / WEBP formats.</div>
+                                </div>
+
+                            </div>
+                        </div>
+                         {# --- END: Conversion Options --- #}
+
+
+                        {# Convert Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-aspect-ratio me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h13A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5zM1.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5z"/><path d="M2 4.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1H3v1.5a.5.5 0 0 1-1 0zm12 7a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H13V9.5a.5.5 0 0 1 1 0z"/></svg>
+                                Resize Image
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Download Section --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic">
+                    <h3 class="mb-3 text-success">Resizing Complete!</h3>
+                    <p class="text-muted mb-4">Your resized image is ready.</p>
+                    <form method="post" action="{% url 'image_tools:resize_image' %}">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_resized" value="true">
+                         <button type="submit" class="btn btn-success btn-lg mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-download me-2" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg>
+                             Download {{ download_filename|default:"Image" }}
+                         </button>
+                    </form>
+                    <a href="{% url 'image_tools:resize_image' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-arrow-left-short me-1" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                        Resize Another Image
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Re-use styles from previous pages or custom.css */
+    .drop-zone { border: 2px dashed var(--border-color); /* ... */ }
+    .drop-zone.dragover { /* ... */ }
+    .preview-item { /* ... */ }
+    .preview-image { /* ... */ }
+    .preview-remove-btn { /* ... */ }
+    #browseButton { /* ... */ }
+    .form-select.neumorphic-inset, .form-control.neumorphic-inset { /* ... */ }
+    body.dark-mode .form-select.neumorphic-inset { /* ... */ }
+    .form-label.fw-medium { color: var(--text-color); transition: color 0.3s ease; }
+    /* Add these styles to the <style> block in tool_resize_image.html */
+
+/* --- Dropzone/Preview Styles --- */
+.drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-main);
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.drop-zone.dragover {
+    border-color: var(--link-color);
+    background-color: rgba(var(--link-color-rgb), 0.1);
+    box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+}
+.preview-item {
+    position: relative;
+    border-radius: var(--radius-small);
+    overflow: hidden;
+    box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+    background-color: var(--bg-color);
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+}
+.preview-image {
+    display: block;
+    width: 100px;
+    height: 100px;
+    object-fit: cover;
+}
+.preview-remove-btn {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    width: 20px;
+    height: 20px;
+    border-radius: 50%;
+    background-color: rgba(0, 0, 0, 0.6);
+    color: white;
+    border: none;
+    font-size: 12px;
+    font-weight: bold;
+    line-height: 18px;
+    text-align: center;
+    cursor: pointer;
+    opacity: 0.8;
+    transition: opacity 0.2s ease;
+}
+.preview-remove-btn:hover {
+    opacity: 1;
+}
+#browseButton {
+    background-color: transparent;
+    border: 1px solid var(--muted-text-color);
+    color: var(--muted-text-color);
+    transition: all 0.2s ease-out;
+}
+#browseButton:hover {
+    background-color: rgba(var(--text-color-rgb), 0.1);
+    border-color: var(--text-color);
+    color: var(--text-color);
+}
+
+/* --- Form Control & Option Styles --- */
+.form-label.fw-medium { /* For option titles */
+     color: var(--text-color);
+     transition: color 0.3s ease;
+}
+.form-text { /* For helper text below options */
+     color: var(--muted-text-color); /* Use muted color variable */
+     transition: color 0.3s ease;
+     font-size: 0.8em; /* Make it slightly smaller */
+}
+.form-select.neumorphic-inset,
+.form-control.neumorphic-inset,
+input[type="number"].neumorphic-inset { /* Style number inputs too */
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                inset -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--text-color);
+    padding: 0.75rem 1rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    height: auto; /* Override default heights if needed */
+    -moz-appearance: textfield; /* Firefox - hide number spinners */
+}
+input[type=number].neumorphic-inset::-webkit-inner-spin-button,
+input[type=number].neumorphic-inset::-webkit-outer-spin-button { /* Chrome, Safari, Edge - hide number spinners */
+  -webkit-appearance: none;
+  margin: 0;
+}
+/* Select arrow styling */
+.form-select.neumorphic-inset {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    background-repeat: no-repeat;
+    background-position: right .75rem center;
+    background-size: 16px 12px;
+    appearance: none;
+}
+body.dark-mode .form-select.neumorphic-inset {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+}
+/* Focus styles for inputs/selects */
+.form-select.neumorphic-inset:focus,
+.form-control.neumorphic-inset:focus,
+input[type="number"].neumorphic-inset:focus {
+     background-color: var(--bg-color);
+     box-shadow: inset 6px 6px 12px var(--shadow-dark),
+                 inset -6px -6px 12px var(--shadow-light);
+     color: var(--text-color);
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     border: none;
+}
+
+/* --- Option Button Styling (Radio Buttons) --- */
+.option-btn-group .btn-option {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+    border: 1px solid transparent;
+    color: var(--muted-text-color);
+    padding: .75rem 1rem;
+    text-align: center;
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 80px;
+    cursor: pointer;
+}
+ .option-btn-group .option-icon {
+    width: 24px;
+    height: 24px;
+    margin-bottom: 0.5rem;
+    opacity: 0.7;
+    transition: opacity 0.2s ease-out, fill 0.3s ease;
+    fill: currentColor;
+}
+ .option-btn-group .option-text {
+     font-size: 0.9rem;
+     line-height: 1.2;
+     font-weight: 500;
+}
+.option-btn-group .btn-check:checked + .btn-option {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    border-color: var(--link-color);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+}
+.option-btn-group .btn-check:checked + .btn-option .option-icon {
+     opacity: 1;
+}
+ .option-btn-group .btn-option:hover {
+    color: var(--text-color);
+    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+}
+ .option-btn-group .btn-check:checked + .btn-option:hover {
+    color: var(--link-color);
+}
+.option-btn-group .btn-check:focus-visible + .btn-option {
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+}
+
+/* Neumorphic Radio Buttons (for Resize Mode) */
+.neumorphic-radio {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+    border: 1px solid transparent;
+    color: var(--muted-text-color);
+    transition: all 0.2s ease-out;
+    padding: .5rem 1rem; /* Adjust padding for inline buttons */
+    margin-bottom: 0; /* Align with Bootstrap btn-group */
+}
+.btn-check:checked + .neumorphic-radio {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    border-color: transparent;
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+}
+ .neumorphic-radio:hover {
+    color: var(--text-color);
+    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+}
+ .btn-check:checked + .neumorphic-radio:hover {
+     color: var(--link-color);
+}
+ .btn-check:focus-visible + .neumorphic-radio {
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     z-index: 1; /* Ensure outline is visible above adjacent elements */
+}
+/* Adjust Bootstrap btn-group for neumorphic */
+.btn-group > .btn-check:checked + .neumorphic-radio {
+     z-index: 1; /* Ensure checked button is visually on top */
+}
+
+
+/* Style Range Slider */
+.form-range {
+    padding: 0; /* Remove default padding */
+    cursor: pointer;
+}
+/* Customize track - may need vendor prefixes */
+.form-range::-webkit-slider-runnable-track {
+    width: 100%; height: 8px; cursor: pointer;
+    background: var(--bg-color); /* Match background */
+    border-radius: var(--radius-small);
+    box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); /* Inset track */
+}
+.form-range::-moz-range-track {
+    width: 100%; height: 8px; cursor: pointer;
+    background: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+}
+/* Customize thumb */
+.form-range::-webkit-slider-thumb {
+    height: 20px; width: 20px; border-radius: 50%;
+    background: var(--bg-color); /* Match background */
+    box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); /* Neumorphic thumb */
+    cursor: pointer; margin-top: -6px; /* Center thumb on track */
+    -webkit-appearance: none;
+}
+.form-range::-moz-range-thumb {
+     height: 20px; width: 20px; border-radius: 50%;
+     background: var(--bg-color);
+     box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light);
+     cursor: pointer; border: none;
+}
+/* Focus for range */
+.form-range:focus {
+     outline: none; /* Remove default */
+}
+.form-range:focus::-webkit-slider-thumb {
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+}
+.form-range:focus::-moz-range-thumb {
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+}
+
+/* Style Color Picker */
+.form-control-color {
+    min-height: calc(1.5em + .75rem + 2px); width: 100%; max-width: 100px;
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+    border: none;
+    padding: 0.2rem 0.3rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.form-control-color:focus {
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+}
+
+/* Style Checkbox/Switch */
+.form-check-input { /* Uses styles from custom.css - already neumorphic inset */ }
+.form-switch .form-check-input { /* Specific styles for switch */
+     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(0,0,0,.25)'/%3e%3c/svg%3e");
+     background-position: left center;
+     border-radius: 2em;
+     width: 2.5em; /* Slightly larger switch */
+     height: 1.25em;
+     margin-top: 0.125em; /* Align better with label */
+     box-shadow: inset 1px 1px 2px var(--shadow-dark), inset -1px -1px 2px var(--shadow-light); /* Inset track */
+     border-color: transparent; /* Override border */
+}
+body.dark-mode .form-switch .form-check-input {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(255,255,255,.25)'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:checked {
+     background-position: right center;
+     border-color: var(--link-color); /* Add border color on check */
+     background-color: var(--link-color); /* Fill with link color */
+     box-shadow: none; /* Remove inset */
+     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e"); /* White thumb */
+}
+.form-check-label { /* Uses styles from custom.css */ }
+
+/* --- Submit Button Styles --- */
+.btn-submit-tool {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--link-color);
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-submit-tool:hover {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+}
+.btn-submit-tool:active {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+}
+.btn-submit-tool:disabled {
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    opacity: 0.6;
+    cursor: not-allowed;
+    color: var(--muted-text-color);
+}
+.btn-submit-tool:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+}
+
+/* --- Success/Download Buttons --- */
+ .btn-success {
+    padding: 0.75rem 1.25rem;
+ }
+ .clear-filters-btn { /* For Convert More button */
+    background-color: transparent;
+    border: 1px solid var(--muted-text-color);
+    color: var(--muted-text-color);
+    border-radius: var(--radius-small);
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.clear-filters-btn:hover {
+    background-color: rgba(var(--text-color-rgb), 0.1);
+    border-color: var(--text-color);
+    color: var(--text-color);
+}
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for drag/drop/preview AND option visibility toggle #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- File Handling Elements ---
+    const form = document.getElementById('uploadForm');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('imagefileInput'); // Correct ID
+    const browseButton = document.getElementById('browseButton');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const convertButton = document.getElementById('convertButton');
+    let currentFile = null; // Store single file for resizer
+
+    // --- Options Elements ---
+    const modePixelsRadio = document.getElementById('modePixels');
+    const modePercentageRadio = document.getElementById('modePercentage');
+    const pixelInputs = document.getElementById('pixelInputs');
+    const pixelInputsHeight = document.getElementById('pixelInputsHeight');
+    const percentageInput = document.getElementById('percentageInput');
+    const aspectRatioDiv = document.getElementById('aspectRatioDiv'); // Checkbox container
+    const aspectRatioCheck = document.getElementById('aspectRatioCheck');
+    const outputFormatSelect = document.getElementById('outputFormatSelect');
+    const qualityDiv = document.getElementById('qualityDiv');
+    const qualityRange = document.getElementById('qualityRange');
+    const qualityValue = document.getElementById('qualityValue');
+
+    // --- Quality Range Display ---
+    if (qualityRange && qualityValue) {
+        qualityRange.oninput = function() { qualityValue.textContent = this.value; }
+    }
+
+    // --- Update UI ---
+    const updateUI = () => {
+        previewContainer.innerHTML = '';
+        if (currentFile) {
+            createPreviewElement(currentFile);
+            previewPlaceholder.style.display = 'none';
+            convertButton.disabled = false;
+        } else {
+            previewPlaceholder.style.display = 'block';
+            convertButton.disabled = true;
+        }
+        try { // Update hidden input
+            const dataTransfer = new DataTransfer();
+            if (currentFile) dataTransfer.items.add(currentFile);
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("Browser doesn't support DataTransfer:", e); }
+    };
+
+    // --- Create Preview ---
+    const createPreviewElement = (file) => { /* ... same as before ... */
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const previewItem = document.createElement('div'); previewItem.classList.add('preview-item');
+            const img = document.createElement('img'); img.classList.add('preview-image'); img.src = e.target.result; img.alt = `Preview of ${file.name}`; previewItem.appendChild(img);
+            const removeBtn = document.createElement('button'); removeBtn.classList.add('preview-remove-btn'); removeBtn.innerHTML = '×'; removeBtn.type = 'button'; removeBtn.setAttribute('aria-label', `Remove ${file.name}`); removeBtn.onclick = handleRemoveFile; previewItem.appendChild(removeBtn);
+            previewContainer.appendChild(previewItem);
+        }
+        // Allow any image type preview supported by browser
+        if (file.type.startsWith('image/')) { reader.readAsDataURL(file); }
+        else { console.warn(`File "${file.name}" is not an image? Type: ${file.type}`); }
+    };
+
+    // --- Remove File ---
+    const handleRemoveFile = () => { /* ... same as before ... */
+        currentFile = null; updateUI();
+    };
+
+    // --- Handle Single File Input ---
+    const handleFiles = (files) => {
+        if (files.length === 0) { handleRemoveFile(); return; }
+        const file = files[0];
+        // Basic check - more robust server-side
+        if (!file.type.startsWith('image/')) {
+            alert('Please select an image file (JPG, PNG, GIF, WEBP, etc.).');
+            handleRemoveFile();
+            return;
+        }
+        currentFile = file;
+        updateUI();
+    };
+
+    // --- Toggle Options Visibility ---
+    const toggleOptions = () => {
+        if (modePixelsRadio.checked) {
+            pixelInputs.classList.remove('d-none');
+            pixelInputsHeight.classList.remove('d-none');
+            percentageInput.classList.add('d-none');
+            aspectRatioDiv.classList.remove('d-none'); // Show aspect ratio for pixels
+        } else { // Percentage mode
+            pixelInputs.classList.add('d-none');
+            pixelInputsHeight.classList.add('d-none');
+            percentageInput.classList.remove('d-none');
+            aspectRatioDiv.classList.add('d-none'); // Hide aspect ratio for percentage
+            aspectRatioCheck.checked = true; // Force aspect ratio for percentage
+        }
+    };
+
+    // --- Toggle Quality Slider Visibility ---
+    const toggleQualitySlider = () => {
+        const selectedFormat = outputFormatSelect.value.toUpperCase();
+        if (selectedFormat === 'JPEG' || selectedFormat === 'WEBP') {
+            qualityDiv.classList.remove('d-none');
+        } else {
+            qualityDiv.classList.add('d-none');
+        }
+    };
+
+    // --- Event Listeners ---
+    // File Handling
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    // Options Toggling
+    modePixelsRadio.addEventListener('change', toggleOptions);
+    modePercentageRadio.addEventListener('change', toggleOptions);
+    outputFormatSelect.addEventListener('change', toggleQualitySlider);
+
+    // Initial State
+    updateUI();
+    toggleOptions(); // Set initial visibility based on default checked radio
+    toggleQualitySlider(); // Set initial visibility of quality slider
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

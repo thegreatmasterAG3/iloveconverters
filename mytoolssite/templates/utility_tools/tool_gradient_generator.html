@@ -1,0 +1,344 @@
+{# templates/utility_tools/tool_gradient_generator.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">Grad</div>
+        <h1 class="fw-bold">{{ page_title }}</h1>
+        <p class="lead text-muted">Visually create linear and radial CSS gradients and copy the code.</p>
+    </div>
+
+    <div class="row g-4 justify-content-center">
+        {# --- Controls Column --- #}
+        <div class="col-lg-5 col-md-6">
+            <div class="card p-4" id="controlsCard">
+                <h4 class="mb-4 text-center">Controls</h4>
+
+                {# Gradient Type #}
+                <div class="mb-4">
+                    <label class="form-label fw-medium d-block mb-2">Gradient Type:</label>
+                    <div class="btn-group w-100 neumorphic-radio-group" role="group">
+                        <input type="radio" class="btn-check" name="gradient_type" id="typeLinear" value="linear" autocomplete="off" checked>
+                        <label class="btn btn-outline-primary neumorphic-radio" for="typeLinear">Linear</label>
+
+                        <input type="radio" class="btn-check" name="gradient_type" id="typeRadial" value="radial" autocomplete="off">
+                        <label class="btn btn-outline-primary neumorphic-radio" for="typeRadial">Radial</label>
+                    </div>
+                </div>
+
+                {# Linear Angle (Only shown for Linear) #}
+                <div class="mb-4" id="angleControl">
+                     <label for="angleRange" class="form-label fw-medium">Angle: <span id="angleValue">90</span>°</label>
+                     <input type="range" class="form-range" id="angleRange" name="angle" min="0" max="360" value="90" step="1">
+                </div>
+
+                 {# Radial Options (Simplified - info only for V1) #}
+                <div class="mb-4 d-none text-muted small" id="radialInfo">
+                     (Radial type set to 'circle at center' for simplicity)
+                </div>
+
+
+                {# Color Stops #}
+                <div class="mb-3">
+                    <label class="form-label fw-medium d-block mb-2">Colors:</label>
+                    <div class="d-flex align-items-center gap-3" id="colorStopContainer">
+                        {# Color Stop 1 #}
+                        <div class="color-stop flex-fill">
+                             <input type="color" class="form-control form-control-color neumorphic-inset color-input" id="color1" value="#2979FF"> {# Default Blue #}
+                             <label for="color1" class="form-label visually-hidden">Color 1</label>
+                        </div>
+                         {# Color Stop 2 #}
+                         <div class="color-stop flex-fill">
+                             <input type="color" class="form-control form-control-color neumorphic-inset color-input" id="color2" value="#1DE9B6"> {# Default Teal AI Color #}
+                             <label for="color2" class="form-label visually-hidden">Color 2</label>
+                         </div>
+                         {# Add/Remove buttons can be added here later #}
+                    </div>
+                </div>
+
+            </div> {# End Controls Card #}
+        </div>
+
+        {# --- Preview & Output Column --- #}
+        <div class="col-lg-7 col-md-6">
+             {# Preview Card #}
+             <div class="card p-3 mb-4 text-center" id="previewCard">
+                <h4 class="mb-3">Live Preview</h4>
+                <div id="gradientPreview" class="gradient-preview-box neumorphic-inset"></div>
+             </div>
+
+             {# CSS Output Card #}
+              <div class="card p-3" id="outputCard">
+                <h4 class="mb-3 text-center">Generated CSS</h4>
+                <div class="position-relative">
+                     <textarea id="cssOutput" class="form-control neumorphic-inset font-monospace" rows="6" readonly></textarea>
+                     <button id="copyCssButton" class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2" type="button" title="Copy CSS">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg>
+                         Copy
+                     </button>
+                </div>
+              </div>
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Re-use base styles defined in custom.css for cards */
+    #controlsCard, #previewCard, #outputCard {
+        /* .card styles are inherited */
+    }
+
+    /* Style section headings within cards */
+    #controlsCard h4, #previewCard h4, #outputCard h4 {
+         color: var(--text-color);
+         transition: color 0.3s ease;
+         font-weight: 600; /* Make headings stand out slightly */
+         margin-bottom: 1.5rem !important; /* Ensure consistent spacing */
+    }
+
+    /* Style labels for options */
+    .form-label.fw-medium {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        display: block; /* Ensure label takes full width if needed */
+        margin-bottom: 0.5rem;
+    }
+
+    /* Neumorphic Radio Buttons for Gradient Type */
+    .neumorphic-radio-group {
+         /* Container styling if needed */
+    }
+    .neumorphic-radio { /* Label styled as button */
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        border: 1px solid transparent;
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        padding: .5rem 1rem;
+        flex-grow: 1; /* Make buttons fill space */
+        text-align: center; /* Center text */
+        cursor: pointer;
+    }
+    .btn-check:checked + .neumorphic-radio {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        border-color: transparent;
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        z-index: 1;
+    }
+    .neumorphic-radio:hover {
+        color: var(--text-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+    .btn-check:checked + .neumorphic-radio:hover {
+         color: var(--link-color);
+    }
+    .btn-check:focus-visible + .neumorphic-radio {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         z-index: 1;
+    }
+
+    /* Angle Slider */
+    .form-range {
+        padding: 0;
+        cursor: pointer;
+    }
+    .form-range::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+    .form-range::-moz-range-track { width: 100%; height: 8px; cursor: pointer; background: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+    .form-range::-webkit-slider-thumb { height: 20px; width: 20px; border-radius: 50%; background: var(--bg-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); cursor: pointer; margin-top: -6px; -webkit-appearance: none; }
+    .form-range::-moz-range-thumb { height: 20px; width: 20px; border-radius: 50%; background: var(--bg-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); cursor: pointer; border: none; }
+    .form-range:focus { outline: none; }
+    .form-range:focus::-webkit-slider-thumb { outline: 2px solid var(--link-color); outline-offset: 2px; }
+    .form-range:focus::-moz-range-thumb { outline: 2px solid var(--link-color); outline-offset: 2px; }
+
+    /* Color Input Styling */
+    .color-stop input[type="color"].neumorphic-inset {
+        width: 100%;
+        min-height: 45px;
+        padding: 0.2rem 0.3rem;
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        cursor: pointer;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .color-stop input[type="color"].neumorphic-inset:focus {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+    }
+    /* Hide default color input text/border */
+     .color-stop input[type="color"]::-webkit-color-swatch-wrapper {
+        padding: 0;
+    }
+     .color-stop input[type="color"]::-webkit-color-swatch {
+        border: none;
+        border-radius: calc(var(--radius-small) - 3px); /* Slightly smaller radius */
+    }
+     .color-stop input[type="color"]::-moz-color-swatch {
+         border: none;
+         border-radius: calc(var(--radius-small) - 3px);
+     }
+
+
+    /* Gradient Preview Box */
+    .gradient-preview-box {
+        height: 250px;
+        border-radius: var(--radius-small);
+        /* Neumorphic Inset */
+        background-color: var(--bg-color); /* Fallback */
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+        transition: background 0.2s linear, background-color 0.3s ease, box-shadow 0.3s ease; /* Smooth transition */
+    }
+
+    /* CSS Output Textarea */
+    #cssOutput {
+        min-height: 150px; /* Good starting height */
+        font-size: 0.9em;
+        line-height: 1.6;
+        /* Neumorphic Inset */
+        background-color: var(--card-bg-color); /* Match card bg */
+        border-radius: var(--radius-small);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                    inset -3px -3px 6px var(--shadow-light);
+        border: none;
+        color: var(--muted-text-color); /* Muted for code */
+        padding: 0.75rem 1rem;
+        padding-right: 3rem; /* Space for copy button */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        word-break: break-all;
+    }
+    #cssOutput:focus {
+         background-color: var(--card-bg-color);
+         box-shadow: inset 4px 4px 8px var(--shadow-dark),
+                     inset -4px -4px 8px var(--shadow-light);
+         color: var(--muted-text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+
+    /* Copy Button Style */
+    #copyCssButton {
+         opacity: 0.7;
+         transition: opacity 0.2s ease, background-color 0.2s ease, color 0.2s ease;
+         background-color: rgba(var(--text-color-rgb), 0.1); /* Subtle bg */
+         border: 1px solid transparent;
+         color: var(--muted-text-color);
+    }
+    #copyCssButton:hover {
+         opacity: 1;
+         background-color: rgba(var(--text-color-rgb), 0.15);
+    }
+    #copyCssButton.copied {
+        background-color: #198754; /* Bootstrap success green */
+        border-color: #198754;
+        color: white;
+        opacity: 1;
+    }
+    #copyCssButton:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: 1px;
+    }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Get Elements ---
+    const typeLinear = document.getElementById('typeLinear');
+    const typeRadial = document.getElementById('typeRadial');
+    const angleControl = document.getElementById('angleControl'); // Div containing angle slider
+    const angleRange = document.getElementById('angleRange');
+    const angleValue = document.getElementById('angleValue');
+    const radialInfo = document.getElementById('radialInfo'); // Info text for radial
+    const colorInputs = document.querySelectorAll('.color-input'); // Get all color inputs
+    const gradientPreview = document.getElementById('gradientPreview');
+    const cssOutput = document.getElementById('cssOutput');
+    const copyCssButton = document.getElementById('copyCssButton');
+
+    // --- Update Function ---
+    function updateGradient() {
+        const type = typeLinear.checked ? 'linear' : 'radial';
+        const angle = angleRange.value;
+        const colors = Array.from(colorInputs).map(input => input.value);
+
+        let gradientCss = '';
+
+        if (type === 'linear') {
+            angleControl.classList.remove('d-none');
+            radialInfo.classList.add('d-none');
+            if (angleValue) angleValue.textContent = angle; // Update angle display
+            gradientCss = `linear-gradient(${angle}deg, ${colors.join(', ')})`;
+        } else { // Radial
+            angleControl.classList.add('d-none');
+            radialInfo.classList.remove('d-none');
+            // Simple V1 radial - circle at center
+            gradientCss = `radial-gradient(circle at center, ${colors.join(', ')})`;
+        }
+
+        // Apply to preview
+        if (gradientPreview) {
+            gradientPreview.style.background = gradientCss;
+        }
+
+        // Update CSS output
+        if (cssOutput) {
+            // Add vendor prefixes for broader compatibility (optional but good practice)
+            const fullCss = `background: ${colors[0]}; /* Fallback */\n` + // Simple fallback
+                            `background: -webkit-${gradientCss};\n` + // Chrome/Safari
+                            `background: ${gradientCss};`; // Standard
+            cssOutput.value = fullCss;
+        }
+    }
+
+    // --- Event Listeners ---
+    typeLinear.addEventListener('change', updateGradient);
+    typeRadial.addEventListener('change', updateGradient);
+    angleRange.addEventListener('input', updateGradient); // Use 'input' for live update on slider drag
+    colorInputs.forEach(input => {
+        input.addEventListener('input', updateGradient); // Use 'input' for live update on color change
+    });
+
+    // --- Copy Button ---
+     if (copyCssButton && cssOutput) {
+        copyCssButton.addEventListener('click', () => {
+            if (navigator.clipboard) {
+                 navigator.clipboard.writeText(cssOutput.value).then(() => {
+                    copyCssButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    copyCssButton.classList.add('copied');
+                    setTimeout(() => {
+                         copyCssButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg> Copy';
+                         copyCssButton.classList.remove('copied');
+                    }, 2000);
+                 }).catch(err => { console.error('Failed to copy CSS: ', err); alert('Failed to copy CSS.'); });
+            } else {
+                // Fallback for older browsers
+                cssOutput.select();
+                try { document.execCommand('copy'); /* ... feedback ... */ }
+                catch (err) { alert('Copying failed.'); }
+            }
+        });
+    }
+
+    // --- Initial Call ---
+    updateGradient(); // Generate initial preview and CSS
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

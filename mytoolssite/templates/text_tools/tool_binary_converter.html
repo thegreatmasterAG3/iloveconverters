@@ -1,0 +1,304 @@
+{# templates/text_tools/tool_binary_converter.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12"> {# Wider column for two text areas #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">01</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Convert text to binary code (0s and 1s) and binary code back to text.</p>
+            </div>
+
+            {# Display Error Message #}
+            {% if error %}
+            <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+                {{ error }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+
+            {# --- Input Form --- #}
+            <div class="card p-4 p-md-5 mb-4" id="inputCard">
+                <form method="post" action="{% url 'text_tools:binary_converter' %}" id="binaryForm">
+                    {% csrf_token %}
+
+                    {# --- Conversion Mode Selection --- #}
+                    <div class="mb-3 text-center">
+                        <div class="btn-group w-100 w-md-auto" role="group" aria-label="Conversion mode">
+                            <input type="radio" class="btn-check" name="conversion_mode" id="modeTextToBinary" value="text_to_binary" autocomplete="off" {% if conversion_mode == 'text_to_binary' %}checked{% endif %}>
+                            <label class="btn btn-outline-primary neumorphic-radio" for="modeTextToBinary">Text → Binary</label>
+
+                            <input type="radio" class="btn-check" name="conversion_mode" id="modeBinaryToText" value="binary_to_text" autocomplete="off" {% if conversion_mode == 'binary_to_text' %}checked{% endif %}>
+                            <label class="btn btn-outline-primary neumorphic-radio" for="modeBinaryToText">Binary → Text</label>
+                        </div>
+                    </div>
+
+                    {# --- Input Text Area --- #}
+                    <div class="mb-3">
+                        <label for="input_data" class="form-label fw-medium">Input:</label>
+                        <textarea class="form-control neumorphic-inset font-monospace"
+                                  id="input_data"
+                                  name="input_data"
+                                  rows="8"
+                                  placeholder="Enter text or space-separated binary..."
+                                  required>{{ input_data }}</textarea>
+                    </div>
+
+                    {# --- Buttons --- #}
+                    <div class="d-flex justify-content-end gap-2 mt-3">
+                        <button type="button" class="btn btn-outline-secondary clear-filters-btn" id="clearButton">Clear</button>
+                        <button type="submit" class="btn btn-submit-tool" id="convertButton">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-arrow-repeat me-1" viewBox="0 0 16 16"><path d="M11.534 7h3.932a.25.25 0 0 1 .192.41l-1.966 2.36a.25.25 0 0 1-.384 0l-1.966-2.36a.25.25 0 0 1 .192-.41zm-11 2h3.932a.25.25 0 0 0 .192-.41L2.692 6.23a.25.25 0 0 0-.384 0L.342 8.59A.25.25 0 0 0 .534 9z"/><path fill-rule="evenodd" d="M8 3c-1.552 0-2.94.707-3.857 1.818a.5.5 0 1 1-.771-.636A6.002 6.002 0 0 1 13.917 7H12.5a.5.5 0 0 1 0-1h3.5a.5.5 0 0 1 .5.5v3.5a.5.5 0 0 1-1 0V6.118A5.002 5.002 0 0 0 8 3zM3.5 12.5a.5.5 0 0 1 .5-.5h3.5a.5.5 0 0 1 0 1H4v1.882a5.002 5.002 0 0 0 8.051-.078.5.5 0 1 1 .771.636A6.002 6.002 0 0 1 2.083 9H3.5a.5.5 0 0 1 .5.5z"/></svg>
+                            Convert
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {# --- End Input Form Section --- #}
+
+            {# --- Output Section --- #}
+            {% if output_data %}
+            <div class="card p-4 mt-4 neumorphic" id="outputCard">
+                <div class="d-flex justify-content-between align-items-center mb-2">
+                     <h5 class="mb-0">Result:</h5>
+                     <button id="copyButton" class="btn btn-sm btn-secondary" type="button" title="Copy to Clipboard">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg>
+                         Copy
+                     </button>
+                </div>
+                <textarea id="output_data" class="form-control neumorphic-inset font-monospace" rows="8" readonly>{{ output_data }}</textarea>
+            </div>
+            {% endif %}
+            {# --- End Output Section --- #}
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+{# Styles specific to Binary Converter page #}
+<style>
+    /* --- Form Control & Option Styles --- */
+    .form-label.fw-medium { /* For Input label */
+         color: var(--text-color);
+         transition: color 0.3s ease;
+         font-weight: 500;
+    }
+    textarea.neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        line-height: 1.6;
+        min-height: 150px; /* Input area height */
+    }
+     textarea.neumorphic-inset:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+     textarea.neumorphic-inset::placeholder {
+         color: var(--muted-text-color);
+         opacity: 0.7;
+         transition: color 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* --- Radio Button Group Styling --- */
+    .neumorphic-radio {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        border: 1px solid transparent;
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        padding: .5rem 1rem;
+        margin-bottom: 0;
+        cursor: pointer;
+    }
+    .btn-check:checked + .neumorphic-radio {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        border-color: transparent;
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+     .neumorphic-radio:hover {
+        color: var(--text-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+     .btn-check:checked + .neumorphic-radio:hover {
+         color: var(--link-color);
+    }
+     .btn-check:focus-visible + .neumorphic-radio {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         z-index: 1;
+    }
+    .btn-group > .btn-check:checked + .neumorphic-radio {
+         z-index: 1;
+    }
+
+
+    /* --- Submit/Clear Button Styles --- */
+    .btn-submit-tool {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--link-color);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn-submit-tool:hover {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+    .btn-submit-tool:active {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    .btn-submit-tool:disabled {
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        opacity: 0.6;
+        cursor: not-allowed;
+        color: var(--muted-text-color);
+    }
+    .btn-submit-tool:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    }
+    .clear-filters-btn { /* For Clear button */
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        border-radius: var(--radius-small);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .clear-filters-btn:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+
+    /* --- Output Section Styles --- */
+     /* Style the Results Heading */
+    #outputCard h5 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+    /* Style output Textarea */
+    #output_data {
+        min-height: 150px;
+        background-color: var(--card-bg-color); /* Match card background */
+        border-radius: var(--radius-small);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                   inset -3px -3px 6px var(--shadow-light);
+        border: none;
+        color: var(--muted-text-color); /* Muted color for output */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        font-size: 0.9em;
+        word-break: break-all;
+    }
+    #output_data:focus {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                    inset -3px -3px 6px var(--shadow-light);
+    }
+    /* Style Copy Button */
+    #copyButton {
+         opacity: 0.7;
+         transition: opacity 0.2s ease;
+         /* Ensure button color adapts if using btn-secondary */
+         background-color: var(--bg-color);
+         border-color: var(--muted-text-color);
+         color: var(--muted-text-color);
+         box-shadow: 2px 2px 4px var(--shadow-dark), -1px -1px 2px var(--shadow-light);
+    }
+    body.dark-mode #copyButton {
+        background-color: var(--bg-color);
+        border-color: var(--muted-text-color);
+        color: var(--muted-text-color);
+         box-shadow: 2px 2px 4px var(--shadow-dark), -1px -1px 2px var(--shadow-light);
+    }
+    #copyButton:hover {
+         opacity: 1;
+    }
+    #copyButton.copied {
+        background-color: #198754 !important; /* Force success color */
+        border-color: #198754 !important;
+        color: white !important;
+        box-shadow: none; /* Remove shadow when copied */
+    }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const clearButton = document.getElementById('clearButton');
+    const inputTextArea = document.getElementById('input_data');
+    const outputTextArea = document.getElementById('output_data');
+    const copyButton = document.getElementById('copyButton');
+    const convertButton = document.getElementById('convertButton'); // To disable/enable
+
+    // Enable/disable Convert button based on input
+    const toggleConvertButton = () => {
+        if(convertButton && inputTextArea){
+            convertButton.disabled = inputTextArea.value.trim() === '';
+        }
+    }
+
+    if(clearButton && inputTextArea) {
+        clearButton.addEventListener('click', () => {
+            inputTextArea.value = '';
+            if (outputTextArea) outputTextArea.value = ''; // Clear output too
+            const resultsCard = document.getElementById('outputCard');
+            if (resultsCard) resultsCard.style.display = 'none'; // Hide results card
+            inputTextArea.focus();
+            toggleConvertButton(); // Disable convert button
+        });
+    }
+
+    if (inputTextArea) {
+         inputTextArea.addEventListener('input', toggleConvertButton);
+    }
+
+    // Copy Button Logic
+    if (copyButton && outputTextArea) {
+        copyButton.addEventListener('click', () => {
+            if (navigator.clipboard) {
+                 navigator.clipboard.writeText(outputTextArea.value).then(() => {
+                    copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    copyButton.classList.add('copied');
+                    setTimeout(() => {
+                         copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg> Copy';
+                         copyButton.classList.remove('copied');
+                    }, 2000);
+                 }).catch(err => { console.error('Failed to copy: ', err); alert('Failed to copy.'); });
+            } else { /* Fallback execCommand */ }
+        });
+    }
+
+    // Initial state
+    toggleConvertButton();
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

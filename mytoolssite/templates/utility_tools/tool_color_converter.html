@@ -1,0 +1,330 @@
+{# templates/utility_tools/tool_color_converter.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">🎨</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Convert HEX, RGB(A) color values to their equivalents.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {# --- Input Form Section --- #}
+            <div class="card p-4 p-md-5 mb-4" id="inputCard">
+                <form method="post" action="{% url 'utility_tools:color_converter' %}" id="colorForm">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="color_input" class="form-label fw-medium">Enter Color Value:</label>
+                        <div class="input-group input-group-lg"> {# Group input and button #}
+                             <input type="text"
+                                   class="form-control neumorphic-inset font-monospace" {# Use monospace #}
+                                   id="color_input"
+                                   name="color_input"
+                                   value="{{ color_input }}"
+                                   placeholder="e.g., #ff0000, rgb(255, 0, 0), rgba(0,0,255,0.5)"
+                                   required>
+                             <button type="submit" class="btn btn-submit-tool" id="convertButton">
+                                Convert
+                             </button>
+                        </div>
+                         <div class="form-text">Enter HEX (#RRGGBB or #RGB), RGB(A) formats.</div>
+                    </div>
+
+                </form>
+            </div>
+            {# --- End Input Form --- #}
+
+
+             {# --- Results Section --- #}
+            {% if color_outputs %}
+            <div class="card p-4 mt-4 neumorphic" id="resultsCard">
+                <h3 class="text-center mb-4">Conversion Results</h3>
+                <div class="row g-3 align-items-center justify-content-center">
+
+                    {# Color Preview Swatch #}
+                    <div class="col-12 text-center mb-3">
+                         <div class="color-preview-wrapper d-inline-block p-1 neumorphic">
+                            <div id="colorPreview"
+                                 style="width: 100px; height: 100px; border-radius: var(--radius-small); background-color: rgba({{ color_outputs.rgba_tuple.0 }}, {{ color_outputs.rgba_tuple.1 }}, {{ color_outputs.rgba_tuple.2 }}, {{ color_outputs.rgba_tuple.3 }});">
+                             </div>
+                         </div>
+                    </div>
+
+                    {# HEX Output #}
+                    <div class="col-md-6">
+                        <label for="outputHex" class="form-label fw-medium">HEX:</label>
+                        <div class="position-relative">
+                            <input type="text" id="outputHex" class="form-control neumorphic-inset font-monospace text-center" readonly value="{{ color_outputs.hex }}">
+                            <button class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2 copy-btn" type="button" data-target="outputHex" title="Copy HEX"> <svg class="bi bi-clipboard" width="16" height="16" fill="currentColor"><use xlink:href="#icon-clipboard"/></svg> </button>
+                        </div>
+                    </div>
+
+                     {# RGB(A) Output #}
+                     <div class="col-md-6">
+                        <label for="outputRgb" class="form-label fw-medium">RGB(A):</label>
+                        <div class="position-relative">
+                            <input type="text" id="outputRgb" class="form-control neumorphic-inset font-monospace text-center" readonly value="{{ color_outputs.rgb }}">
+                            <button class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2 copy-btn" type="button" data-target="outputRgb" title="Copy RGB(A)"> <svg class="bi bi-clipboard" width="16" height="16" fill="currentColor"><use xlink:href="#icon-clipboard"/></svg> </button>
+                        </div>
+                    </div>
+
+                     {# HSL(A) Output #}
+                     <div class="col-md-6">
+                        <label for="outputHsl" class="form-label fw-medium">HSL(A):</label>
+                        <div class="position-relative">
+                            <input type="text" id="outputHsl" class="form-control neumorphic-inset font-monospace text-center" readonly value="{{ color_outputs.hsl }}">
+                            <button class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2 copy-btn" type="button" data-target="outputHsl" title="Copy HSL(A)"> <svg class="bi bi-clipboard" width="16" height="16" fill="currentColor"><use xlink:href="#icon-clipboard"/></svg> </button>
+                        </div>
+                    </div>
+
+                     {# RGBA Tuple Output (for info) #}
+                     <div class="col-md-6">
+                        <label class="form-label fw-medium">RGBA (Raw):</label>
+                         <div class="position-relative">
+                             <input type="text" id="outputRawRgba" class="form-control neumorphic-inset font-monospace text-center" readonly value="{{ color_outputs.rgba_tuple.0 }}, {{ color_outputs.rgba_tuple.1 }}, {{ color_outputs.rgba_tuple.2 }}, {{ color_outputs.rgba_tuple.3|floatformat:2 }}">
+                             <button class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2 copy-btn" type="button" data-target="outputRawRgba" title="Copy Raw RGBA"> <svg class="bi bi-clipboard" width="16" height="16" fill="currentColor"><use xlink:href="#icon-clipboard"/></svg> </button>
+                         </div>
+                    </div>
+
+                </div>
+                 <div class="text-center mt-4">
+                    <a href="{% url 'utility_tools:color_converter' %}" class="btn btn-outline-secondary clear-filters-btn">
+                        <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                        Convert Another Color
+                    </a>
+                </div>
+            </div>
+            {% endif %}
+            {# --- End Results Section --- #}
+
+        </div>
+    </div>
+</div>
+
+{# Define Clipboard Icon #}
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+  <symbol id="icon-clipboard" viewBox="0 0 16 16">
+       <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/>
+       <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/>
+  </symbol>
+   <symbol id="icon-check" viewBox="0 0 16 16">
+       <path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/>
+   </symbol>
+</svg>
+
+{# Styles specific to this page #}
+<style>
+    /* Re-use styles */
+    textarea.neumorphic-inset, input[type="text"].neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        line-height: 1.6;
+    }
+     textarea.neumorphic-inset {
+         min-height: 250px; /* Taller text areas */
+     }
+     input[type="text"].neumorphic-inset {
+        height: auto; /* Adjust height */
+     }
+    textarea.neumorphic-inset:focus, input[type="text"].neumorphic-inset:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+    textarea.neumorphic-inset::placeholder, input[type="text"].neumorphic-inset::placeholder {
+        color: var(--muted-text-color);
+        opacity: 0.7;
+        transition: color 0.3s ease, opacity 0.3s ease;
+    }
+    textarea.neumorphic-inset[readonly], input[type="text"].neumorphic-inset[readonly] {
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        opacity: 0.9;
+        cursor: default;
+    }
+    .form-label.fw-medium {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+    }
+     .form-text {
+         color: var(--muted-text-color);
+         transition: color 0.3s ease;
+         font-size: 0.8em;
+    }
+
+    /* Input Group Styling */
+    .input-group .form-control { z-index: 1; }
+    .input-group .btn-submit-tool {
+        border-top-left-radius: 0;
+        border-bottom-left-radius: 0;
+        /* Ensure button neumorphic style overrides potential input group styles */
+         background-color: var(--bg-color);
+         box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+         border: none;
+         color: var(--link-color);
+    }
+     .input-group .btn-submit-tool:hover {
+         color: var(--link-color);
+         background-color: var(--bg-color);
+         box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+     }
+      .input-group .btn-submit-tool:active {
+         color: var(--link-color);
+         background-color: var(--bg-color);
+         box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+     }
+      .input-group .btn-submit-tool:focus-visible {
+         outline: 2px solid var(--link-color);
+         outline-offset: -1px; /* Adjust offset for adjacent element */
+         box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+         z-index: 3; /* Bring button focus forward */
+     }
+    .input-group .form-control:focus { z-index: 3; }
+
+     /* Results Heading */
+     #resultsCard h3 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+
+     /* Color Preview */
+    .color-preview-wrapper {
+        border-radius: var(--radius-main); /* Match outer card radius */
+        /* Neumorphic Raised Style */
+        background-color: var(--bg-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    #colorPreview {
+        border: 1px solid rgba(var(--shadow-dark-rgb), 0.5); /* Add subtle border */
+        transition: background-color 0.3s ease, border-color 0.3s ease;
+        /* width/height/radius set inline */
+    }
+
+    /* Result Input (Readonly) */
+    #resultsCard input[type="text"].neumorphic-inset[readonly] {
+        text-align: center;
+        font-size: 0.95em;
+        padding-right: 45px; /* Space for copy button */
+    }
+
+     /* Copy Button Style */
+    .copy-btn {
+        opacity: 0.6;
+        transition: opacity 0.2s ease;
+        border: none;
+        background: none;
+        color: var(--muted-text-color);
+        transition: color 0.3s ease;
+    }
+    .copy-btn:hover {
+        opacity: 1;
+        color: var(--link-color);
+    }
+    .copy-btn.copied {
+        color: #198754; /* Success color */
+    }
+     .copy-btn.copied .bi-clipboard {
+         display: none; /* Hide clipboard icon */
+     }
+     .copy-btn:not(.copied) .bi-check-lg {
+         display: none; /* Hide check icon */
+     }
+
+     /* Clear / Convert Another Button */
+    .clear-filters-btn {
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        border-radius: var(--radius-small);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .clear-filters-btn:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for copy buttons #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const copyButtons = document.querySelectorAll('.copy-btn');
+
+    copyButtons.forEach(button => {
+        button.addEventListener('click', () => {
+            const targetId = button.dataset.target;
+            const outputField = document.getElementById(targetId);
+
+            if (outputField && navigator.clipboard) {
+                 navigator.clipboard.writeText(outputField.value).then(() => {
+                    // Temporarily change icon to checkmark
+                    button.innerHTML = '<svg class="bi bi-check-lg text-success" width="16" height="16" fill="currentColor" viewBox="0 0 16 16"><use xlink:href="#icon-check"/></svg>';
+                    setTimeout(() => {
+                        // Change back to clipboard icon
+                         button.innerHTML = '<svg class="bi bi-clipboard" width="16" height="16" fill="currentColor"><use xlink:href="#icon-clipboard"/></svg>';
+                    }, 1500);
+                 }).catch(err => { alert('Failed to copy.'); });
+            } else if (outputField) { /* Fallback */
+                 try { outputField.select(); document.execCommand('copy'); /* Add feedback */ }
+                 catch (err) { alert('Copying failed.'); }
+            }
+        });
+    });
+
+    // Clear button (if added - not strictly needed as convert handles empty)
+    const clearButton = document.getElementById('clearTextButton'); // Assuming you might add one
+    const inputField = document.getElementById('color_input');
+    const outputFields = ['outputHex', 'outputRgb', 'outputHsl', 'outputRawRgba']; // IDs of output fields
+    const resultsCard = document.getElementById('resultsCard');
+
+    if (clearButton && inputField) {
+         clearButton.addEventListener('click', () => {
+             inputField.value = '';
+             outputFields.forEach(id => {
+                 const field = document.getElementById(id);
+                 if (field) field.value = '';
+             });
+             if(resultsCard) resultsCard.style.display = 'none';
+             document.querySelectorAll('.copy-btn').forEach(btn => btn.classList.add('d-none')); // Hide copy buttons
+             inputField.focus();
+         });
+    }
+
+    // Hide results card initially if no results present
+    if (resultsCard && !document.getElementById('outputHex')?.value) {
+         resultsCard.style.display = 'none';
+    }
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

@@ -1,0 +1,440 @@
+{# templates/developer_tools/tool_regex_tester.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+         {# Use a wider column for better layout #}
+        <div class="col-lg-10 col-xl-9">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">/../</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Test your Regular Expressions (JavaScript syntax) against sample text in real-time.</p>
+            </div>
+
+            {# --- Input Form Section --- #}
+            <div class="card p-4 p-md-5" id="regexCard">
+
+                {# Regular Expression Input #}
+                <div class="mb-3">
+                    <label for="regexPattern" class="form-label fw-medium">Regular Expression:</label>
+                    <div class="input-group neumorphic-inset"> {# Group for structure #}
+                        <span class="input-group-text bg-transparent border-0 pe-1">/</span>
+                        <input type="text" class="form-control bg-transparent border-0 ps-1 font-monospace" id="regexPattern" placeholder="Enter your pattern here">
+                         <span class="input-group-text bg-transparent border-0 ps-1" id="regexFlagsDisplay">/gu</span> {# Display active flags #}
+                    </div>
+                    <div class="invalid-feedback" id="regexError">Invalid Regex Pattern</div>
+                </div>
+
+                {# Flags/Options #}
+                <div class="mb-3">
+                    <label class="form-label fw-medium d-block mb-2">Flags:</label>
+                    <div class="d-flex flex-wrap gap-3">
+                        <div class="form-check form-switch">
+                            <input class="form-check-input regex-flag" type="checkbox" role="switch" id="flagG" value="g" checked>
+                            <label class="form-check-label" for="flagG" title="Global search (find all matches)">g</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input regex-flag" type="checkbox" role="switch" id="flagI" value="i">
+                            <label class="form-check-label" for="flagI" title="Ignore case">i</label>
+                        </div>
+                         <div class="form-check form-switch">
+                            <input class="form-check-input regex-flag" type="checkbox" role="switch" id="flagM" value="m">
+                            <label class="form-check-label" for="flagM" title="Multiline (^/$ match line breaks)">m</label>
+                        </div>
+                         <div class="form-check form-switch">
+                            <input class="form-check-input regex-flag" type="checkbox" role="switch" id="flagS" value="s">
+                            <label class="form-check-label" for="flagS" title="dotAll (. matches newline)">s</label>
+                        </div>
+                        <div class="form-check form-switch">
+                            <input class="form-check-input regex-flag" type="checkbox" role="switch" id="flagU" value="u" checked>
+                            <label class="form-check-label" for="flagU" title="Unicode support">u</label>
+                        </div>
+                    </div>
+                </div>
+
+                 {# Test String Input #}
+                 <div class="mb-3">
+                     <label for="testString" class="form-label fw-medium">Test String:</label>
+                     <textarea class="form-control neumorphic-inset font-monospace" id="testString" rows="8" placeholder="Paste or type your test text here..."></textarea>
+                 </div>
+
+                 {# Results Area #}
+                 <div class="mt-4 border-top pt-4">
+                    <h5 class="mb-3">Result: <span id="matchCount" class="badge bg-secondary ms-1">0</span> <span class="text-muted small">matches</span></h5>
+                     <div id="resultsOutput" class="results-output neumorphic-inset p-3 font-monospace" aria-live="polite">Enter a pattern and test string.</div> {# Use pre for formatting #}
+                 </div>
+
+            </div> {# End Card #}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Use styles from custom.css for .card, .form-label, .form-check, etc. */
+
+    /* Regex Input Group Styling */
+    .input-group.neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        padding: 0 0.75rem; /* Padding inside group */
+    }
+    .input-group.neumorphic-inset .input-group-text {
+         color: var(--muted-text-color);
+         padding-left: 0.2rem;
+         padding-right: 0.2rem;
+         transition: color 0.3s ease;
+         font-size: 1rem;
+    }
+    .input-group.neumorphic-inset .form-control {
+        box-shadow: none; /* Remove inner shadow */
+        background-color: transparent !important; /* Ensure transparent background */
+        color: var(--text-color);
+        padding: 0.75rem 0.2rem; /* Adjust internal padding */
+        transition: color 0.3s ease;
+    }
+    .input-group.neumorphic-inset .form-control:focus {
+         box-shadow: none; /* Remove focus shadow */
+         outline: none;
+    }
+    /* Error state for input group */
+    .input-group.is-invalid {
+         outline: 1px solid #dc3545; /* Show outline on group for error */
+         outline-offset: 1px;
+    }
+    /* Error message below input */
+    .invalid-feedback {
+        display: none; /* Hide by default */
+        color: #dc3545;
+        width: 100%;
+        margin-top: .25rem;
+        font-size: .875em;
+    }
+    .input-group.is-invalid + .invalid-feedback,
+    .form-control.is-invalid + .invalid-feedback {
+        display: block; /* Show when invalid */
+    }
+
+
+    /* Test String Textarea */
+    #testString {
+        min-height: 150px;
+        font-size: 0.95rem; /* Slightly smaller monospace */
+        line-height: 1.6;
+    }
+
+    /* Results Output Area */
+    .results-output {
+        min-height: 150px;
+        font-size: 0.95rem;
+        line-height: 1.6;
+        white-space: pre-wrap; /* Preserve whitespace and wrap */
+        word-wrap: break-word;
+         /* Use neumorphic inset style */
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    }
+    /* Highlighted Matches */
+    .results-output .highlight {
+        background-color: rgba(var(--link-color-rgb), 0.3); /* Use link color with opacity */
+        border-radius: 3px;
+        padding: 0.1em 0;
+        margin: -0.1em 0; /* Prevent changing line height */
+        box-decoration-break: clone; /* Handle wrapping nicely */
+        -webkit-box-decoration-break: clone;
+    }
+     body.dark-mode .results-output .highlight {
+         background-color: rgba(var(--link-color-rgb), 0.4);
+     }
+
+    /* Ensure headings are visible */
+    #regexCard h5 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+
+
+    /* Styles specific to Regex Tester or general styles ensuring visibility */
+
+/* Form Labels (already covered by general styles using var(--text-color)) */
+.form-label.fw-medium {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+/* Regex Input Group Styling */
+.input-group.neumorphic-inset {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--text-color); /* Base color for text inside */
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    padding: 0 0.75rem;
+}
+.input-group.neumorphic-inset .input-group-text {
+     background-color: transparent; /* Ensure transparency */
+     border: none; /* Ensure no border */
+     color: var(--muted-text-color); /* Use muted color for slashes/flags */
+     padding-left: 0.2rem;
+     padding-right: 0.2rem;
+     transition: color 0.3s ease;
+     font-size: 1rem;
+}
+.input-group.neumorphic-inset .form-control {
+    box-shadow: none;
+    background-color: transparent !important;
+    color: var(--text-color); /* Use main text color for pattern */
+    padding: 0.75rem 0.2rem;
+    transition: color 0.3s ease;
+    border: none; /* Ensure no border on input itself */
+}
+.input-group.neumorphic-inset .form-control:focus {
+     box-shadow: none;
+     outline: none;
+}
+.input-group.is-invalid { /* Error indication */
+     outline: 1px solid #dc3545;
+     outline-offset: 1px;
+     /* Consider adding background indication too */
+     /* background-color: rgba(220, 53, 69, 0.1); */
+}
+.invalid-feedback { /* Error message text */
+    display: none;
+    color: #dc3545;
+    width: 100%;
+    margin-top: .25rem;
+    font-size: .875em;
+}
+.input-group.is-invalid + .invalid-feedback,
+.form-control.is-invalid + .invalid-feedback {
+    display: block;
+}
+
+
+/* Flags/Options Switches (uses general switch styles from custom.css) */
+/* Ensure label visibility */
+.form-check-label {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+
+
+/* Test String Textarea */
+#testString {
+    min-height: 150px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+     /* Neumorphic inset style (uses variables) */
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--text-color);
+    padding: 0.75rem 1rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+}
+ #testString:focus {
+    /* Focus style (uses variables) */
+     background-color: var(--bg-color);
+     box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+     color: var(--text-color);
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     border: none;
+}
+ #testString::placeholder {
+    /* Placeholder style (uses variables) */
+     color: var(--muted-text-color);
+     opacity: 0.7;
+     transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+
+/* Results Section Heading */
+#regexCard .border-top h5 { /* Target specifically */
+    color: var(--text-color);
+    transition: color 0.3s ease;
+    font-weight: 600;
+}
+/* Match Count Badge */
+#matchCount.badge { /* Style the badge */
+     background-color: var(--muted-text-color) !important; /* Use muted color for badge bg */
+     color: var(--bg-color) !important; /* Use bg color for text for contrast */
+     transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+/* Results Output Area */
+.results-output {
+    min-height: 150px;
+    font-size: 0.95rem;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    word-wrap: break-word;
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--text-color); /* Use main text color */
+    padding: 0.75rem 1rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+}
+/* Highlighted Matches */
+.results-output .highlight {
+    background-color: rgba(var(--link-color-rgb), 0.3); /* Adjusted light mode highlight */
+    border-radius: 3px;
+    padding: 0.1em 0;
+    margin: -0.1em 0;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+}
+ body.dark-mode .results-output .highlight {
+     background-color: rgba(var(--link-color-rgb), 0.4); /* Adjusted dark mode highlight */
+ }
+ /* Style for error message in results */
+.results-output[style*="color: rgb(220, 53, 69)"] { /* Target when error color is set */
+    /* Optional: Add more visual indication for error */
+}
+
+/* Add this rule to the CSS for the Regex Tester */
+
+/* Style placeholder specifically for the pattern input */
+#regexPattern::placeholder {
+    color: var(--muted-text-color); /* Use theme variable */
+    opacity: 0.7; /* Keep standard opacity */
+    transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+/* Ensure general placeholder rule also exists if not already there */
+/* This was in a previous update but good to double-check */
+input[type="number"].neumorphic-inset::placeholder,
+textarea.neumorphic-inset::placeholder {
+    color: var(--muted-text-color);
+    opacity: 0.7;
+    transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const patternInput = document.getElementById('regexPattern');
+    const flagsCheckboxes = document.querySelectorAll('.regex-flag');
+    const testStringInput = document.getElementById('testString');
+    const resultsOutput = document.getElementById('resultsOutput');
+    const matchCountSpan = document.getElementById('matchCount');
+    const flagsDisplaySpan = document.getElementById('regexFlagsDisplay');
+    const regexErrorDiv = document.getElementById('regexError');
+    const inputGroup = patternInput.closest('.input-group'); // Get the parent group
+
+    // Function to safely escape HTML special characters
+    function escapeHTML(str) {
+        const p = document.createElement('p');
+        p.textContent = str;
+        return p.innerHTML;
+    }
+
+    // Function to update results
+    const updateMatches = () => {
+        const pattern = patternInput.value;
+        const testString = testStringInput.value;
+        let flags = '';
+        let regexValid = true;
+        let matchCount = 0;
+
+        flagsCheckboxes.forEach(checkbox => {
+            if (checkbox.checked) {
+                flags += checkbox.value;
+            }
+        });
+
+        // Ensure global flag is always present for matchAll
+        if (!flags.includes('g')) {
+            flags += 'g';
+             // Find the 'g' checkbox and check it visually if needed
+             const gCheckbox = document.getElementById('flagG');
+             if (gCheckbox) gCheckbox.checked = true;
+        }
+
+        flagsDisplaySpan.textContent = `/${flags}`; // Update displayed flags
+        resultsOutput.innerHTML = ''; // Clear previous results
+        regexErrorDiv.style.display = 'none'; // Hide error message
+        if (inputGroup) inputGroup.classList.remove('is-invalid'); // Remove error style
+
+        if (!pattern || !testString) {
+            resultsOutput.textContent = 'Enter a pattern and test string.';
+            matchCountSpan.textContent = '0';
+            return;
+        }
+
+        try {
+            const regex = new RegExp(pattern, flags);
+            let outputHTML = '';
+            let lastIndex = 0;
+
+            // Use matchAll to find all matches with indices
+            for (const match of testString.matchAll(regex)) {
+                matchCount++;
+                const matchIndex = match.index;
+                const matchedText = match[0];
+
+                // Append text before the match (escaped)
+                outputHTML += escapeHTML(testString.substring(lastIndex, matchIndex));
+                // Append highlighted match (escaped)
+                outputHTML += `<span class="highlight">${escapeHTML(matchedText)}</span>`;
+
+                lastIndex = matchIndex + matchedText.length;
+            }
+
+            // Append any remaining text after the last match (escaped)
+            outputHTML += escapeHTML(testString.substring(lastIndex));
+
+            resultsOutput.innerHTML = outputHTML || escapeHTML(testString); // Show original if no matches but valid regex
+            matchCountSpan.textContent = matchCount.toLocaleString(); // Format count
+
+        } catch (error) {
+            regexValid = false;
+            resultsOutput.textContent = 'Invalid Regular Expression';
+            resultsOutput.style.color = '#dc3545'; // Error color
+            matchCountSpan.textContent = 'Error';
+            regexErrorDiv.textContent = error.message; // Show specific regex error
+            regexErrorDiv.style.display = 'block';
+            if (inputGroup) inputGroup.classList.add('is-invalid');
+             console.error("Regex Error:", error);
+        } finally {
+             if(regexValid && resultsOutput.style.color) {
+                 resultsOutput.style.color = ''; // Reset color if valid
+             }
+        }
+    };
+
+    // Add event listeners to update on input
+    patternInput.addEventListener('input', updateMatches);
+    testStringInput.addEventListener('input', updateMatches);
+    flagsCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', updateMatches);
+    });
+
+    // Initial run
+    updateMatches();
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

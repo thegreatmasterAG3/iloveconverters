@@ -1,0 +1,418 @@
+{# templates/pdf_tools/tool_rotate_pdf.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">⟳P⟳</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Rotate all or specific pages in your PDF document by 90°, 180°, or 270°.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        {# Unique name 'pdffile_rotate', single file #}
+                        <input class="d-none" type="file" id="pdffileInput" name="pdffile_rotate" accept=".pdf,application/pdf" required>
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cloud-arrow-up-fill mb-3 text-muted" viewBox="0 0 16 16"><path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z"/></svg>
+                            <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop PDF File Here</p>
+                            <p class="mb-0 text-muted small">(Select one PDF file)</p>
+                            <p class="mb-0 text-muted small">or</p>
+                            <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse File</button>
+                        </div>
+                        <div id="selectedFileName" class="text-center text-muted small mb-3"></div> {# Show selected filename #}
+                        <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No file selected.</div>
+
+                        {# --- Rotation Options --- #}
+                        <div class="border-top pt-4 mb-4">
+                             <h5 class="text-center mb-3">Rotation Options</h5>
+                             <div class="row g-3 justify-content-center">
+                                {# Rotation Angle #}
+                                <div class="col-md-12 mb-3">
+                                     <label class="form-label d-block mb-2 fw-medium">Rotate By:</label>
+                                     <div class="btn-group w-100" role="group" aria-label="Rotation angle">
+                                         <input type="radio" class="btn-check" name="rotation_angle" id="rotate90" value="90" autocomplete="off" {% if prev_options.rotation_angle == '90' or not prev_options.rotation_angle %}checked{% endif %}>
+                                         <label class="btn btn-outline-primary neumorphic-radio" for="rotate90">90° Clockwise</label>
+
+                                         <input type="radio" class="btn-check" name="rotation_angle" id="rotate180" value="180" autocomplete="off" {% if prev_options.rotation_angle == '180' %}checked{% endif %}>
+                                         <label class="btn btn-outline-primary neumorphic-radio" for="rotate180">180°</label>
+
+                                         <input type="radio" class="btn-check" name="rotation_angle" id="rotate270" value="270" autocomplete="off" {% if prev_options.rotation_angle == '270' %}checked{% endif %}>
+                                         <label class="btn btn-outline-primary neumorphic-radio" for="rotate270">90° Counter-Clockwise (270°)</label>
+                                     </div>
+                                </div>
+                                {# Page Selection Mode #}
+                                <div class="col-md-12 mb-2">
+                                    <label class="form-label d-block mb-2 fw-medium">Apply Rotation To:</label>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="page_selection_mode" id="rotateAll" value="all" {% if prev_options.page_selection_mode != 'specific' %}checked{% endif %}>
+                                        <label class="form-check-label" for="rotateAll">All Pages</label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="page_selection_mode" id="rotateSpecific" value="specific" {% if prev_options.page_selection_mode == 'specific' %}checked{% endif %}>
+                                        <label class="form-check-label" for="rotateSpecific">Specific Pages</label>
+                                    </div>
+                                </div>
+                                 {# Specific Pages Input (Show/Hide with JS) #}
+                                 <div class="col-md-12" id="specificPagesInputDiv" style="display: {% if prev_options.page_selection_mode == 'specific' %}block{% else %}none{% endif %};">
+                                     <label for="specificPagesInput" class="form-label visually-hidden">Specific Pages</label> {# Hidden label for semantics #}
+                                     <input type="text" class="form-control neumorphic-inset" id="specificPagesInput" name="specific_pages" value="{{ prev_options.specific_pages|default:'' }}" placeholder="e.g., 1, 3-5, 8">
+                                     <div class="form-text">Enter page numbers or ranges, separated by commas.</div>
+                                 </div>
+                             </div>
+                        </div>
+                        {# --- END: Rotation Options --- #}
+
+
+                        {# Rotate Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-arrow-clockwise me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/></svg>
+                                Rotate PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Download Section --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic">
+                    <h3 class="mb-3 text-success">Rotation Complete!</h3>
+                    <p class="text-muted mb-4">Your rotated PDF file is ready.</p>
+                    <form method="post" action="{% url 'pdf_tools:rotate_pdf' %}">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_rotated" value="true">
+                         <button type="submit" class="btn btn-success btn-lg mb-3">
+                             <svg class="bi bi-download me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg>
+                             Download {{ download_filename|default:"Rotated PDF" }}
+                         </button>
+                    </form>
+                    <a href="{% url 'pdf_tools:rotate_pdf' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                        <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                        Rotate Another PDF
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    
+    .form-label.fw-medium { color: var(--text-color); transition: color 0.3s ease; }
+    .form-text { color: var(--muted-text-color); transition: color 0.3s ease; font-size: 0.8em; }
+    .neumorphic-inset, input[type="number"].neumorphic-inset, input[type="text"].neumorphic-inset { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; height: auto; }
+    input[type=number].neumorphic-inset::-webkit-inner-spin-button, input[type=number].neumorphic-inset::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    .neumorphic-inset:focus, input[type="number"].neumorphic-inset:focus, input[type="text"].neumorphic-inset:focus { background-color: var(--bg-color); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none; }
+    input[type="number"].neumorphic-inset::placeholder, input[type="text"].neumorphic-inset::placeholder { color: var(--muted-text-color); opacity: 0.7; transition: color 0.3s ease, opacity 0.3s ease; }
+    
+    #selectedFileName { transition: color 0.3s ease; font-weight: 500; }
+    #pageCountDisplay { transition: color 0.3s ease; }
+    #uploadCard .border-top h5 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+    /* Neumorphic Radio Buttons */
+    .neumorphic-radio { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); border: 1px solid transparent; color: var(--muted-text-color); transition: all 0.2s ease-out; padding: .5rem 1rem; margin-bottom: 0; }
+    .btn-check:checked + .neumorphic-radio { color: var(--link-color); background-color: var(--bg-color); border-color: transparent; box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .neumorphic-radio:hover { color: var(--text-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-check:checked + .neumorphic-radio:hover { color: var(--link-color); }
+    .btn-check:focus-visible + .neumorphic-radio { outline: 2px solid var(--link-color); outline-offset: 2px; z-index: 1; }
+    .btn-group > .btn-check:checked + .neumorphic-radio { z-index: 1; }
+
+
+    <style>
+    /* --- Dropzone/File Input Styles --- */
+    .drop-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-main);
+        cursor: pointer;
+        transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        /* Neumorphic Inset */
+        background-color: var(--bg-color);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+    }
+    .drop-zone.dragover {
+        border-color: var(--link-color);
+        background-color: rgba(var(--link-color-rgb), 0.1);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+    }
+    #browseButton {
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out;
+    }
+    #browseButton:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+    /* Style for showing selected filename */
+    #selectedFileName {
+         transition: color 0.3s ease;
+         font-weight: 500;
+    }
+    #pageCountDisplay { /* If used later */
+         transition: color 0.3s ease;
+    }
+
+
+    /* --- Form Control & Option Styles --- */
+    .form-label.fw-medium { /* For option titles/labels */
+         color: var(--text-color);
+         transition: color 0.3s ease;
+    }
+    /* Style for the options section heading */
+    #uploadCard .border-top h5 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+    .form-text { /* For helper text */
+         color: var(--muted-text-color);
+         transition: color 0.3s ease;
+         font-size: 0.8em;
+    }
+    /* Style number and text inputs used for pages */
+    input[type="number"].neumorphic-inset,
+    input[type="text"].neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        height: auto;
+        -moz-appearance: textfield; /* Firefox - hide number spinners */
+    }
+    input[type=number].neumorphic-inset::-webkit-inner-spin-button,
+    input[type=number].neumorphic-inset::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"].neumorphic-inset:focus,
+    input[type="text"].neumorphic-inset:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark),
+                     inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+    input[type="number"].neumorphic-inset::placeholder,
+    input[type="text"].neumorphic-inset::placeholder {
+        color: var(--muted-text-color);
+        opacity: 0.7;
+        transition: color 0.3s ease, opacity 0.3s ease;
+    }
+     /* Input validation styles */
+    .form-control.is-invalid { /* Includes text and number inputs */
+        border: 1px solid transparent !important;
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light),
+                    0 0 0 .25rem rgba(220, 53, 69, .25) !important;
+    }
+    .invalid-feedback {
+        color: #dc3545;
+        display: none;
+        width: 100%;
+        margin-top: .25rem;
+        font-size: .875em;
+    }
+    .form-control.is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+
+    /* Neumorphic Radio Buttons (for Angle selection) */
+    .neumorphic-radio {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        border: 1px solid transparent;
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out;
+        padding: .5rem 1rem;
+        margin-bottom: 0;
+    }
+    .btn-check:checked + .neumorphic-radio {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        border-color: transparent;
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+     .neumorphic-radio:hover {
+        color: var(--text-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+     .btn-check:checked + .neumorphic-radio:hover {
+         color: var(--link-color);
+    }
+     .btn-check:focus-visible + .neumorphic-radio {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         z-index: 1;
+    }
+    .btn-group > .btn-check:checked + .neumorphic-radio {
+         z-index: 1;
+    }
+    /* Standard Radio/Checkboxes (for Page Selection Mode) */
+ 
+
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+
+    /* --- Success/Download Buttons --- */
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+
+     /* --- Results Heading --- */
+     #resultsCard h3 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+
+</style>
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for single file input, showing filename, toggling specific pages input #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('pdffileInput'); // Correct ID
+    const browseButton = document.getElementById('browseButton');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const selectedFileNameDisplay = document.getElementById('selectedFileName');
+    const convertButton = document.getElementById('convertButton');
+    const dropZoneText = document.getElementById('dropZoneText');
+    const rotateAllRadio = document.getElementById('rotateAll');
+    const rotateSpecificRadio = document.getElementById('rotateSpecific');
+    const specificPagesDiv = document.getElementById('specificPagesInputDiv');
+    const specificPagesInput = document.getElementById('specificPagesInput'); // Specific pages text input
+
+    let currentFile = null;
+
+    // --- File Handling & UI Update ---
+    const updateUI = () => {
+        selectedFileNameDisplay.textContent = '';
+        if (currentFile) {
+            selectedFileNameDisplay.textContent = `Selected: ${currentFile.name}`;
+            dropZoneText.textContent = "Replace file by dropping or browsing";
+            convertButton.disabled = false;
+            previewPlaceholder.style.display = 'none';
+        } else {
+            previewPlaceholder.style.display = 'block';
+            dropZoneText.textContent = "Drag & Drop PDF File Here";
+            convertButton.disabled = true;
+        }
+        try {
+            const dataTransfer = new DataTransfer();
+            if (currentFile) dataTransfer.items.add(currentFile);
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    const handleRemoveFile = () => {
+        currentFile = null; fileInput.value = ''; updateUI();
+    };
+
+    const handleFiles = (files) => {
+        if (files.length === 0) { handleRemoveFile(); return; }
+        const file = files[0];
+        const allowedMimes = ['application/pdf'];
+        const allowedExts = ['.pdf'];
+        const fileNameParts = file.name.split('.');
+        const fileExt = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+        if (!allowedMimes.includes(file.type.toLowerCase()) && !allowedExts.includes(fileExt)) {
+             alert(`Please select a valid PDF file.`); handleRemoveFile(); return;
+         }
+        currentFile = file; updateUI();
+    };
+
+    // --- Toggle Specific Pages Input ---
+    const toggleSpecificPagesInput = () => {
+        if (rotateSpecificRadio && specificPagesDiv) {
+            specificPagesDiv.style.display = rotateSpecificRadio.checked ? 'block' : 'none';
+            // Make required only if specific mode is checked
+            if(specificPagesInput) specificPagesInput.required = rotateSpecificRadio.checked;
+        }
+    };
+
+    // --- Event Listeners ---
+    // File Handling
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    // Options Toggle
+    if (rotateAllRadio) rotateAllRadio.addEventListener('change', toggleSpecificPagesInput);
+    if (rotateSpecificRadio) rotateSpecificRadio.addEventListener('change', toggleSpecificPagesInput);
+
+    // --- Form Validation (optional client-side check) ---
+    form.addEventListener('submit', function(event) {
+        if (!currentFile) { // Check file first
+            event.preventDefault();
+            alert("Please select a PDF file.");
+            return;
+        }
+        if (rotateSpecificRadio && rotateSpecificRadio.checked) {
+             if (!specificPagesInput || specificPagesInput.value.trim() === '') {
+                 event.preventDefault();
+                 alert("Please enter the specific pages/ranges to rotate.");
+                 specificPagesInput.focus(); // Focus the input
+                 // Optionally add is-invalid class here via JS
+             }
+             // Basic regex check for allowed characters (numbers, comma, hyphen, space)
+             else if (!/^[0-9,\-\s]+$/.test(specificPagesInput.value.trim())) {
+                 event.preventDefault();
+                 alert("Invalid characters in page range. Use numbers, commas, hyphens (e.g., 1, 3-5, 8).");
+                 specificPagesInput.focus();
+             }
+        }
+    });
+
+    // Initial state
+    updateUI();
+    toggleSpecificPagesInput(); // Set initial visibility of specific pages input
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

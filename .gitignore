@@ -1,0 +1,25 @@
+# Ignore the folder named 'your_folder_name/'
+newfolder/
+
+# .gitignore
+
+# Database
+db.sqlite3
+*.sqlite3
+
+# Python / Django files
+__pycache__/
+*.py[cod]
+*$py.class
+
+# Virtual Environment
+venv/
+.env
+
+# Static & Media Files (Collected by Django on the server)
+staticfiles/
+media/
+
+# IDE / Editor Files
+.vscode/
+.idea/

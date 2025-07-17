@@ -1,0 +1,248 @@
+{# templates/pdf_tools/tool_compress_pdf.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">P↓</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Reduce the file size of your PDF document using basic compression techniques.</p>
+                 <p class="small text-warning">Note: Size reduction varies greatly depending on the PDF content. Compression is most effective on uncompressed text/vector data, less so on already optimized PDFs or those large due to images.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        {# Unique name 'pdffile_compress', single file #}
+                        <input class="d-none" type="file" id="pdffileInput" name="pdffile_compress" accept=".pdf,application/pdf" required>
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cloud-arrow-up-fill mb-3 text-muted" viewBox="0 0 16 16"><path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z"/></svg>
+                            <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop PDF File Here</p>
+                            <p class="mb-0 text-muted small">(Select one PDF file)</p>
+                            <p class="mb-0 text-muted small">or</p>
+                            <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse File</button>
+                        </div>
+                        <div id="selectedFileName" class="text-center text-muted small mb-3"></div> {# Show selected filename #}
+                        <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No file selected.</div>
+
+                        {# --- Compression Options --- #}
+                        <div class="border-top pt-4 mb-4">
+                             <h5 class="text-center mb-3">Compression Options</h5>
+                             <div class="row gy-3 justify-content-center">
+                                <div class="col-md-8">
+                                    <div class="form-check form-switch">
+                                        {# Default ON based on view logic not needed as it's default behavior #}
+                                        <input class="form-check-input" type="checkbox" name="compress_streams" role="switch" id="compressStreamsCheck" checked disabled>
+                                        <label class="form-check-label" for="compressStreamsCheck">Compress Content Streams</label>
+                                        <div class="form-text">(Standard PDF optimization, usually enabled)</div>
+                                    </div>
+                                 </div>
+                                 <div class="col-md-8">
+                                     <div class="form-check form-switch">
+                                         <input class="form-check-input" type="checkbox" name="remove_metadata" role="switch" id="removeMetadataCheck" {% if prev_options.remove_metadata == 'on' %}checked{% endif %}>
+                                         <label class="form-check-label" for="removeMetadataCheck">Remove Metadata</label>
+                                         <div class="form-text">(Removes Title, Author, Subject etc. May slightly reduce size.)</div>
+                                     </div>
+                                 </div>
+                                 {# Maybe add Remove Images later #}
+                                 <!-- <div class="col-md-8">
+                                     <div class="form-check form-switch">
+                                         <input class="form-check-input" type="checkbox" name="remove_images" role="switch" id="removeImagesCheck">
+                                         <label class="form-check-label" for="removeImagesCheck">Remove All Images <span class="text-danger">(Warning: Destructive!)</span></label>
+                                         <div class="form-text">(Significantly reduces size but removes image content.)</div>
+                                     </div>
+                                 </div> -->
+                             </div>
+                        </div>
+                        {# --- END: Compression Options --- #}
+
+                        {# Compress Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                               <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-file-earmark-zip-fill me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M5.5 9.438V8.5h1v.938a1 1 0 0 0 .03.243l.4 1.598-.93.62-.93-.62.4-1.598a1 1 0 0 0 .03-.243z"/><path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M6.5 7.5h1v1h-1zm-1 0h1v1h-1zm1 1.75V11h1v-1.75a.75.75 0 0 0-1 0M4.5 9.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm0 1.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm4-3h1v1h-1zm-1 0h1v1h-1zm1 1.75V11h1v-1.75a.75.75 0 0 0-1 0zM8.5 9.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm0 1.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1z"/></svg>
+                                Compress PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Download Section --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic">
+                    <h3 class="mb-3 text-success">Compression Attempt Complete!</h3>
+                    {% if original_size and compressed_size is not None %} {# Check compressed_size exists #}
+                        <p class="text-muted mb-1">Original Size: {{ original_size|filesizeformat }}</p>
+                        <p class="text-muted mb-4">Compressed Size: {{ compressed_size|filesizeformat }}
+                           {% if pdf_reduction_percent > 0 %}
+                               <span class="text-success fw-bold">(-{{ pdf_reduction_percent }}%)</span>
+                           {% elif original_size == compressed_size %}
+                               <span class="text-warning fw-bold">(No size change)</span>
+                           {% else %} {# Compressed size > original size #}
+                                <span class="text-danger fw-bold">(Size increased!)</span>
+                           {% endif %}
+                        </p>
+                    {% else %}
+                         <p class="text-muted mb-4">Your compressed PDF file is ready.</p>
+                    {% endif %}
+
+                    <form method="post" action="{% url 'pdf_tools:compress_pdf' %}">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_compressed_pdf" value="true">
+                         <button type="submit" class="btn btn-success btn-lg mb-3">
+                             <svg class="bi bi-download me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg>
+                             Download {{ download_filename|default:"PDF" }}
+                         </button>
+                    </form>
+                    <a href="{% url 'pdf_tools:compress_pdf' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                        <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                        Compress Another PDF
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Re-use styles from previous tools or custom.css */
+    .drop-zone { border: 2px dashed var(--border-color); border-radius: var(--radius-main); cursor: pointer; transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease; background-color: var(--bg-color); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); }
+    .drop-zone.dragover { border-color: var(--link-color); background-color: rgba(var(--link-color-rgb), 0.1); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); }
+    #browseButton { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); transition: all 0.2s ease-out; }
+    #browseButton:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+    #selectedFileName { transition: color 0.3s ease; font-weight: 500; }
+
+    /* Form Control & Option Styles */
+    .form-label.fw-medium { color: var(--text-color); transition: color 0.3s ease; }
+    .form-text { color: var(--muted-text-color); transition: color 0.3s ease; font-size: 0.8em; }
+    /* Style for the options section heading */
+    #uploadCard .border-top h5 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+    /* Base style for checkbox/radio */
+    .form-check-input { background-color: var(--bg-color); border-color: transparent; box-shadow: inset 1px 1px 3px var(--shadow-dark), inset -1px -1px 3px var(--shadow-light); transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease; margin-top: 0.15em; vertical-align: top; width: 1.15em; height: 1.15em; cursor: pointer;}
+    .form-check-input:checked { background-color: var(--link-color); border-color: transparent; box-shadow: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");}
+    .form-check-input:focus { border-color: transparent; outline: 2px solid var(--link-color); outline-offset: 1px; box-shadow: inset 1px 1px 3px var(--shadow-dark), inset -1px -1px 3px var(--shadow-light);}
+    .form-check-input:checked:focus { box-shadow: none; background-color: var(--link-color); }
+    .form-check-label { color: var(--text-color); padding-left: 0.4em; transition: color 0.3s ease; cursor: pointer; vertical-align: middle; }
+    /* Switch specific styles */
+    .form-switch .form-check-input { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); background-position: left center; border-radius: 2em; width: 2.75em; height: 1.5em; margin-top: 0.1em; box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); border: none; transition: background-color 0.3s ease, background-position .15s ease-in-out, box-shadow 0.3s ease, border-color 0.3s ease; -webkit-appearance: none; appearance: none; }
+    body.dark-mode .form-switch .form-check-input { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); }
+    .form-switch .form-check-input:checked { background-position: right center; border-color: transparent; background-color: var(--link-color); box-shadow: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e"); }
+    .form-switch .form-check-input:focus { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); }
+    body.dark-mode .form-switch .form-check-input:focus { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); }
+    .form-switch .form-check-input:checked:focus { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e"); box-shadow: none; }
+    .form-check-input:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: inset 1px 1px 2px var(--shadow-dark), inset -1px -1px 2px var(--shadow-light); }
+    .form-switch .form-check-input:disabled { box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+    .form-check-input:disabled:checked { background-color: var(--muted-text-color); border-color: transparent; box-shadow: none; }
+    .form-switch .form-check-input:disabled:checked { background-color: var(--muted-text-color); }
+    .form-check-input:disabled ~ .form-check-label { opacity: 0.6; cursor: not-allowed; }
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+
+    /* --- Success/Download Buttons --- */
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS adapted for single file input 'pdffile_compress', just showing filename #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('pdffileInput'); // Correct ID
+    const browseButton = document.getElementById('browseButton');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const selectedFileNameDisplay = document.getElementById('selectedFileName'); // Display filename
+    const convertButton = document.getElementById('convertButton');
+    const dropZoneText = document.getElementById('dropZoneText');
+    let currentFile = null; // Store single file
+
+    // --- File Handling & UI Update ---
+    const updateUI = () => {
+        selectedFileNameDisplay.textContent = ''; // Clear previous filename
+        if (currentFile) {
+            selectedFileNameDisplay.textContent = `Selected: ${currentFile.name}`;
+            dropZoneText.textContent = "Replace file by dropping or browsing";
+            convertButton.disabled = false; // Enable button when file selected
+            previewPlaceholder.style.display = 'none';
+        } else {
+            previewPlaceholder.style.display = 'block';
+            dropZoneText.textContent = "Drag & Drop PDF File Here";
+            convertButton.disabled = true;
+        }
+        // Update hidden input
+        try {
+            const dataTransfer = new DataTransfer();
+            if (currentFile) dataTransfer.items.add(currentFile);
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    const handleRemoveFile = () => { // Simple clear for filename display
+        currentFile = null;
+        fileInput.value = ''; // Clear the actual input value
+        updateUI();
+    };
+
+    const handleFiles = (files) => {
+        if (files.length === 0) { handleRemoveFile(); return; }
+        const file = files[0]; // Only handle the first file
+        const allowedMimes = ['application/pdf'];
+        const allowedExts = ['.pdf'];
+        const fileNameParts = file.name.split('.');
+        const fileExt = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+
+        if (!allowedMimes.includes(file.type.toLowerCase()) && !allowedExts.includes(fileExt)) {
+             alert(`Please select a valid PDF file.`);
+             handleRemoveFile();
+             return;
+         }
+        currentFile = file;
+        updateUI();
+    };
+
+    // Drag/Drop/Browse listeners
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    updateUI(); // Initial state
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

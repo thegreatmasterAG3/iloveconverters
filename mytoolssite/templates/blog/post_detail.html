@@ -1,0 +1,143 @@
+{# templates/blog/post_detail.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ post.title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <article>
+        <header class="mb-4 text-center">
+            <h1 class="fw-bolder mb-1">{{ post.title }}</h1>
+            <div class="text-muted fst-italic mb-2">
+                Posted on {{ post.published_date|date:"F j, Y" }} by {{ post.author.username }}
+            </div>
+            {# Add category/tags display here later if implemented #}
+        </header>
+        {# Add Featured Image here later if implemented #}
+
+        {# Main content area - .card provides neumorphic background #}
+        <section class="mb-5 card p-4 p-md-5"> {# Padding added to card #}
+            {# This div will hold the rendered HTML. Output raw content initially for JS #}
+            <div class="post-content" id="post-content-area">
+                {{ post.content|safe }} {# Output content - use safe if admin input is trusted, otherwise escape first #}
+            </div>
+        </section>
+    </article>
+    <div class="text-center">
+        <a href="{% url 'blog:post_list' %}" class="btn btn-outline-secondary clear-filters-btn">← Back to Blog List</a>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{# --- Include Marked.js and Highlight.js via CDN --- #}
+<script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
+{# Load both themes and let CSS handle visibility via prefers-color-scheme initially #}
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github-dark.min.css"
+      id="hljs-dark-theme" media="(prefers-color-scheme: dark)">
+<link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/github.min.css"
+      id="hljs-light-theme" media="(prefers-color-scheme: no-preference), (prefers-color-scheme: light)">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+{# Optional: Load languages if needed: <script src="//cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/languages/python.min.js"></script> etc. #}
+{# Tell highlight.js to actually run #}
+<script>hljs.highlightAll();</script>
+
+
+{# --- Markdown Rendering & Highlighting Logic --- #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const contentArea = document.getElementById('post-content-area');
+
+    if (contentArea) {
+        // 1. Get the raw markdown text (already output by Django template)
+        //    We assume the initial content of #post-content-area IS the raw markdown
+        const rawMarkdown = contentArea.innerHTML; // Might need decoding if escaped
+
+        // 2. Configure Marked.js with Highlight.js integration
+        marked.setOptions({
+            gfm: true,         // Enable GitHub Flavored Markdown
+            breaks: true,      // Use GitHub line breaks
+            sanitize: false,   // IMPORTANT: Only use false if you TRUST the source of your Markdown (e.g., only you write it in admin). Otherwise, use a sanitizer library like DOMPurify AFTER marked.parse().
+            smartLists: true,
+            smartypants: true,
+            highlight: function (code, lang) {
+                const language = hljs.getLanguage(lang) ? lang : 'plaintext';
+                try {
+                    return hljs.highlight(code, { language, ignoreIllegals: true }).value;
+                } catch (error) {
+                    console.error("Highlighting error:", error);
+                    return hljs.highlight(code, { language: 'plaintext', ignoreIllegals: true }).value; // Fallback
+                }
+            }
+        });
+
+        // 3. Parse the Markdown and update the content area
+        try {
+            const renderedHtml = marked.parse(rawMarkdown);
+            contentArea.innerHTML = renderedHtml;
+
+            // 4. Explicitly re-highlight code blocks *after* inserting HTML
+            // This ensures highlight.js processes the newly added elements
+            contentArea.querySelectorAll('pre code').forEach((block) => {
+                 try {
+                     hljs.highlightElement(block);
+                 } catch (e) { console.error("Highlighting error on element:", e, block); }
+             });
+
+        } catch(e) {
+            console.error("Error parsing Markdown:", e);
+            // Keep raw content if parsing fails
+            contentArea.innerHTML = rawMarkdown; // Or show an error message
+        }
+    }
+
+    // --- Optional: Theme switching for highlight.js ---
+    // More robust theme switching based on body class
+    const lightThemeLink = document.getElementById('hljs-light-theme');
+    const darkThemeLink = document.getElementById('hljs-dark-theme');
+
+    function switchHighlightTheme(theme) {
+        if (!lightThemeLink || !darkThemeLink) return; // Safety check
+
+        if (theme === 'dark') {
+            lightThemeLink.media = 'not all'; // Disable light theme
+            darkThemeLink.media = 'all';      // Enable dark theme
+        } else {
+            lightThemeLink.media = 'all';      // Enable light theme
+            darkThemeLink.media = 'not all'; // Disable dark theme
+        }
+    }
+
+    // Check initial theme (must run AFTER theme toggle script in base.html)
+    const currentTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+    switchHighlightTheme(currentTheme);
+
+    // Listen for changes triggered by the theme toggle button (using a custom event or MutationObserver)
+    // Simpler approach: Re-check when the main toggle button is clicked (if accessible)
+    const themeToggleButton = document.getElementById('theme-toggle-btn');
+     if (themeToggleButton) {
+         themeToggleButton.addEventListener('click', () => {
+             // Check theme *after* toggle might have applied class change
+             setTimeout(() => { // Use timeout to wait for class change potentially
+                  const newTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+                  switchHighlightTheme(newTheme);
+             }, 50);
+         });
+     }
+     // More robust: Use MutationObserver on body class attribute
+     const observer = new MutationObserver(mutations => {
+        mutations.forEach(mutation => {
+            if (mutation.attributeName === 'class') {
+                 const newTheme = document.body.classList.contains('dark-mode') ? 'dark' : 'light';
+                 switchHighlightTheme(newTheme);
+            }
+        });
+     });
+     observer.observe(document.body, { attributes: true });
+
+
+});
+</script>
+{# --- Theme toggle inherited from base --- #}
+{% endblock %}

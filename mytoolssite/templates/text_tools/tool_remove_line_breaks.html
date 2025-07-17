@@ -1,0 +1,214 @@
+{# templates/text_tools/tool_remove_line_breaks.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12"> {# Wider column for side-by-side #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">¶↵</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Paste your text below to remove all line breaks, only empty lines, or replace breaks with spaces.</p>
+            </div>
+
+            {# Display Messages if needed later #}
+            {# {% if messages %} ... {% endif %} #}
+
+            {# --- Input Form Section --- #}
+            <form method="post" action="{% url 'text_tools:remove_line_breaks' %}" id="lineBreakForm">
+                 {% csrf_token %}
+                <div class="card p-4 p-md-5 mb-4" id="inputCard">
+
+                    {# --- Options --- #}
+                    <div class="mb-4 text-center">
+                         <label class="form-label fw-medium d-block mb-2">Processing Mode:</label>
+                         <div class="btn-group w-100 w-md-auto" role="group" aria-label="Processing mode">
+                            <input type="radio" class="btn-check" name="processing_mode" id="modeRemoveAll" value="remove_all" autocomplete="off" {% if selected_mode == 'remove_all' %}checked{% endif %}>
+                            <label class="btn btn-outline-primary neumorphic-radio" for="modeRemoveAll">Remove All Breaks</label>
+
+                            <input type="radio" class="btn-check" name="processing_mode" id="modeRemoveEmpty" value="remove_empty" autocomplete="off" {% if selected_mode == 'remove_empty' %}checked{% endif %}>
+                            <label class="btn btn-outline-primary neumorphic-radio" for="modeRemoveEmpty">Remove Empty Lines</label>
+
+                            <input type="radio" class="btn-check" name="processing_mode" id="modeReplaceSpace" value="replace_with_space" autocomplete="off" {% if selected_mode == 'replace_with_space' %}checked{% endif %}>
+                            <label class="btn btn-outline-primary neumorphic-radio" for="modeReplaceSpace">Replace Breaks with Space</label>
+                        </div>
+                    </div>
+
+                    {# --- Input and Output Text Areas --- #}
+                    <div class="row g-4">
+                        <div class="col-md-6">
+                            <label for="text_input" class="form-label fw-medium">Input Text:</label>
+                            <textarea class="form-control neumorphic-inset font-monospace"
+                                      id="text_input"
+                                      name="text_input"
+                                      rows="12"
+                                      placeholder="Paste or type your text here..."
+                                      required>{{ text_input }}</textarea>
+                        </div>
+                        <div class="col-md-6">
+                             <label for="text_output" class="form-label fw-medium">Output Text:</label>
+                             <div class="position-relative">
+                                <textarea class="form-control neumorphic-inset font-monospace"
+                                          id="text_output"
+                                          rows="12"
+                                          readonly
+                                          placeholder="Result will appear here...">{{ processed_text }}</textarea>
+                                 <button id="copyOutputButton" class="btn btn-sm btn-secondary position-absolute top-0 end-0 mt-2 me-2 {% if processed_text is None %}d-none{% endif %}" type="button" title="Copy Output">
+                                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg>
+                                     Copy
+                                 </button>
+                             </div>
+                        </div>
+                    </div>
+
+                    {# Buttons Row #}
+                    <div class="d-flex justify-content-end gap-2 mt-4">
+                        <button type="button" class="btn btn-outline-secondary clear-filters-btn" id="clearTextButton">Clear Input</button>
+                        <button type="submit" class="btn btn-submit-tool" id="processButton">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-play-fill me-1" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="m11.596 8.697-6.363 3.692c-.54.313-1.233-.066-1.233-.697V4.308c0-.63.692-1.01 1.233-.696l6.363 3.692a.802.802 0 0 1 0 1.393z"/></svg>
+                            Process Text
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {# --- End Input Form Section --- #}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Re-use styles from previous tools or custom.css */
+    .form-label.fw-medium { color: var(--text-color); transition: color 0.3s ease; }
+    .form-text { color: var(--muted-text-color); transition: color 0.3s ease; font-size: 0.8em; }
+    textarea.neumorphic-inset { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; line-height: 1.6; min-height: 250px; /* Make text areas taller */ }
+    textarea.neumorphic-inset:focus { background-color: var(--bg-color); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none; }
+    textarea.neumorphic-inset::placeholder { color: var(--muted-text-color); opacity: 0.7; transition: color 0.3s ease, opacity 0.3s ease; }
+    textarea#text_output { color: var(--muted-text-color); } /* Muted color for output */
+    /* --- Submit/Action Button Styles --- */
+.btn-submit-tool {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--link-color); /* Use link variable for primary action */
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-submit-tool:hover {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); /* Enhance shadow */
+}
+.btn-submit-tool:active {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); /* Pressed effect */
+}
+.btn-submit-tool:disabled {
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); /* Keep inset look when disabled */
+    opacity: 0.6;
+    cursor: not-allowed;
+    color: var(--muted-text-color); /* Muted color when disabled */
+}
+.btn-submit-tool:focus-visible { /* Accessibility focus */
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); /* Keep base shadow */
+}
+
+/* --- Clear/Secondary Button Styles (Reusing .clear-filters-btn class) --- */
+.clear-filters-btn {
+    background-color: transparent; /* No background */
+    border: 1px solid var(--muted-text-color); /* Use muted color for border */
+    color: var(--muted-text-color); /* Use muted color for text */
+    border-radius: var(--radius-small);
+    padding: 0.75rem 1rem; /* Match padding */
+    font-weight: 500; /* Match weight */
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.clear-filters-btn:hover {
+    background-color: rgba(var(--text-color-rgb), 0.1); /* Subtle background on hover */
+    border-color: var(--text-color); /* Darker border on hover */
+    color: var(--text-color); /* Darker text on hover */
+}
+/* Focus style for clear button */
+.clear-filters-btn:focus-visible {
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     box-shadow: none; /* No neumorphic shadow */
+}
+
+/* Optional: Adjust spacing if buttons are side-by-side */
+/* .d-flex.gap-2 > .btn { ... } */
+    /* Neumorphic Radio Buttons */
+    .neumorphic-radio { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); border: 1px solid transparent; color: var(--muted-text-color); transition: all 0.2s ease-out; padding: .5rem 1rem; }
+    .btn-check:checked + .neumorphic-radio { color: var(--link-color); background-color: var(--bg-color); border-color: transparent; box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .neumorphic-radio:hover { color: var(--text-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-check:checked + .neumorphic-radio:hover { color: var(--link-color); }
+    .btn-check:focus-visible + .neumorphic-radio { outline: 2px solid var(--link-color); outline-offset: 2px; z-index: 1; }
+    .btn-group > .btn-check:checked + .neumorphic-radio { z-index: 1; }
+    /* Copy Button */
+    #copyOutputButton { opacity: 0.7; transition: opacity 0.2s ease; }
+    #copyOutputButton:hover { opacity: 1; }
+    #copyOutputButton.copied { background-color: #198754; border-color: #198754; color: white; }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for clear button and copy button #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const clearButton = document.getElementById('clearTextButton');
+    const textAreaInput = document.getElementById('text_input');
+    const outputTextArea = document.getElementById('text_output');
+    const copyButton = document.getElementById('copyOutputButton');
+
+    // Clear Input Button
+    if(clearButton && textAreaInput) {
+        clearButton.addEventListener('click', () => {
+            textAreaInput.value = '';
+            if (outputTextArea) {
+                 outputTextArea.value = ''; // Also clear output
+            }
+            if (copyButton) {
+                copyButton.classList.add('d-none'); // Hide copy button
+            }
+            textAreaInput.focus();
+        });
+    }
+
+    // Copy Output Button
+    if (copyButton && outputTextArea) {
+        copyButton.addEventListener('click', () => {
+            if (navigator.clipboard && outputTextArea.value) {
+                 navigator.clipboard.writeText(outputTextArea.value).then(() => {
+                    copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    copyButton.classList.add('copied');
+                    setTimeout(() => {
+                         copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg> Copy';
+                         copyButton.classList.remove('copied');
+                    }, 2000);
+                 }).catch(err => { console.error('Failed to copy: ', err); alert('Failed to copy.'); });
+            } else if (outputTextArea.value) {
+                // Fallback for older browsers
+                outputTextArea.select();
+                try { document.execCommand('copy'); /* Add feedback */ }
+                catch (err) { alert('Copying failed.'); }
+            }
+        });
+        // Show/hide copy button based on output content initially
+        copyButton.classList.toggle('d-none', !outputTextArea.value);
+    }
+
+    // Radio buttons automatically submit via form, no extra JS needed for them
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

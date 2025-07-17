@@ -1,0 +1,324 @@
+{# templates/text_tools/tool_text_compare.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-4">
+         <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">T≠T</div>
+         <h1 class="fw-bold">{{ page_title }}</h1>
+         <p class="lead text-muted">Paste two blocks of text below to see the differences highlighted.</p>
+    </div>
+
+    {# Display Messages if needed later #}
+    {# {% if messages %} ... {% endif %} #}
+
+    {# --- Input Form Section --- #}
+    <div class="card p-4 p-md-5 mb-4" id="inputCard">
+        <form method="post" action="{% url 'text_tools:text_compare' %}" id="compareForm">
+            {% csrf_token %}
+
+            <div class="row g-3">
+                {# Text Area A #}
+                <div class="col-md-6">
+                    <label for="text_a" class="form-label fw-medium">Text A (Original/Before):</label>
+                    <textarea class="form-control neumorphic-inset font-monospace"
+                              id="text_a"
+                              name="text_a"
+                              rows="15"
+                              placeholder="Paste the first text here...">{{ text_a }}</textarea>
+                </div>
+                 {# Text Area B #}
+                 <div class="col-md-6">
+                    <label for="text_b" class="form-label fw-medium">Text B (Modified/After):</label>
+                    <textarea class="form-control neumorphic-inset font-monospace"
+                              id="text_b"
+                              name="text_b"
+                              rows="15"
+                              placeholder="Paste the second text here...">{{ text_b }}</textarea>
+                </div>
+            </div>
+
+            {# --- Options --- #}
+            <div class="border-top pt-4 mt-4 mb-4" id="compareOptions">
+                 <h5 class="text-center mb-3">Comparison Options</h5>
+                 <div class="d-flex flex-wrap justify-content-center gap-3">
+                    <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="ignore_case" role="switch" id="ignoreCaseCheck" {% if options.ignore_case %}checked{% endif %}>
+                        <label class="form-check-label" for="ignoreCaseCheck">Ignore Case</label>
+                    </div>
+                     <div class="form-check form-switch">
+                        <input class="form-check-input" type="checkbox" name="ignore_whitespace" role="switch" id="ignoreWhitespaceCheck" {% if options.ignore_whitespace %}checked{% endif %}>
+                        <label class="form-check-label" for="ignoreWhitespaceCheck">Ignore Whitespace Changes</label>
+                    </div>
+                 </div>
+            </div>
+            {# --- END: Options --- #}
+
+            {# Compare Button #}
+            <div class="d-grid mt-2"> {# Reduced top margin #}
+                <button type="submit" class="btn btn-submit-tool btn-lg" id="compareButton">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-symmetry-horizontal me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path fill-rule="evenodd" d="M13.5 7a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 0-1h-1a.5.5 0 0 0-.5.5m-11-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0 0 1h1a.5.5 0 0 0 .5-.5m10.854 9.646a.5.5 0 0 0 .707 0l1-1a.5.5 0 0 0-.707-.707l-.646.646V8.5a.5.5 0 0 0-1 0v6.293l-.647-.646a.5.5 0 0 0-.707.707zM1.146 2.354a.5.5 0 0 0-.707 0l-1 1a.5.5 0 0 0 .707.707l.646-.646V8.5a.5.5 0 0 0 1 0V2.707l.647.646a.5.5 0 0 0 .707-.707z"/><path d="M8 2a.5.5 0 0 1 .5.5V13a.5.5 0 0 1-1 0V2.5A.5.5 0 0 1 8 2"/></svg>
+                    Compare Texts
+                </button>
+            </div>
+        </form>
+    </div>
+    {# --- End Input Form Section --- #}
+
+    {# --- Results Section --- #}
+    {% if diff_result is not None %} {# Display only if comparison was run #}
+    <div class="card p-3 mt-4" id="resultsCard">
+        <h3 class="text-center mb-3">Differences</h3>
+        <div class="table-responsive diff-table-container neumorphic-inset"> {# Make table responsive & styled #}
+            <table class="table diff-table mb-0">
+                <tbody>
+                    {% for line_a_num, line_a_text, line_b_num, line_b_text, change_type in diff_result %}
+                    <tr class="diff-row-{{ change_type }}">
+                        <td class="line-num">{{ line_a_num|default:"" }}</td>
+                        <td class="line-content"><div>{% autoescape off %}{{ line_a_text|default:" " }}{% endautoescape %}</div></td>
+                        <td class="line-num">{{ line_b_num|default:"" }}</td>
+                        <td class="line-content"><div>{% autoescape off %}{{ line_b_text|default:" " }}{% endautoescape %}</div></td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+    {% endif %}
+    {# --- End Results Section --- #}
+
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* CSS for Text Compare Tool Elements */
+
+/* Text Area Styling */
+textarea.neumorphic-inset {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--text-color);
+    padding: 0.75rem 1rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    line-height: 1.6; /* Good for readability */
+    min-height: 250px; /* Ensure text areas have good height */
+}
+textarea.neumorphic-inset:focus {
+     background-color: var(--bg-color);
+     box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+     color: var(--text-color);
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     border: none;
+}
+textarea.neumorphic-inset::placeholder {
+     color: var(--muted-text-color);
+     opacity: 0.7;
+     transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+/* Form Label Styling */
+.form-label.fw-medium {
+     color: var(--text-color);
+     transition: color 0.3s ease;
+     font-weight: 500 !important; /* Ensure font-weight applies */
+}
+.form-check-label { /* For Switch Labels */
+    color: var(--text-color);
+    padding-left: 0.4em;
+    transition: color 0.3s ease;
+    cursor: pointer;
+    vertical-align: middle;
+}
+
+/* Form Switch Input Styling */
+.form-switch .form-check-input {
+     background-color: var(--bg-color);
+     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+     background-position: left center;
+     border-radius: 2em;
+     width: 2.75em;
+     height: 1.5em;
+     margin-top: 0.1em;
+     box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+     border: none;
+     cursor: pointer;
+     transition: background-color 0.3s ease, background-position .15s ease-in-out, box-shadow 0.3s ease, border-color 0.3s ease;
+     -webkit-appearance: none;
+     appearance: none;
+}
+body.dark-mode .form-switch .form-check-input {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:checked {
+     background-position: right center;
+     border-color: transparent;
+     background-color: var(--link-color);
+     box-shadow: none;
+     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:focus {
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+}
+body.dark-mode .form-switch .form-check-input:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:checked:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+    box-shadow: none;
+}
+
+#compareOptions h5 { /* Target h5 within the options section */
+        color: var(--text-color); /* Use main text color variable */
+        transition: color 0.3s ease;
+        font-weight: 600; /* Optional */
+    }
+
+/* Submit Button Styling */
+.btn-submit-tool {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--link-color);
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-submit-tool:hover {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+}
+.btn-submit-tool:active {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+}
+.btn-submit-tool:disabled {
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    opacity: 0.6;
+    cursor: not-allowed;
+    color: var(--muted-text-color);
+}
+.btn-submit-tool:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+}
+    /* ... other inherited styles ... */
+
+    /* Specific styles for Diff Table */
+    .diff-table-container {
+        border-radius: var(--radius-small);
+        padding: 0.5rem; /* Padding inside the inset container */
+         /* Neumorphic inset */
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                    inset -3px -3px 6px var(--shadow-light);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        max-height: 60vh; /* Limit table height */
+        overflow-y: auto; /* Add scroll if needed */
+    }
+    .diff-table {
+        font-family: 'Courier New', Courier, monospace;
+        font-size: 0.9em;
+        border-collapse: separate; /* Allows spacing */
+        border-spacing: 0;
+        width: 100%;
+        table-layout: fixed; /* Important for equal columns */
+    }
+    .diff-table td {
+        padding: 0.1rem 0.5rem; /* Minimal padding */
+        vertical-align: top;
+        word-break: break-all; /* Wrap long lines without spaces */
+        white-space: pre-wrap; /* Preserve whitespace from text */
+        color: var(--text-color);
+        transition: background-color 0.3s ease, color 0.3s ease;
+        border: none; /* Remove bootstrap table borders */
+    }
+    .diff-table td.line-num {
+        text-align: right;
+        color: var(--muted-text-color);
+        padding-right: 1em;
+        width: 50px; /* Fixed width for line numbers */
+        -webkit-user-select: none; /* Prevent selecting line numbers */
+        -moz-user-select: none;
+        -ms-user-select: none;
+        user-select: none;
+    }
+     .diff-table td.line-content div {
+         min-height: 1.2em; /* Ensure empty lines have height */
+     }
+
+    /* Row highlighting */
+    .diff-row-replace td { background-color: rgba(var(--link-color-rgb), 0.1); }
+    .diff-row-delete td { background-color: rgba(220, 53, 69, 0.1); } /* Bootstrap danger lightened */
+    .diff-row-insert td { background-color: rgba(25, 135, 84, 0.1); } /* Bootstrap success lightened */
+
+    /* Word highlighting */
+    .diff-table del {
+        background-color: rgba(220, 53, 69, 0.3); /* Darker red */
+        text-decoration: none; /* Optional: remove strikethrough */
+        border-radius: 3px;
+        padding: 0 0.1em;
+    }
+    .diff-table ins {
+        background-color: rgba(25, 135, 84, 0.3); /* Darker green */
+        text-decoration: none;
+        border-radius: 3px;
+         padding: 0 0.1em;
+    }
+    body.dark-mode .diff-table del {
+         background-color: rgba(220, 53, 69, 0.4);
+         color: #ffd0d4; /* Light red text */
+    }
+    body.dark-mode .diff-table ins {
+         background-color: rgba(25, 135, 84, 0.4);
+         color: #c8f5d8; /* Light green text */
+    }
+
+     /* Results heading */
+     #resultsCard h3 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for Text Compare - primarily for option toggling if needed in future #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const textAreaA = document.getElementById('text_a');
+    const textAreaB = document.getElementById('text_b');
+    const compareButton = document.getElementById('compareButton');
+
+    // Enable button only when both text areas have content
+    const toggleCompareButton = () => {
+        if (compareButton && textAreaA && textAreaB) {
+            compareButton.disabled = textAreaA.value.trim() === '' || textAreaB.value.trim() === '';
+        }
+    }
+
+    if (textAreaA) textAreaA.addEventListener('input', toggleCompareButton);
+    if (textAreaB) textAreaB.addEventListener('input', toggleCompareButton);
+
+    // Initial state
+    toggleCompareButton();
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

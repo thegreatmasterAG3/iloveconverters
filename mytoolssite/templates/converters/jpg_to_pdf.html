@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <!-- Use the page_title variable passed from the view -->
+    <title>{{ page_title }} - My Awesome Tools Site</title>
+</head>
+<body>
+    <h1>{{ page_title }}</h1>
+    <p>Upload your JPG file to convert it into a PDF.</p>
+
+    <!-- Basic HTML Form for File Upload -->
+    <!-- We use method="post" because we are sending data -->
+    <!-- enctype="multipart/form-data" is REQUIRED for file uploads -->
+    <form method="post" enctype="multipart/form-data">
+        <!-- Django security token - REQUIRED for POST forms -->
+        {% csrf_token %}
+
+        <!-- Basic file input -->
+        <label for="jpgfile">Select JPG File:</label>
+        <input type="file" id="jpgfile" name="jpgfile" accept=".jpg, .jpeg" required>
+        <br><br>
+
+        <!-- We'll replace this basic input with a Django Form later for better validation -->
+
+        <button type="submit">Convert to PDF</button>
+    </form>
+
+    <hr>
+    <a href="{% url 'home' %}">Back to Homepage</a>
+
+    <!-- Later, we can add sections here to show success messages or download links -->
+
+</body>
+</html>

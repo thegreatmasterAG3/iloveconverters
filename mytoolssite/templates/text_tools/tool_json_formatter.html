@@ -1,0 +1,330 @@
+{# templates/text_tools/tool_json_formatter.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12"> {# Wider column for side-by-side view #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">{ }</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Paste your JSON data to validate, format, and beautify it.</p>
+            </div>
+
+            {# Display Error Messages #}
+            {% if error_message %}
+            <div class="alert alert-danger alert-dismissible fade show text-center" role="alert">
+                {{ error_message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            {% endif %}
+             {# Display Success Message (Optional) #}
+            {% if formatted_json and not error_message and request.method == 'POST' %}
+                 <div class="alert alert-success alert-dismissible fade show text-center" role="alert">
+                     JSON Formatted Successfully!
+                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                 </div>
+            {% endif %}
+
+
+            {# --- Input Form & Output Section --- #}
+            <form method="post" action="{% url 'text_tools:json_formatter' %}" id="jsonForm">
+                 {% csrf_token %}
+                <div class="row g-4">
+                    {# Input Area #}
+                    <div class="col-lg-6">
+                        <div class="card p-3 h-100 d-flex flex-column"> {# Card for input #}
+                            <label for="json_input" class="form-label fw-medium mb-2">Input JSON:</label>
+                            <textarea class="form-control neumorphic-inset font-monospace flex-grow-1" {# Use monospace #}
+                                      id="json_input"
+                                      name="json_input"
+                                      rows="15"
+                                      placeholder='Paste your JSON here... e.g., {"name": "example", "value": 123}'
+                                      required>{{ input_text }}</textarea>
+                        </div>
+                    </div>
+
+                    {# Output Area #}
+                    <div class="col-lg-6">
+                        <div class="card p-3 h-100 d-flex flex-column"> {# Card for output #}
+                            <div class="d-flex justify-content-between align-items-center mb-2">
+                                <label for="json_output" class="form-label fw-medium mb-0">Formatted JSON:</label>
+                                <button id="copyOutputButton" class="btn btn-sm btn-secondary" type="button" title="Copy Output" {% if not formatted_json %}disabled{% endif %}>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg>
+                                    Copy
+                                </button>
+                            </div>
+                            <textarea class="form-control neumorphic-inset font-monospace flex-grow-1" {# Readonly output #}
+                                      id="json_output"
+                                      name="json_output"
+                                      rows="15"
+                                      readonly
+                                      placeholder="Formatted JSON will appear here...">{% if formatted_json %}{{ formatted_json }}{% endif %}</textarea>
+                        </div>
+                    </div>
+
+                     {# Options and Actions #}
+                     <div class="col-12">
+                         <div class="card p-3 mt-3 neumorphic"> {# Wrap actions in card #}
+                             <div class="row g-3 align-items-center">
+                                <div class="col-md-4">
+                                    <label for="indentSelect" class="form-label fw-medium mb-0">Indentation:</label>
+                                     <select class="form-select neumorphic-inset" id="indentSelect" name="indent_style">
+                                        <option value="2" {% if prev_options.indent_style == '2' %}selected{% endif %}>2 Spaces</option>
+                                        <option value="4" {% if not prev_options.indent_style or prev_options.indent_style == '4' %}selected{% endif %}>4 Spaces</option> {# Default #}
+                                        <option value="tab" {% if prev_options.indent_style == 'tab' %}selected{% endif %}>Tab</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-4 d-flex align-items-center pt-3 pt-md-0">
+                                     <div class="form-check form-switch">
+                                         <input class="form-check-input" type="checkbox" name="sort_keys" role="switch" id="sortKeysCheck" {% if prev_options.sort_keys == 'on' %}checked{% endif %}>
+                                         <label class="form-check-label" for="sortKeysCheck">Sort Keys</label>
+                                     </div>
+                                </div>
+                                <div class="col-md-4 text-end">
+                                    <button type="button" class="btn btn-outline-secondary clear-filters-btn me-2" id="clearInputButton">Clear</button>
+                                    <button type="submit" class="btn btn-submit-tool" id="formatButton" disabled>Format</button>
+                                </div>
+                             </div>
+                         </div>
+                    </div>
+
+                </div> {# End row g-4 #}
+            </form>
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Re-use textarea, button, select styles from previous tools */
+    textarea.neumorphic-inset { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; line-height: 1.6; min-height: 300px; /* Make text areas taller */}
+    textarea.neumorphic-inset:focus { background-color: var(--bg-color); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none; }
+    textarea.neumorphic-inset::placeholder { color: var(--muted-text-color); opacity: 0.7; transition: color 0.3s ease, opacity 0.3s ease; }
+    .form-select.neumorphic-inset { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right .75rem center; background-size: 16px 12px; appearance: none; }
+    body.dark-mode .form-select.neumorphic-inset { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); }
+    .form-select.neumorphic-inset:focus { background-color: var(--bg-color); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none; }
+        /* Base style for checkbox/radio */
+        .form-check-input {
+        background-color: var(--bg-color); /* Match bg */
+        border-color: transparent; /* Remove Bootstrap border initially */
+        /* Neumorphic inset */
+        box-shadow: inset 1px 1px 3px var(--shadow-dark),
+                   inset -1px -1px 3px var(--shadow-light);
+        transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+        margin-top: 0.15em; /* Adjust vertical alignment */
+        vertical-align: top; /* Align top with label */
+        width: 1.15em; /* Slightly larger */
+        height: 1.15em;
+        cursor: pointer;
+        -webkit-appearance: none; /* Remove default */
+        appearance: none;
+    }
+    .form-check-input:checked {
+        background-color: var(--link-color);
+        border-color: transparent; /* No border needed */
+        box-shadow: none; /* Remove inset shadow when checked */
+        /* Default Bootstrap checkmark SVG colored white */
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 20 20'%3e%3cpath fill='none' stroke='%23fff' stroke-linecap='round' stroke-linejoin='round' stroke-width='3' d='m6 10 3 3 6-6'/%3e%3c/svg%3e");
+    }
+    .form-check-input:focus {
+        border-color: transparent; /* Keep border transparent */
+        outline: 2px solid var(--link-color); /* Use standard outline */
+        outline-offset: 1px;
+        box-shadow: inset 1px 1px 3px var(--shadow-dark), inset -1px -1px 3px var(--shadow-light); /* Keep inset shadow on focus */
+    }
+     .form-check-input:checked:focus {
+          box-shadow: none; /* Remove inset on checked focus */
+          background-color: var(--link-color); /* Ensure bg color stays */
+     }
+    .form-check-label {
+        color: var(--text-color);
+        padding-left: 0.4em;
+        transition: color 0.3s ease;
+        cursor: pointer;
+        vertical-align: middle;
+    }
+
+    /* Switch specific styles */
+    .form-switch .form-check-input {
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); /* Thumb color based on text */
+         background-position: left center;
+         border-radius: 2em;
+         width: 2.75em;
+         height: 1.5em;
+         margin-top: 0.1em; /* Adjust vertical alignment with label */
+         /* Neumorphic inset track */
+         box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                     inset -2px -2px 4px var(--shadow-light);
+         border: none; /* Remove default border */
+         transition: background-color 0.3s ease, background-position .15s ease-in-out, box-shadow 0.3s ease, border-color 0.3s ease;
+         -webkit-appearance: none;
+         appearance: none;
+    }
+    body.dark-mode .form-switch .form-check-input {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+    }
+    .form-switch .form-check-input:checked {
+         background-position: right center;
+         border-color: transparent; /* No border needed when checked */
+         background-color: var(--link-color); /* Use link color for checked track */
+         box-shadow: none; /* Remove inset */
+          /* White thumb for checked state */
+         background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+    }
+     /* Focus style for switch (using outline) */
+     .form-switch .form-check-input:focus {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); /* Keep inset shadow on focus */
+         /* Ensure background image rule exists for focus state */
+          background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+    }
+    body.dark-mode .form-switch .form-check-input:focus {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+    }
+    .form-switch .form-check-input:checked:focus {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+        box-shadow: none; /* Remove inset on checked focus */
+    }
+    .form-check-input:disabled {
+        opacity: 0.6; cursor: not-allowed;
+        box-shadow: inset 1px 1px 2px var(--shadow-dark), inset -1px -1px 2px var(--shadow-light);
+    }
+    .form-switch .form-check-input:disabled {
+         box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light);
+     }
+    .form-check-input:disabled:checked {
+        background-color: var(--muted-text-color); border-color: transparent; box-shadow: none;
+    }
+     .form-switch .form-check-input:disabled:checked { background-color: var(--muted-text-color); }
+    .form-check-input:disabled ~ .form-check-label { opacity: 0.6; cursor: not-allowed; }
+
+    /* General Label Style */
+    .form-label.fw-medium {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 500; /* Ensure this is applied */
+    }
+
+    /* Submit Button Style */
+    .btn-submit-tool {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--link-color);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn-submit-tool:disabled {
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        opacity: 0.6;
+        cursor: not-allowed;
+        color: var(--muted-text-color);
+    }
+    /* Hover/Active/Focus omitted for brevity but should be included from custom.css */
+
+    /* Clear Button Style */
+    .clear-filters-btn { /* Also used for Clear Text */
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        border-radius: var(--radius-small);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .clear-filters-btn:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+     /* Focus omitted for brevity but should be included from custom.css */
+    #copyOutputButton { /* Style copy button */
+         opacity: 0.7; transition: opacity 0.2s ease;
+    }
+    #copyOutputButton:hover { opacity: 1; }
+    #copyOutputButton.copied { background-color: #198754; border-color: #198754; color: white;}
+    #json_output { /* Specific style for output textarea */
+         background-color: var(--card-bg-color); /* Use card bg for contrast maybe */
+         color: var(--text-color); /* Use main text color */
+    }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for clear, copy, enabling format button #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('jsonForm');
+    const inputTextArea = document.getElementById('json_input');
+    const outputTextArea = document.getElementById('json_output');
+    const formatButton = document.getElementById('formatButton');
+    const clearButton = document.getElementById('clearInputButton');
+    const copyButton = document.getElementById('copyOutputButton');
+
+    // --- Enable/Disable Format Button ---
+    const toggleFormatButton = () => {
+        if(formatButton && inputTextArea){
+            formatButton.disabled = inputTextArea.value.trim() === '';
+        }
+    }
+
+    // --- Clear Input ---
+    const clearInput = () => {
+        if(inputTextArea) {
+            inputTextArea.value = '';
+        }
+        if(outputTextArea) {
+             outputTextArea.value = ''; // Clear output too
+        }
+        if(copyButton){
+            copyButton.disabled = true; // Disable copy when cleared
+        }
+        toggleFormatButton(); // Update format button state
+        inputTextArea.focus();
+    }
+
+    // --- Copy Output ---
+    const copyOutput = () => {
+        if (!outputTextArea || !navigator.clipboard) return; // Exit if no output or clipboard unsupported
+
+        navigator.clipboard.writeText(outputTextArea.value).then(() => {
+            copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+            copyButton.classList.add('copied');
+            setTimeout(() => {
+                copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg> Copy';
+                copyButton.classList.remove('copied');
+            }, 2000);
+        }).catch(err => { console.error('Copy failed: ', err); alert('Failed to copy.'); });
+    }
+
+
+    // --- Event Listeners ---
+    if(inputTextArea) {
+        inputTextArea.addEventListener('input', toggleFormatButton);
+    }
+    if(clearButton) {
+        clearButton.addEventListener('click', clearInput);
+    }
+    if(copyButton) {
+        copyButton.addEventListener('click', copyOutput);
+        // Disable copy button initially if output is empty
+        copyButton.disabled = !outputTextArea || outputTextArea.value.trim() === '';
+    }
+
+    // Initial state
+    toggleGenerateButton(); // Correct function name from previous examples
+     if (copyButton) {
+        copyButton.disabled = !outputTextArea || outputTextArea.value.trim() === '';
+     }
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

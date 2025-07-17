@@ -1,0 +1,282 @@
+{# templates/pdf_tools/tool_split_pdf.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">✂P✂</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Extract a specific range of pages from your PDF document.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        {# Unique name 'pdffile_split', single file #}
+                        <input class="d-none" type="file" id="pdffileInput" name="pdffile_split" accept=".pdf,application/pdf" required>
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cloud-arrow-up-fill mb-3 text-muted" viewBox="0 0 16 16"><path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z"/></svg>
+                            <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop PDF File Here</p>
+                            <p class="mb-0 text-muted small">(Select one PDF file)</p>
+                            <p class="mb-0 text-muted small">or</p>
+                            <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse File</button>
+                        </div>
+                        <div id="selectedFileName" class="text-center text-muted small mb-3"></div> {# Show selected filename #}
+                        <div id="pageCountDisplay" class="text-center text-muted small mb-3" style="display: none;"></div> {# Show page count #}
+
+                        {# --- Split Options --- #}
+                        <div class="border-top pt-4 mb-4">
+                             <h5 class="text-center mb-3">Select Page Range</h5>
+                             <div class="row g-3 justify-content-center">
+                                <div class="col-md-5">
+                                     <label for="startPageInput" class="form-label fw-medium">Start Page:</label>
+                                     <input type="number" class="form-control neumorphic-inset" id="startPageInput" name="start_page" min="1" value="{{ prev_options.start_page|default:'1' }}" required>
+                                     <div class="invalid-feedback" id="startPageError"></div> {# For JS validation #}
+                                </div>
+                                <div class="col-md-5">
+                                     <label for="endPageInput" class="form-label fw-medium">End Page:</label>
+                                     <input type="number" class="form-control neumorphic-inset" id="endPageInput" name="end_page" min="1" value="{{ prev_options.end_page|default:'' }}" placeholder="e.g., 5" required>
+                                     <div class="invalid-feedback" id="endPageError"></div> {# For JS validation #}
+                                </div>
+                             </div>
+                        </div>
+                        {# --- END: Split Options --- #}
+
+                        {# Split Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-scissors me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M3.5 3.5c-.614-.884-.074-1.962.858-2.5L8 7.226 11.642 1c.932.538 1.472 1.616.858 2.5L8.81 8.61l1.556 2.661a2.5 2.5 0 1 1-.794.637L8 9.73l-1.572 2.177a2.5 2.5 0 1 1-.794-.637L7.19 8.61zm2.5 10a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0m7 0a1.5 1.5 0 1 0-3 0 1.5 1.5 0 0 0 3 0"/></svg>
+                                Split PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Download Section --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic">
+                    <h3 class="mb-3 text-success">Split Complete!</h3>
+                    <p class="text-muted mb-4">Your PDF containing the selected pages is ready.</p>
+                    <form method="post" action="{% url 'pdf_tools:split_pdf' %}">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_split" value="true">
+                         <button type="submit" class="btn btn-success btn-lg mb-3">
+                             <svg class="bi bi-download me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg>
+                             Download {{ download_filename|default:"Split PDF" }}
+                         </button>
+                    </form>
+                    <a href="{% url 'pdf_tools:split_pdf' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                         <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                        Split Another PDF
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* --- Dropzone/File Input Styles --- */
+    .drop-zone { border: 2px dashed var(--border-color); border-radius: var(--radius-main); cursor: pointer; transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease; background-color: var(--bg-color); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); }
+    .drop-zone.dragover { border-color: var(--link-color); background-color: rgba(var(--link-color-rgb), 0.1); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); }
+    #browseButton { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); transition: all 0.2s ease-out; }
+    #browseButton:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+    #selectedFileName { transition: color 0.3s ease; font-weight: 500; }
+    #pageCountDisplay { transition: color 0.3s ease; }
+
+    /* --- Form Control & Option Styles --- */
+    .form-label.fw-medium { color: var(--text-color); transition: color 0.3s ease; }
+    .form-text { color: var(--muted-text-color); transition: color 0.3s ease; font-size: 0.8em; }
+    /* Style for the options section heading */
+    .border-top h5 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+    /* Style number inputs */
+    input[type="number"].neumorphic-inset { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; height: auto; -moz-appearance: textfield;}
+    input[type=number].neumorphic-inset::-webkit-inner-spin-button, input[type=number].neumorphic-inset::-webkit-outer-spin-button { -webkit-appearance: none; margin: 0; }
+    input[type="number"].neumorphic-inset:focus { background-color: var(--bg-color); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none; }
+    /* Style placeholder text for light and dark mode */
+    input[type="number"].neumorphic-inset::placeholder { color: var(--muted-text-color); opacity: 0.7; transition: color 0.3s ease, opacity 0.3s ease; }
+    /* Input validation styles */
+    .form-control.is-invalid { border: 1px solid transparent !important; box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light), 0 0 0 .25rem rgba(220, 53, 69, .25) !important; }
+    .invalid-feedback { color: #dc3545; display: none; width: 100%; margin-top: .25rem; font-size: .875em; }
+    .form-control.is-invalid ~ .invalid-feedback { display: block; }
+
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+
+    /* --- Success/Download Buttons --- */
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS adapted for single file input 'pdffile_split', file list display #}
+{# JS adapted for single file input 'pdffile_split', file list display, page validation #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('pdffileInput'); // Correct ID
+    const browseButton = document.getElementById('browseButton');
+    // Removed previewContainer/fileListUl as we show filename only
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const selectedFileNameDisplay = document.getElementById('selectedFileName'); // Display filename
+    const pageCountDisplay = document.getElementById('pageCountDisplay'); // Display page count
+    const convertButton = document.getElementById('convertButton');
+    const dropZoneText = document.getElementById('dropZoneText');
+    const startPageInput = document.getElementById('startPageInput');
+    const endPageInput = document.getElementById('endPageInput');
+    const startPageError = document.getElementById('startPageError'); // Error div
+    const endPageError = document.getElementById('endPageError'); // Error div
+
+    let currentFile = null; // Store single file
+
+    // --- File Handling & UI Update ---
+    const updateUI = () => {
+        selectedFileNameDisplay.textContent = ''; // Clear previous filename
+        pageCountDisplay.style.display = 'none'; // Hide page count initially
+        pageCountDisplay.textContent = '';
+        // Clear previous validation
+        if(startPageInput) startPageInput.classList.remove('is-invalid');
+        if(endPageInput) endPageInput.classList.remove('is-invalid');
+        if(startPageError) startPageError.textContent = '';
+        if(endPageError) endPageError.textContent = '';
+
+
+        if (currentFile) {
+            selectedFileNameDisplay.textContent = `Selected: ${currentFile.name}`;
+            dropZoneText.textContent = "Replace file by dropping or browsing";
+            convertButton.disabled = false; // Enable button when file selected
+            previewPlaceholder.style.display = 'none';
+
+            // Client-side page count attempt (Optional, complex)
+            // console.log("File selected, skipping client-side page count for now.");
+
+        } else {
+            previewPlaceholder.style.display = 'block';
+            dropZoneText.textContent = "Drag & Drop PDF File Here";
+            convertButton.disabled = true;
+        }
+        // Update hidden input
+        try {
+            const dataTransfer = new DataTransfer();
+            if (currentFile) dataTransfer.items.add(currentFile);
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    const handleRemoveFile = () => { // No previews, just clear state
+        currentFile = null;
+        fileInput.value = ''; // Clear the actual input value
+        updateUI();
+    };
+
+    const handleFiles = (files) => {
+        if (files.length === 0) { handleRemoveFile(); return; }
+        const file = files[0]; // Only handle the first file
+        const allowedMimes = ['application/pdf'];
+        const allowedExts = ['.pdf'];
+        const fileNameParts = file.name.split('.');
+        const fileExt = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+
+        if (!allowedMimes.includes(file.type.toLowerCase()) && !allowedExts.includes(fileExt)) {
+             alert(`Please select a valid PDF file.`);
+             handleRemoveFile();
+             return;
+         }
+        currentFile = file;
+        updateUI();
+    };
+
+    // Drag/Drop/Browse listeners
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    // --- Simple Client-side validation for page numbers ---
+    function validatePageInputs(showFeedback = false) {
+        let isValid = true;
+        // Clear previous errors
+        startPageInput.classList.remove('is-invalid');
+        endPageInput.classList.remove('is-invalid');
+        if(startPageError) startPageError.textContent = '';
+        if(endPageError) endPageError.textContent = '';
+
+        const startVal = parseInt(startPageInput.value, 10);
+        const endVal = parseInt(endPageInput.value, 10);
+
+        if (isNaN(startVal) || startVal < 1) {
+            if(showFeedback && startPageError) startPageError.textContent = 'Start page must be 1 or greater.';
+            startPageInput.classList.add('is-invalid');
+            isValid = false;
+        }
+        if (isNaN(endVal) || endVal < 1) {
+             if(showFeedback && endPageError) endPageError.textContent = 'End page must be 1 or greater.';
+             endPageInput.classList.add('is-invalid');
+             isValid = false;
+        }
+        // Check start <= end only if both are valid numbers
+        if (!isNaN(startVal) && !isNaN(endVal) && startVal > 0 && endVal > 0 && startVal > endVal) {
+             if(showFeedback && startPageError) startPageError.textContent = 'Start page cannot be greater than end page.';
+             startPageInput.classList.add('is-invalid');
+             endPageInput.classList.add('is-invalid');
+             isValid = false;
+        }
+        // Note: We cannot reliably validate against total pages on client-side easily
+        return isValid;
+    }
+
+    if (startPageInput) startPageInput.addEventListener('input', () => validatePageInputs(true)); // Show errors on input change
+    if (endPageInput) endPageInput.addEventListener('input', () => validatePageInputs(true));
+
+    // Prevent form submission if basic JS validation fails
+    form.addEventListener('submit', function(event) {
+        // Also check if a file is selected
+        if (!currentFile) {
+            event.preventDefault();
+            alert("Please select a PDF file first.");
+            return; // Stop if no file
+        }
+        // Validate page numbers just before submit
+        if (!validatePageInputs(true)) { // Show errors on submit attempt
+            event.preventDefault(); // Stop submission
+            // Error messages are now shown below inputs
+        }
+    });
+
+    updateUI(); // Initial state
+});
+</script>
+{# Theme toggle inherited from base #}
+{# Theme toggle inherited from base #}
+{% endblock %}

@@ -1,0 +1,183 @@
+{# templates/contact/contact_form.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <h1 class="text-center mb-4 border-bottom pb-2">{{ page_title }}</h1>
+            <p class="lead text-center mb-4 text-muted">Have questions, feedback, or need support? Fill out the form below.</p>
+
+            {# Display General Error from View #}
+            {% if errors.general %}
+                <div class="alert alert-danger" role="alert">
+                    {{ errors.general }}
+                </div>
+            {% endif %}
+
+             {# Display Success Message #}
+             {% if success_message %}
+                <div class="alert alert-success text-center" role="alert">
+                     {{ success_message }}
+                </div>
+             {% endif %}
+
+
+            {# --- Manual HTML Form --- #}
+            <div class="card p-4 p-md-5" id="contact_form_card"> {# Using .card for neumorphic style #}
+                <form method="POST" action="{% url 'contact:contact_form' %}">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="name" class="form-label">Your Name *</label>
+                        <input type="text"
+                               class="form-control {% if errors.name %}is-invalid{% endif %}"
+                               id="name"
+                               name="name"
+                               value="{{ submitted_data.name|default:'' }}"
+                               required
+                               maxlength="100">
+                        {% if errors.name %}
+                            <div class="invalid-feedback">{{ errors.name }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-3">
+                        <label for="email" class="form-label">Your Email *</label>
+                        <input type="email"
+                               class="form-control {% if errors.email %}is-invalid{% endif %}"
+                               id="email"
+                               name="email"
+                               value="{{ submitted_data.email|default:'' }}"
+                               required>
+                         {% if errors.email %}
+                            <div class="invalid-feedback">{{ errors.email }}</div>
+                        {% endif %}
+                    </div>
+
+                     <div class="mb-3">
+                        <label for="subject" class="form-label">Subject *</label>
+                        <input type="text"
+                               class="form-control {% if errors.subject %}is-invalid{% endif %}"
+                               id="subject"
+                               name="subject"
+                               value="{{ submitted_data.subject|default:'' }}"
+                               required
+                               maxlength="200">
+                        {% if errors.subject %}
+                            <div class="invalid-feedback">{{ errors.subject }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="mb-4">
+                        <label for="message" class="form-label">Message *</label>
+                        <textarea class="form-control {% if errors.message %}is-invalid{% endif %}"
+                                  id="message"
+                                  name="message"
+                                  rows="6"
+                                  required>{{ submitted_data.message|default:'' }}</textarea>
+                        {% if errors.message %}
+                            <div class="invalid-feedback">{{ errors.message }}</div>
+                        {% endif %}
+                    </div>
+
+                    <div class="d-grid">
+                        <button type="submit" class="btn btn-submit-contact btn-lg">Send Message</button> {# Custom class for styling #}
+                    </div>
+
+                </form>
+            </div>
+             {# --- End Manual HTML Form --- #}
+
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+{# --- Styles using CSS Variables for Dark Mode compatibility --- #}
+<style>
+    /* Target form elements specifically within this card */
+    #contact_form_card .form-control {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                   inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        height: auto;
+    }
+    #contact_form_card .form-control:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark),
+                     inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+    #contact_form_card .form-control::placeholder {
+        color: var(--muted-text-color);
+        opacity: 0.7;
+         transition: color 0.3s ease, opacity 0.3s ease;
+    }
+    #contact_form_card .form-label {
+        color: var(--text-color);
+        font-weight: 500;
+        transition: color 0.3s ease;
+    }
+    #contact_form_card .form-text {
+         color: var(--muted-text-color);
+         transition: color 0.3s ease;
+     }
+     /* Error styles */
+    #contact_form_card .form-control.is-invalid {
+        border: 1px solid transparent;
+         box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light),
+                    0 0 0 .25rem rgba(220, 53, 69, .25);
+    }
+     #contact_form_card .invalid-feedback {
+        color: #dc3545;
+        display: block;
+    }
+
+    /* Style the submit button neumorphic */
+     #contact_form_card .btn-submit-contact { /* Using a specific class */
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 5px 5px 10px var(--shadow-dark),
+                   -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--link-color);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+     #contact_form_card .btn-submit-contact:hover {
+         color: var(--link-color);
+         background-color: var(--bg-color);
+         box-shadow: 6px 6px 12px var(--shadow-dark),
+                    -6px -6px 12px var(--shadow-light);
+    }
+     #contact_form_card .btn-submit-contact:active {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                   inset -3px -3px 6px var(--shadow-light);
+    }
+    /* Ensure focus outline is visible on submit button */
+    #contact_form_card .btn-submit-contact:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        box-shadow: 5px 5px 10px var(--shadow-dark),
+                   -5px -5px 10px var(--shadow-light);
+    }
+
+</style>
+{% endblock %}

@@ -1,0 +1,308 @@
+{# templates/utility_tools/tool_random_number_generator.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %} {# For potential number formatting later #}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-11"> {# Wider column for text area #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">#?</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Generate random integers within your specified range.</p>
+            </div>
+
+            {# Display Messages if needed later #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {# --- Input Form Section --- #}
+            <div class="card p-4 p-md-5 mb-4" id="inputCard"> {# Use card for consistency #}
+                <form method="post" action="{% url 'utility_tools:random_number_generator' %}" id="randomNumberForm">
+                    {% csrf_token %}
+
+                    {# --- Options --- #}
+                    <div class="row g-3 mb-4 align-items-end">
+                        <div class="col-md-4 col-sm-6">
+                            <label for="minValueInput" class="form-label fw-medium">Minimum Value:</label>
+                            <input type="number" class="form-control neumorphic-inset" id="minValueInput" name="min_value" value="{{ prev_options.min_value|default:'1' }}" required>
+                        </div>
+                         <div class="col-md-4 col-sm-6">
+                            <label for="maxValueInput" class="form-label fw-medium">Maximum Value:</label>
+                            <input type="number" class="form-control neumorphic-inset" id="maxValueInput" name="max_value" value="{{ prev_options.max_value|default:'100' }}" required>
+                        </div>
+                         <div class="col-md-4 col-12"> {# Full width on small #}
+                            <label for="countInput" class="form-label fw-medium">How Many Numbers?</label>
+                            <input type="number" class="form-control neumorphic-inset" id="countInput" name="count" value="{{ prev_options.count|default:'1' }}" min="1" max="10000" required>
+                            <div class="form-text">(Max: 10,000)</div>
+                        </div>
+                    </div>
+                    {# --- END: Options --- #}
+
+
+                    {# Generate Button #}
+                    <div class="d-grid mt-4">
+                        <button type="submit" class="btn btn-submit-tool btn-lg" id="generateButton">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-shuffle me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path fill-rule="evenodd" d="M0 3.5A.5.5 0 0 1 .5 3H1c2.202 0 3.827 1.24 4.874 2.418.494.552.865 1.102 1.126 1.532.26-.43.63-.98 1.126-1.532C9.173 4.24 10.798 3 13 3h.5a.5.5 0 0 1 0 1H13c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 7.556 8a9.6 9.6 0 0 0 1.317 1.918C9.828 10.99 11.204 12 13 12h.5a.5.5 0 0 1 0 1H13c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 7 9.05c-.26.43-.63.98-1.126 1.532C4.827 11.76 3.202 13 1 13H.5a.5.5 0 0 1 0-1H1c1.798 0 3.173-1.01 4.126-2.082A9.6 9.6 0 0 0 6.444 8a9.6 9.6 0 0 0-1.317-1.918C4.172 5.01 2.796 4 1 4H.5a.5.5 0 0 1 0-1"/><path d="M13 5.466V1.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192m0 9V9.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384l-2.36 1.966a.25.25 0 0 1-.41-.192M.5 11a.5.5 0 0 1 0 1H3c1.798 0 3.173-1.01 4.126-2.082A9.6 9.6 0 0 0 8.444 8 9.6 9.6 0 0 0 7.126 6.082C6.173 5.01 4.796 4 3 4H.5a.5.5 0 0 1 0-1H3c2.202 0 3.827 1.24 4.874 2.418.494.552.865 1.102 1.126 1.532.26-.43.63-.98 1.126-1.532C11.173 4.24 12.798 3 15 3h.5a.5.5 0 0 1 0 1H15c-1.798 0-3.173 1.01-4.126 2.082A9.6 9.6 0 0 0 9.556 8a9.6 9.6 0 0 0 1.317 1.918C11.828 10.99 13.204 12 15 12h.5a.5.5 0 0 1 0 1H15c-2.202 0-3.827-1.24-4.874-2.418A10.6 10.6 0 0 1 9 9.05c-.26.43-.63.98-1.126 1.532C6.827 11.76 5.202 13 3 13H.5a.5.5 0 0 1 0-1z"/></svg>
+                            Generate Numbers
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {# --- End Input Form Section --- #}
+
+            {# --- Results Section --- #}
+            {% if results is not None %} {# Display only if stats were calculated (even if zeros) #}
+            <div class="card p-4 mt-4" id="resultsCard">
+                <h3 class="text-center mb-3">Generated Numbers</h3>
+                 {# Display as comma-separated list, maybe in a textarea for easy copy #}
+                 <textarea id="resultsOutput" class="form-control neumorphic-inset font-monospace" rows="6" readonly>{% for num in results %}{{ num }}{% if not forloop.last %}, {% endif %}{% empty %}No numbers generated.{% endfor %}</textarea>
+                 <div class="text-center mt-3">
+                      <button id="copyResultsButton" class="btn btn-sm btn-secondary" type="button" title="Copy Results" {% if not results %}disabled{% endif %}>
+                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard me-1" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg>
+                           Copy Results
+                      </button>
+                 </div>
+            </div>
+            {% endif %}
+            {# --- End Results Section --- #}
+
+        </div> {# End col-lg-9 #}
+    </div> {# End row #}
+</div> {# End container #}
+
+{# Styles specific to this page #}
+<style>
+    /* Input Card & General Form Styling */
+    .form-label.fw-medium {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+    }
+    .form-text {
+        color: var(--muted-text-color);
+        transition: color 0.3s ease;
+        font-size: 0.8em;
+    }
+    input[type="number"].neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        height: auto;
+        -moz-appearance: textfield;
+    }
+    input[type=number].neumorphic-inset::-webkit-inner-spin-button,
+    input[type=number].neumorphic-inset::-webkit-outer-spin-button {
+      -webkit-appearance: none;
+      margin: 0;
+    }
+    input[type="number"].neumorphic-inset:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark),
+                     inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+    input[type="number"].neumorphic-inset::placeholder {
+        color: var(--muted-text-color);
+        opacity: 0.7;
+         transition: color 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* Input validation styles */
+    .form-control.is-invalid { /* For number inputs */
+        border: 1px solid transparent !important;
+         box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light),
+                    0 0 0 .25rem rgba(220, 53, 69, .25) !important;
+    }
+    .invalid-feedback {
+        color: #dc3545;
+        display: none;
+        width: 100%;
+        margin-top: .25rem;
+        font-size: .875em;
+    }
+    .form-control.is-invalid ~ .invalid-feedback {
+        display: block;
+    }
+
+
+    /* Submit Button Styles */
+    .btn-submit-tool {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--link-color);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn-submit-tool:hover {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+    .btn-submit-tool:active {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    .btn-submit-tool:disabled {
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        opacity: 0.6;
+        cursor: not-allowed;
+        color: var(--muted-text-color);
+    }
+    .btn-submit-tool:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    }
+
+    /* Clear Text Button Styles */
+    .clear-filters-btn { /* Re-using class */
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        border-radius: var(--radius-small);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .clear-filters-btn:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+
+    /* Results Section Styles */
+    #resultsCard h3 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+    #resultsOutput {
+        min-height: 100px;
+        font-size: 1rem;
+        line-height: 1.6;
+        background-color: var(--card-bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                   inset -3px -3px 6px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        resize: vertical;
+        word-wrap: break-word;
+    }
+     #resultsOutput:focus {
+         background-color: var(--card-bg-color);
+         box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+    /* Copy Button Style */
+    #copyResultsButton {
+         opacity: 0.7;
+         transition: opacity 0.2s ease;
+    }
+    #copyResultsButton:hover {
+         opacity: 1;
+    }
+    #copyResultsButton.copied {
+        background-color: #198754;
+        border-color: #198754;
+        color: white;
+        opacity: 1;
+    }
+    #copyResultsButton:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+</style>
+
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for Random Number Generator: Clear button, Copy button #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('randomNumberForm');
+    const clearButton = document.getElementById('clearTextButton'); // NOTE: No clear button in HTML currently
+    const generateButton = document.getElementById('generateButton'); // Generate button
+    const resultsCard = document.getElementById('resultsCard'); // Results card
+    const resultsOutput = document.getElementById('resultsOutput'); // Results text area
+    const copyButton = document.getElementById('copyResultsButton'); // Copy button
+
+    // Input fields (for potential reset on clear)
+    const minInput = document.getElementById('minValueInput');
+    const maxInput = document.getElementById('maxValueInput');
+    const countInput = document.getElementById('countInput');
+
+    // Copy Results Button
+    if (copyButton && resultsOutput) {
+        // Disable button initially if textarea is empty or has default message
+        copyButton.disabled = !resultsOutput.value.trim() || resultsOutput.value.includes("No numbers generated.");
+
+        copyButton.addEventListener('click', () => {
+            if (navigator.clipboard && resultsOutput.value && !resultsOutput.value.includes("No numbers generated.")) {
+                 navigator.clipboard.writeText(resultsOutput.value).then(() => {
+                    copyButton.innerHTML = '<svg class="bi bi-check-lg me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    copyButton.classList.add('copied');
+                    copyButton.disabled = true;
+                    setTimeout(() => {
+                         copyButton.innerHTML = '<svg class="bi bi-clipboard me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg> Copy Results';
+                         copyButton.classList.remove('copied');
+                         copyButton.disabled = !resultsOutput.value.trim() || resultsOutput.value.includes("No numbers generated.");
+                    }, 2000);
+                 }).catch(err => { console.error('Copy failed: ', err); alert('Copy failed.'); });
+            } else if (resultsOutput.value && !resultsOutput.value.includes("No numbers generated.")) { // Fallback
+                resultsOutput.select();
+                try { document.execCommand('copy'); copyButton.disabled = true; setTimeout(()=>{copyButton.disabled = !resultsOutput.value.trim();}, 1000); }
+                catch (err) { alert('Copy failed.'); }
+            }
+        });
+    }
+    // --- End Copy Button Logic ---
+
+
+    // --- Optional: Add simple validation visual feedback on input change ---
+    const inputsToValidate = [minInput, maxInput, countInput];
+    inputsToValidate.forEach(input => {
+        if(input) {
+            input.addEventListener('input', () => {
+                 // You could re-run parts of the view's validation logic here
+                 // For simplicity, just clear invalid state on input
+                 input.classList.remove('is-invalid');
+                 const errorDiv = document.getElementById(input.id + 'Error'); // Requires adding error divs in HTML
+                 if (errorDiv) errorDiv.textContent = '';
+            });
+        }
+    });
+
+
+});
+</script>
+{# Theme toggle inherited from base.html #}
+{% endblock %}

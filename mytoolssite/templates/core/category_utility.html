@@ -1,0 +1,418 @@
+{# templates/core/category_utility.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container px-4 py-2"> {# Reduced top padding #}
+    <h1 class="pb-2 border-bottom text-center mb-4">{{ page_title }}</h1> {# Reduced bottom margin #}
+    <p class="text-center lead mb-4">Handy tools for everyday tasks, calculations, conversions, and generation.</p>
+
+    <!-- ================== Filter Section for Utility Tools ================== -->
+    <div class="container mb-4" id="sticky-filter-section"> {# Re-use sticky ID #}
+        <!-- Row for Search and Mobile Filter Button -->
+        <div class="row justify-content-center align-items-center mb-3">
+            <div class="col">
+                <input type="search" id="tool-search-input" class="form-control form-control-lg" placeholder="Search utilities..." aria-label="Search utility tools">
+            </div>
+            <div class="col-auto d-lg-none">
+                <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFiltersUtility" aria-controls="offcanvasFiltersUtility">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16"> <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/> </svg>
+                    Filter Type
+                </button>
+            </div>
+        </div>
+
+        <!-- Inline Type Filters Container (Hidden on small screens) -->
+        <div class="row justify-content-center gy-3 d-none d-lg-flex" id="inline-filters-container">
+            <div class="col-12 col-lg text-center text-lg-start">
+                <span class="me-3 fw-bold">Tool Type:</span>
+                 <div class="form-check form-check-inline">
+                    <input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeSimpleInlineUtility" value="simple" checked>
+                    <label class="form-check-label" for="filterTypeSimpleInlineUtility">Simple</label>
+                </div>
+                 <div class="form-check form-check-inline">
+                    <input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeAiInlineUtility" value="ai" checked>
+                    <label class="form-check-label" for="filterTypeAiInlineUtility">AI ✨</label>
+                    {# Add AI checkbox if/when you have AI utility tools #}
+                </div>
+            </div>
+             <!-- Clear Button (Inline) -->
+             <div class="col-12 col-lg-auto text-center text-lg-end">
+                 <button id="clear-filters-btn-inline-utility" class="btn btn-sm btn-outline-secondary clear-filters-btn" type="button">Clear Type Filter</button>
+             </div>
+        </div>
+    </div><!-- End Sticky Filter Section -->
+
+    <!-- Offcanvas Filter Menu for Utility Tools -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFiltersUtility" aria-labelledby="offcanvasFiltersLabelUtility">
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabelUtility">Filter Tool Type</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <!-- Type Filters (Offcanvas) -->
+        <div class="mb-3">
+            <h6>Tool Type:</h6>
+            <div class="form-check"><input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeSimpleOffcanvasUtility" value="simple" checked><label class="form-check-label" for="filterTypeSimpleOffcanvasUtility">Simple</label></div>
+            <div class="form-check"><input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeAiOffcanvasUtility" value="ai" checked><label class="form-check-label" for="filterTypeAiOffcanvasUtility">AI ✨</label></div>
+        </div>
+        <!-- Clear Button (Offcanvas) -->
+        <div class="d-grid gap-2">
+            <button id="clear-filters-btn-offcanvas-utility" class="btn btn-outline-secondary clear-filters-btn" type="button">Clear Type Filter</button>
+        </div>
+      </div>
+    </div>
+    <!-- ================== End Filter Section ================== -->
+
+
+    <!-- Tool Listing Section -->
+    <div class="container px-0 py-2" id="tool-list-container">
+        <!-- Row to contain the tool cards -->
+        <div class="row g-4 py-5 row-cols-1 row-cols-md-2 row-cols-lg-3" id="tools-grid">
+
+            {# --- PASTE ONLY UTILITY TOOL CARDS BELOW --- #}
+
+            <div class="feature col tool-card" data-tool-name="Password Generator Secure Random String Simple Security Utility" data-tool-categories="text generator utility security" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-security d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">***</div>
+                            <h3 class="fs-4 card-title">Password Generator</h3>
+                        </div>
+                        <p class="card-text">Create strong, random, and customizable passwords for your accounts.</p>
+                        <a href="{% url 'utility_tools:password_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="URL Encoder Decoder Percent Encoding Simple Developer Webdev" data-tool-categories="developer utility webdev converter text" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">%</div>
+                            <h3 class="fs-4 card-title">URL Encoder/Decoder</h3>
+                        </div>
+                        <p class="card-text">Encode text into URL-safe percent-encoded format or decode it back to human-readable text.</p>
+                        <a href="{% url 'utility_tools:url_encoder_decoder' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Tool <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Base64 Encoder Decoder String File Simple Developer Webdev" data-tool-categories="developer utility webdev text converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">64</div>
+                            <h3 class="fs-4 card-title">Base64 Encoder/Decoder</h3>
+                        </div>
+                        <p class="card-text">Encode text data into Base64 format or decode Base64 data back to plain text.</p>
+                        <a href="{% url 'utility_tools:base64_encoder_decoder' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Tool <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Color Converter HEX RGB HSL Simple Developer Webdev Image" data-tool-categories="developer utility webdev image converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">🎨</div>
+                            <h3 class="fs-4 card-title">Color Converter</h3>
+                        </div>
+                        <p class="card-text">Convert color values between HEX, RGB(A), and HSL(A) formats instantly.</p>
+                        <a href="{% url 'utility_tools:color_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Hash Generator MD5 SHA1 SHA256 SHA512 Checksum Simple Developer Security" data-tool-categories="developer utility security text generator" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">#G</div>
+                            <h3 class="fs-4 card-title">Hash Generator</h3>
+                        </div>
+                        <p class="card-text">Generate cryptographic hashes (MD5, SHA-1, SHA-256, SHA-512) from text input.</p>
+                        <a href="{% url 'utility_tools:hash_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="UUID Generator GUID Unique Identifier Simple Developer" data-tool-categories="developer utility generator" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">ID</div>
+                            <h3 class="fs-4 card-title">UUID Generator</h3>
+                        </div>
+                        <p class="card-text">Generate Version 1 (Timestamp) or Version 4 (Random) universally unique identifiers.</p>
+                        <a href="{% url 'utility_tools:uuid_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+           </div>
+            <div class="feature col tool-card" data-tool-name="Unix Timestamp Converter Epoch Time Date Simple Developer Utility" data-tool-categories="developer utility generator converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">TS</div>
+                            <h3 class="fs-4 card-title">Timestamp Converter</h3>
+                        </div>
+                        <p class="card-text">Convert Unix timestamps (seconds or milliseconds) to human-readable dates (UTC & Local) and vice-versa.</p>
+                        <a href="{% url 'utility_tools:timestamp_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="CSS Gradient Generator Linear Radial Simple Developer Webdev" data-tool-categories="utility developer webdev generator" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Grad</div>
+                            <h3 class="fs-4 card-title">CSS Gradient Generator</h3>
+                        </div>
+                        <p class="card-text">Visually create linear and radial CSS background gradients and copy the code.</p>
+                        <a href="{% url 'utility_tools:css_gradient_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Unit Converter Length Mass Temperature Area Volume Speed Simple" data-tool-categories="utility converter generator" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">📐</div>
+                            <h3 class="fs-4 card-title">Unit Converter</h3>
+                        </div>
+                        <p class="card-text">Convert between common units of measurement like length, mass, temperature, and more.</p>
+                        <a href="{% url 'utility_tools:unit_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="Currency Converter Exchange Rates Forex Simple Generator Finance" data-tool-categories="utility converter generator finance" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-finance d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">$€¥</div><h3 class="fs-4 card-title">Currency Converter</h3></div><p class="card-text">Convert between different world currencies (requires API).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Time Zone Converter World Clock Simple Generator" data-tool-categories="utility generator" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">TZ</div>
+                            <h3 class="fs-4 card-title">Time Zone Converter</h3>
+                        </div>
+                        <p class="card-text">Convert dates and times between different time zones around the world.</p>
+                        <a href="{% url 'utility_tools:timezone_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="QR Code Generator URL Text Contact Simple Image" data-tool-categories="utility generator image" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">QR</div><h3 class="fs-4 card-title">QR Code Generator</h3></div><p class="card-text">Generate QR codes for URLs, text, contact info, Wi-Fi, etc.</p><a href="{% url 'utility_tools:qr_code_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                    Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Barcode Generator Code128 Code39 EAN UPC Simple Image Utility" data-tool-categories="utility generator image" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">||||</div>
+                            <h3 class="fs-4 card-title">Barcode Generator</h3>
+                        </div>
+                        <p class="card-text">Create standard 1D barcodes like Code 128, Code 39, EAN, UPC in PNG or SVG format.</p>
+                        <a href="{% url 'utility_tools:barcode_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Random Number Generator Integer Range Simple Utility" data-tool-categories="utility generator" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">#?</div>
+                            <h3 class="fs-4 card-title">Random Number Generator</h3>
+                        </div>
+                        <p class="card-text">Generate one or more random integers within a specified minimum and maximum range.</p>
+                        <a href="{% url 'utility_tools:random_number_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Calculator Simple Scientific Math Utility" data-tool-categories="utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Calc</div>
+                            <h3 class="fs-4 card-title">Calculator</h3>
+                        </div>
+                        <p class="card-text">Perform basic arithmetic or switch to scientific mode for more complex calculations.</p>
+                        <a href="{% url 'utility_tools:calculator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Calculator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="What's My IP Address Location Network Simple Utility" data-tool-categories="utility network developer" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">IP?</div>
+                            <h3 class="fs-4 card-title">What's My IP?</h3>
+                        </div>
+                        <p class="card-text">Quickly find out the public IP address your internet connection is currently using.</p>
+                        <a href="{% url 'utility_tools:whats_my_ip' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Find My IP <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Screen Resolution Detector Display Size Viewport Simple Utility Webdev" data-tool-categories="utility webdev developer" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                             <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-aspect-ratio" viewBox="0 0 16 16"><path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h13A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5zM1.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5z"/><path d="M2 4.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1H3v1.5a.5.5 0 0 1-1 0zm12 7a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H13V9.5a.5.5 0 0 1 1 0z"/></svg>
+                             </div>
+                            <h3 class="fs-4 card-title">Screen Resolution</h3>
+                        </div>
+                        <p class="card-text">Quickly find out your screen resolution, browser viewport size, color depth, and pixel ratio.</p>
+                        <a href="{% url 'utility_tools:screen_resolution' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Detector <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Binary Converter Text Translator Simple Developer Utility" data-tool-categories="utility text developer converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">01</div>
+                            <h3 class="fs-4 card-title">Binary Converter</h3>
+                        </div>
+                        <p class="card-text">Convert text to its binary (0s and 1s) representation and vice versa (UTF-8).</p>
+                        <a href="{% url 'text_tools:binary_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            {# --- END UTILITY TOOL CARDS --- #}
+
+        </div> <!-- /row #tools-grid -->
+        <!-- Message shown when no tools match filters -->
+        <div id="no-results-message" class="text-center py-5" style="display: none;">
+            <h2>No utility tools found matching your criteria.</h2>
+            <p>Try adjusting your search or filters.</p>
+        </div>
+    </div> <!-- /container #tool-list-container -->
+</div>
+<!-- SVG definitions are in base.html -->
+{% endblock %}
+
+
+{% block extra_js %}
+<!-- JavaScript for Search and Filter (Adapted for Utility category page) -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('tool-search-input');
+    // Only select TYPE checkboxes on this page
+    const typeCheckboxes = document.querySelectorAll('.type-filter-checkbox');
+    const toolCards = document.querySelectorAll('.tool-card'); // Cards on this page only
+    const noResultsMessage = document.getElementById('no-results-message');
+    const toolsGrid = document.getElementById('tools-grid');
+    const clearFiltersBtns = document.querySelectorAll('.clear-filters-btn');
+    const offcanvasElement = document.getElementById('offcanvasFiltersUtility'); // Use the correct ID
+    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
+
+    // Sync checkboxes between inline and offcanvas
+    function syncCheckboxes(sourceCheckbox) {
+        const isType = sourceCheckbox.classList.contains('type-filter-checkbox');
+        const value = sourceCheckbox.value;
+        const isChecked = sourceCheckbox.checked;
+
+        if (isType) {
+            typeCheckboxes.forEach(cb => {
+                if (cb.value === value && cb !== sourceCheckbox) {
+                    cb.checked = isChecked;
+                }
+            });
+        }
+    }
+
+    function filterTools() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedTypes = [...new Set(Array.from(typeCheckboxes)
+                                       .filter(checkbox => checkbox.checked)
+                                       .map(checkbox => checkbox.value))];
+        let visibleCount = 0;
+
+        toolCards.forEach(card => {
+            const toolName = card.dataset.toolName.toLowerCase();
+            const toolType = card.dataset.toolType;
+            // Category check is implicit - all cards are Utility tools
+
+            const typeMatch = selectedTypes.includes(toolType);
+            const searchMatch = searchTerm === '' || toolName.includes(searchTerm);
+
+            // Show/Hide Card: Type and Search must match
+            if (typeMatch && searchMatch) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                 card.style.display = 'none';
+            }
+        });
+
+        // Show/Hide "No Results" message and grid
+        if (visibleCount === 0) {
+            noResultsMessage.style.display = 'block';
+            toolsGrid.style.display = 'none';
+        } else {
+            noResultsMessage.style.display = 'none';
+            toolsGrid.style.display = '';
+        }
+    }
+
+    // --- Event Listeners ---
+    searchInput.addEventListener('input', filterTools);
+
+    typeCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', (event) => {
+            syncCheckboxes(event.target);
+            filterTools();
+        });
+    });
+
+    clearFiltersBtns.forEach(button => {
+        button.addEventListener('click', () => {
+            searchInput.value = '';
+            typeCheckboxes.forEach(checkbox => checkbox.checked = true);
+            filterTools();
+
+             if (offcanvasElement.classList.contains('show')) {
+                 offcanvasInstance.hide();
+             }
+        });
+    });
+
+    // Initial filter run
+     filterTools();
+});
+</script>
+
+{# --- Theme Toggle Script (Inherited from base.html) --- #}
+
+{% endblock %}

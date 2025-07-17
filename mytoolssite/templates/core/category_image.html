@@ -1,0 +1,335 @@
+{# templates/core/category_image.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container px-4 py-2"> {# Reduced top padding #}
+    <h1 class="pb-2 border-bottom text-center mb-4">{{ page_title }}</h1> {# Reduced bottom margin #}
+    <p class="text-center lead mb-4">Tools for converting, editing, resizing, and optimizing image files.</p>
+
+    <!-- ================== Filter Section for Image Tools ================== -->
+    <div class="container mb-4" id="sticky-filter-section"> {# Re-use sticky ID #}
+        <!-- Row for Search and Mobile Filter Button -->
+        <div class="row justify-content-center align-items-center mb-3">
+            <div class="col">
+                <input type="search" id="tool-search-input" class="form-control form-control-lg" placeholder="Search image tools..." aria-label="Search image tools">
+            </div>
+            <div class="col-auto d-lg-none">
+                <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFiltersImage" aria-controls="offcanvasFiltersImage">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16"> <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/> </svg>
+                    Filter Type
+                </button>
+            </div>
+        </div>
+
+        <!-- Inline Type Filters Container (Hidden on small screens) -->
+        <div class="row justify-content-center gy-3 d-none d-lg-flex" id="inline-filters-container">
+            <div class="col-12 col-lg text-center text-lg-start">
+                <span class="me-3 fw-bold">Tool Type:</span>
+                 <div class="form-check form-check-inline">
+                    <input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeSimpleInlineImage" value="simple" checked>
+                    <label class="form-check-label" for="filterTypeSimpleInlineImage">Simple</label>
+                </div>
+                 <div class="form-check form-check-inline">
+                    <input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeAiInlineImage" value="ai" checked>
+                    <label class="form-check-label" for="filterTypeAiInlineImage">AI ✨</label>
+                </div>
+            </div>
+             <!-- Clear Button (Inline) -->
+             <div class="col-12 col-lg-auto text-center text-lg-end">
+                 <button id="clear-filters-btn-inline-image" class="btn btn-sm btn-outline-secondary clear-filters-btn" type="button">Clear Type Filter</button>
+             </div>
+        </div>
+    </div><!-- End Sticky Filter Section -->
+
+    <!-- Offcanvas Filter Menu for Image Tools -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFiltersImage" aria-labelledby="offcanvasFiltersLabelImage">
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabelImage">Filter Tool Type</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <!-- Type Filters (Offcanvas) -->
+        <div class="mb-3">
+            <h6>Tool Type:</h6>
+            <div class="form-check"><input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeSimpleOffcanvasImage" value="simple" checked><label class="form-check-label" for="filterTypeSimpleOffcanvasImage">Simple</label></div>
+            <div class="form-check"><input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeAiOffcanvasImage" value="ai" checked><label class="form-check-label" for="filterTypeAiOffcanvasImage">AI ✨</label></div>
+        </div>
+        <!-- Clear Button (Offcanvas) -->
+        <div class="d-grid gap-2">
+            <button id="clear-filters-btn-offcanvas-image" class="btn btn-outline-secondary clear-filters-btn" type="button">Clear Type Filter</button>
+        </div>
+      </div>
+    </div>
+    <!-- ================== End Filter Section ================== -->
+
+
+    <!-- Tool Listing Section -->
+    <div class="container px-0 py-2" id="tool-list-container">
+        <!-- Row to contain the tool cards -->
+        <div class="row g-4 py-5 row-cols-1 row-cols-md-2 row-cols-lg-3" id="tools-grid">
+
+            {# --- PASTE ONLY IMAGE TOOL CARDS BELOW --- #}
+
+            <div class="feature col tool-card" data-tool-name="PDF to JPG Converter Image Simple" data-tool-categories="pdf image converter" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→J</div><h3 class="fs-4 card-title">PDF to JPG</h3></div><p class="card-text">Convert each page of a PDF into JPG images.</p><a href="{% url 'pdf_tools:pdf_to_jpg' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="PDF to PNG Converter Image Simple" data-tool-categories="pdf image converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→Pn</div><h3 class="fs-4 card-title">PDF to PNG</h3></div><p class="card-text">Convert each page of a PDF into high-quality PNG images.</p><a href="{% url 'pdf_tools:pdf_to_png' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="JPG to PDF Converter Image Simple" data-tool-categories="image pdf converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">J→P</div><h3 class="fs-4 card-title">JPG to PDF</h3></div><p class="card-text">Convert your JPG images into a single PDF document.</p><a href="{% url 'pdf_tools:jpg_to_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg></a>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="PNG to PDF Converter Image Simple" data-tool-categories="image pdf converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Pn→P</div><h3 class="fs-4 card-title">PNG to PDF</h3></div><p class="card-text">Convert PNG images into a single PDF document.</p><a href="{% url 'pdf_tools:png_to_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="WebP to PNG Converter Image Format Simple" data-tool-categories="image converter webdev" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">W→P</div>
+                            <h3 class="fs-4 card-title">WebP to PNG</h3>
+                        </div>
+                        <p class="card-text">Convert modern WebP images to the widely supported PNG format, keeping transparency.</p>
+                        <a href="{% url 'image_tools:webp_to_png' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="JPG to PNG Converter Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">J>Pn</div><h3 class="fs-4 card-title">JPG to PNG</h3></div><p class="card-text">Convert JPG images to PNG format (supports transparency).</p><a href="{% url 'image_tools:jpg_to_png' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                    Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                </a></div></div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="PNG to JPG Converter Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Pn>J</div><h3 class="fs-4 card-title">PNG to JPG</h3></div><p class="card-text">Convert PNG images to JPG format (smaller file size).</p><a href="{% url 'image_tools:png_to_jpg' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                    Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                </a></div></div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="WebP to JPG Converter Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Wp>J</div><h3 class="fs-4 card-title">WebP to JPG</h3></div><p class="card-text">Convert modern WebP images to the widely compatible JPG format.</p><a href="{% url 'image_tools:webp_to_jpg' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="JPG to WebP Converter Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">J>Wp</div><h3 class="fs-4 card-title">JPG to WebP</h3></div><p class="card-text">Convert JPG images to the efficient WebP format.</p><a href="{% url 'image_tools:jpg_to_webp' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="HEIC to JPG Converter iPhone Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">H>J</div><h3 class="fs-4 card-title">HEIC to JPG</h3></div><p class="card-text">Convert Apple HEIC images to standard JPG format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="SVG to PNG Converter Vector Image Format Simple Developer" data-tool-categories="image converter developer" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">S>Pn</div><h3 class="fs-4 card-title">SVG to PNG</h3></div><p class="card-text">Convert Scalable Vector Graphics (SVG) to PNG images.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="ICO Converter Favicon Image Format Simple Generator Webdev" data-tool-categories="image converter generator webdev" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">>ICO</div><h3 class="fs-4 card-title">ICO Converter</h3></div><p class="card-text">Convert images (PNG, JPG) to the ICO format for favicons.</p><a href="{% url 'image_tools:ico_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Resize Image Dimensions Scale Simple" data-tool-categories="image utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I↔</div><h3 class="fs-4 card-title">Resize Image</h3></div><p class="card-text">Change the dimensions (width/height) of your images.</p><a href="{% url 'image_tools:resize_image' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                    Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Crop Image Cut Trim Simple" data-tool-categories="image utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I✂</div><h3 class="fs-4 card-title">Crop Image</h3></div><p class="card-text">Cut or trim your images to a specific area or aspect ratio.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Compress Image Reduce File Size Optimizer Simple JPG PNG" data-tool-categories="image utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I↓</div><h3 class="fs-4 card-title">Compress Image</h3></div><p class="card-text">Reduce JPG/PNG image file size with minimal quality loss.</p><a href="{% url 'image_tools:compress_image' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Compressor <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+
+            <div class="feature col tool-card" data-tool-name="Rotate Image Flip Mirror Simple" data-tool-categories="image utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">⟳</div>
+                            <h3 class="fs-4 card-title">Rotate & Flip Image</h3>
+                        </div>
+                        <p class="card-text">Rotate images by 90°, 180°, 270° or custom angles, and flip them horizontally or vertically.</p>
+                        <a href="{% url 'image_tools:rotate_image' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Tool <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Add Watermark Image Stamp Simple" data-tool-categories="image utility" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I™</div><h3 class="fs-4 card-title">Add Watermark (Image)</h3></div><p class="card-text">Add text or image watermarks to your photos.</p><a href="{% url 'image_tools:add_watermark' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Watermarker <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="Image Color Picker Extractor Palette Hex RGB Simple Developer Generator" data-tool-categories="image utility developer generator" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I🎨</div><h3 class="fs-4 card-title">Image Color Picker</h3></div><p class="card-text">Pick colors or extract color palettes (HEX, RGB) from an image.</p><a href="{% url 'image_tools:image_color_picker' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Picker <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="AI Background Remover Image Cutout Transparent Artificial Intelligence" data-tool-categories="image utility ai" data-tool-type="ai">
+                <div class="card h-100 shadow-sm border-info">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-image icon-ai d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I∅</div>
+                            <h3 class="fs-4 card-title">AI Background Remover <span class="badge bg-info text-dark ms-1 align-middle">✨ AI</span></h3>
+                        </div>
+                        <p class="card-text">Automatically remove the background from an image using AI models.</p>
+                        <a href="{% url 'image_tools:remove_background' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Remover <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="Image to Base64 Encoder Embed CSS Simple Developer Webdev" data-tool-categories="image converter developer webdev" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I>64</div><h3 class="fs-4 card-title">Image to Base64</h3></div><p class="card-text">Encode images into Base64 strings for embedding.</p><a href="{% url 'image_tools:image_to_base64' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                    Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Favicon Generator ICO Website Icon Simple Image Generator Webdev" data-tool-categories="image generator webdev" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Fav</div><h3 class="fs-4 card-title">Favicon Generator</h3></div><p class="card-text">Create favicon.ico files for your website from images.</p><a href="{% url 'image_tools:ico_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="AI Image Upscaler Enlarger Resolution Artificial Intelligence" data-tool-categories="image utility ai" data-tool-type="ai">
+                 <div class="card h-100 shadow-sm border-info"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image icon-ai d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I↑</div><h3 class="fs-4 card-title">AI Image Upscaler <span class="badge bg-info text-dark ms-1 align-middle">✨ AI</span></h3></div><p class="card-text">Increase image resolution and enhance details using AI.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="MP4 to GIF Converter Video Animation Simple" data-tool-categories="video image converter" data-tool-type="simple"> {# Also relevant here #}
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">MP4→GIF</div><h3 class="fs-4 card-title">MP4 to GIF</h3></div><p class="card-text">Convert short video clips (MP4) into animated GIF images.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="QR Code Generator URL Text Contact Simple Image" data-tool-categories="utility generator image" data-tool-type="simple"> {# Also relevant here #}
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">QR</div><h3 class="fs-4 card-title">QR Code Generator</h3></div><p class="card-text">Generate QR codes for URLs, text, contact info, Wi-Fi, etc.</p><a href="{% url 'utility_tools:qr_code_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Barcode Generator Code128 EAN UPC Simple Image" data-tool-categories="utility generator image" data-tool-type="simple"> {# Also relevant here #}
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">||||</div><h3 class="fs-4 card-title">Barcode Generator</h3></div><p class="card-text">Generate various barcode formats (Code128, EAN, UPC).</p><a href="{% url 'utility_tools:barcode_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Color Converter HEX RGB HSL Picker Simple Developer Webdev Image" data-tool-categories="developer utility webdev image converter" data-tool-type="simple"> {# Also relevant here #}
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">🎨</div><h3 class="fs-4 card-title">Color Converter</h3></div><p class="card-text">Convert colors between HEX, RGB, and HSL formats.</p><a href="{% url 'utility_tools:color_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+
+            {# --- END IMAGE TOOL CARDS --- #}
+
+        </div> <!-- /row #tools-grid -->
+        <!-- Message shown when no tools match filters -->
+        <div id="no-results-message" class="text-center py-5" style="display: none;">
+            <h2>No image tools found matching your criteria.</h2>
+            <p>Try adjusting your search or filters.</p>
+        </div>
+    </div> <!-- /container #tool-list-container -->
+</div>
+<!-- SVG definitions are in base.html -->
+{% endblock %}
+
+
+{% block extra_js %}
+<!-- JavaScript for Search and Filter (Adapted for Image category page) -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('tool-search-input');
+    // Only select TYPE checkboxes on this page
+    const typeCheckboxes = document.querySelectorAll('.type-filter-checkbox');
+    const toolCards = document.querySelectorAll('.tool-card'); // Cards on this page only
+    const noResultsMessage = document.getElementById('no-results-message');
+    const toolsGrid = document.getElementById('tools-grid');
+    const clearFiltersBtns = document.querySelectorAll('.clear-filters-btn');
+    const offcanvasElement = document.getElementById('offcanvasFiltersImage'); // Use the correct ID
+    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
+
+    // Sync checkboxes between inline and offcanvas
+    function syncCheckboxes(sourceCheckbox) {
+        const isType = sourceCheckbox.classList.contains('type-filter-checkbox');
+        const value = sourceCheckbox.value;
+        const isChecked = sourceCheckbox.checked;
+
+        if (isType) {
+            typeCheckboxes.forEach(cb => {
+                if (cb.value === value && cb !== sourceCheckbox) {
+                    cb.checked = isChecked;
+                }
+            });
+        }
+        // No need to sync categories on this page
+    }
+
+    function filterTools() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedTypes = [...new Set(Array.from(typeCheckboxes)
+                                       .filter(checkbox => checkbox.checked)
+                                       .map(checkbox => checkbox.value))];
+        let visibleCount = 0;
+
+        toolCards.forEach(card => {
+            const toolName = card.dataset.toolName.toLowerCase();
+            const toolType = card.dataset.toolType;
+            // Category check is implicit - all cards are Image tools
+
+            const typeMatch = selectedTypes.includes(toolType); // Tool must match one of the selected types
+            const searchMatch = searchTerm === '' || toolName.includes(searchTerm);
+
+            // Show/Hide Card: Type and Search must match
+            if (typeMatch && searchMatch) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                 card.style.display = 'none';
+            }
+        });
+
+        // Show/Hide "No Results" message and grid
+        if (visibleCount === 0) {
+            noResultsMessage.style.display = 'block';
+            toolsGrid.style.display = 'none';
+        } else {
+            noResultsMessage.style.display = 'none';
+            toolsGrid.style.display = '';
+        }
+    }
+
+    // --- Event Listeners ---
+    searchInput.addEventListener('input', filterTools);
+
+    // Add listeners to Type checkboxes only, and sync them
+    typeCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', (event) => {
+            syncCheckboxes(event.target);
+            filterTools();
+        });
+    });
+
+    // Add listeners to ALL clear buttons
+    clearFiltersBtns.forEach(button => {
+        button.addEventListener('click', () => {
+            searchInput.value = '';
+            typeCheckboxes.forEach(checkbox => checkbox.checked = true); // Check both type boxes
+            // No categories to clear
+            filterTools(); // Re-apply filters
+
+            // Optionally close offcanvas if it's open
+             if (offcanvasElement.classList.contains('show')) {
+                 offcanvasInstance.hide();
+             }
+        });
+    });
+
+    // Initial filter run on page load
+     filterTools();
+});
+</script>
+
+{# --- Theme Toggle Script (Inherited from base.html) --- #}
+
+{% endblock %}

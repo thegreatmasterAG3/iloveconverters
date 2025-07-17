@@ -1,0 +1,117 @@
+{# templates/utility_tools/tool_whats_my_ip.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">IP?</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Your public IP address as seen by this server.</p>
+            </div>
+
+            <div class="card p-4 p-md-5 text-center neumorphic"> {# Card for display #}
+                <h3 class="mb-3">Your Public IP Address Is:</h3>
+                <p class="display-5 fw-bold text-primary mb-3" id="ipAddressDisplay">{{ client_ip|default:"Not Available" }}</p>
+                <button class="btn btn-sm btn-outline-secondary mx-auto" id="copyIpButton" type="button" style="max-width: 150px;">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard me-1" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg>
+                    Copy IP
+                </button>
+                <p class="text-muted small mt-4">
+                    This is the IP address your internet traffic appears to originate from. If you are behind a proxy or VPN, this may be the address of that server.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Style the IP display */
+    #ipAddressDisplay {
+        color: var(--link-color); /* Use link color for emphasis */
+        word-break: break-all; /* Break long IPs if needed */
+         transition: color 0.3s ease;
+         margin-bottom: 1.5rem !important; /* More space below IP */
+         font-family: 'Courier New', Courier, monospace; /* Monospace looks good for IPs */
+    }
+
+    /* Use existing button styles for copy button */
+    #copyIpButton {
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        border-radius: var(--radius-small);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    #copyIpButton:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+     #copyIpButton.copied {
+        background-color: #198754; /* Bootstrap success green */
+        border-color: #198754;
+        color: white;
+    }
+
+    /* Ensure heading/text adapt */
+    .card h3 {
+         color: var(--text-color);
+         transition: color 0.3s ease;
+    }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for Copy Button #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const copyButton = document.getElementById('copyIpButton');
+    const ipAddressDisplay = document.getElementById('ipAddressDisplay');
+
+    if (copyButton && ipAddressDisplay) {
+        copyButton.addEventListener('click', () => {
+            const ipToCopy = ipAddressDisplay.textContent;
+            if (ipToCopy && ipToCopy !== 'Not Available' && navigator.clipboard) {
+                 navigator.clipboard.writeText(ipToCopy).then(() => {
+                    // Success feedback
+                    copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    copyButton.classList.add('copied');
+                    setTimeout(() => {
+                         copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard me-1" viewBox="0 0 16 16"> <path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/> <path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/> </svg> Copy IP';
+                         copyButton.classList.remove('copied');
+                    }, 2000); // Reset after 2 seconds
+                 }).catch(err => {
+                     console.error('Failed to copy IP: ', err);
+                     alert('Failed to copy IP address.');
+                 });
+            } else if (ipToCopy && ipToCopy !== 'Not Available') {
+                 // Basic fallback for older browsers (less reliable)
+                 try {
+                     const tempInput = document.createElement('textarea');
+                     tempInput.value = ipToCopy;
+                     document.body.appendChild(tempInput);
+                     tempInput.select();
+                     document.execCommand('copy');
+                     document.body.removeChild(tempInput);
+                      // Add feedback similar to above
+                     copyButton.innerHTML = 'Copied!'; // Simpler feedback for fallback
+                     setTimeout(() => { copyButton.innerHTML = 'Copy IP'; }, 2000);
+                 } catch (err) {
+                     alert('Could not copy IP address.');
+                 }
+            }
+        });
+    }
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

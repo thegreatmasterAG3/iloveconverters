@@ -1,0 +1,87 @@
+{# templates/news/news_list.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="text-center mb-5">
+        <h1 class="fw-bold">{{ page_title }}</h1>
+        <p class="lead text-muted">Sifting Through All the Noise and Bringing You Just the Good Stuff!</p> {# Inspired by example #}
+        {# Optional note like in example #}
+        {# <p class="text-muted fst-italic small">*News may update slower on weekends...</p> #}
+    </div>
+
+    {% if news_items %}
+        <ul class="list-group list-group-flush"> {# Flush removes borders between items #}
+            {% for item in news_items %}
+            <li class="list-group-item bg-transparent border-bottom py-3"> {# Transparent background, border for separation #}
+                <div class="d-flex w-100 justify-content-start align-items-center">
+                     {# Date Column (Fixed Width) #}
+                    <div style="flex: 0 0 110px;" class="text-muted small me-3"> {# Fixed width for date alignment #}
+                        {{ item.published_date|date:"F j, Y" }}
+                    </div>
+                     {# Title and Source Column #}
+                    <div class="flex-grow-1">
+                         {# Link to external article #}
+                        <a href="{{ item.url }}" target="_blank" rel="noopener noreferrer" class="text-decoration-none fw-medium">
+                            {{ item.title }}
+                            {# External Link Icon #}
+                            <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-box-arrow-up-right ms-1" viewBox="0 0 16 16" style="vertical-align: -0.1em;">
+                                <path fill-rule="evenodd" d="M8.636 3.5a.5.5 0 0 0-.5-.5H1.5A1.5 1.5 0 0 0 0 4.5v10A1.5 1.5 0 0 0 1.5 16h10a1.5 1.5 0 0 0 1.5-1.5V6.864a.5.5 0 0 0-1 0V14.5a.5.5 0 0 1-.5.5h-10a.5.5 0 0 1-.5-.5v-10a.5.5 0 0 1 .5-.5h6.636a.5.5 0 0 0 .5-.5"/>
+                                <path fill-rule="evenodd" d="M16 .5a.5.5 0 0 0-.5-.5h-5a.5.5 0 0 0 0 1h3.793L6.146 9.146a.5.5 0 1 0 .708.708L15 1.707V5.5a.5.5 0 0 0 1 0z"/>
+                            </svg>
+                        </a>
+                         {# Optional: Show source name #}
+                        {% if item.source_name %}
+                            <span class="text-muted small ms-2">({{ item.source_name }})</span>
+                        {% endif %}
+                    </div>
+                </div>
+            </li>
+            {% endfor %}
+        </ul>
+
+         {# Add Pagination later if needed #}
+
+    {% else %}
+        <p class="text-center">No AI news items available yet.</p>
+    {% endif %}
+
+</div>
+
+{# Add custom styling if needed #}
+<style>
+    .list-group-item a {
+        color: var(--link-color); /* Use theme link color */
+    }
+     .list-group-item a:hover {
+        color: var(--link-hover-color);
+        text-decoration: underline;
+    }
+    /* Ensure text elements inherit theme color */
+    .list-group-item .text-muted {
+         color: var(--muted-text-color) !important;
+         transition: color 0.3s ease;
+    }
+     .list-group-item .small {
+        font-size: 0.85em;
+    }
+    /* Use theme border color */
+    .list-group-item.border-bottom {
+        border-bottom-color: var(--border-color) !important;
+         transition: border-color 0.3s ease;
+    }
+     /* Remove default list-group border */
+    .list-group {
+        border: none;
+    }
+
+</style>
+
+{% endblock %}
+
+{% block extra_js %}
+{# No specific JS needed for this page currently #}
+{% endblock %}

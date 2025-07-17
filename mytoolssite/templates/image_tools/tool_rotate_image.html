@@ -1,0 +1,538 @@
+{# templates/image_tools/tool_rotate_image.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12"> {# Wider column for options/preview #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">⟳</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Rotate your images by 90°, 180°, 270° or a custom angle. You can also flip them horizontally or vertically.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {# --- Form Section --- #}
+            <div class="card p-4 p-md-5" id="uploadCard">
+                <form method="post" enctype="multipart/form-data" id="uploadForm">
+                    {% csrf_token %}
+                    <input class="d-none" type="file" id="imagefileInput" name="imagefile_rotate" accept="image/*" required>
+
+                    <div class="row g-4">
+                        {# --- Left Column: Upload & Preview --- #}
+                        <div class="col-lg-5">
+                            <h5 class="mb-3 fw-medium">1. Upload Image</h5>
+                             {# Drop Zone #}
+                             <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 mb-3">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="40" height="40" fill="currentColor" class="bi bi-cloud-arrow-up-fill mb-2 text-muted" viewBox="0 0 16 16"><path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z"/></svg>
+                                <p id="dropZoneText" class="mb-0 text-muted small">Drag & Drop Image File Here</p>
+                                <p class="mb-0 text-muted small">or</p>
+                                <button type="button" class="btn btn-secondary btn-sm mt-1" id="browseButton">Browse File</button>
+                            </div>
+
+                            {# Preview Area #}
+                            <div id="previewContainer" class="text-center mb-3" style="min-height: 150px;"> {# Ensure some height #}
+                                 <img id="imagePreview" src="#" alt="Image Preview" class="img-fluid rounded neumorphic d-none" style="max-height: 200px; object-fit: contain;">
+                            </div>
+                            <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No file selected.</div>
+                            <div id="selectedFileName" class="text-center text-muted small mb-3"></div>
+
+                        </div>
+
+                        {# --- Right Column: Options & Action --- #}
+                        <div class="col-lg-7">
+                             <h5 class="mb-3 fw-medium">2. Set Options</h5>
+
+                             {# Rotation Options #}
+                             <div class="mb-3">
+                                 <label class="form-label d-block mb-2">Rotation Angle:</label>
+                                 <div class="btn-group w-100 option-btn-group-sm" role="group">
+                                     <input type="radio" class="btn-check" name="rotation_option" id="rot0" value="0" autocomplete="off" checked>
+                                     <label class="btn btn-outline-primary neumorphic-radio flex-fill" for="rot0">0°</label>
+
+                                     <input type="radio" class="btn-check" name="rotation_option" id="rot90" value="90" autocomplete="off">
+                                     <label class="btn btn-outline-primary neumorphic-radio flex-fill" for="rot90">90° CW</label>
+
+                                     <input type="radio" class="btn-check" name="rotation_option" id="rot180" value="180" autocomplete="off">
+                                     <label class="btn btn-outline-primary neumorphic-radio flex-fill" for="rot180">180°</label>
+
+                                     <input type="radio" class="btn-check" name="rotation_option" id="rot270" value="270" autocomplete="off">
+                                     <label class="btn btn-outline-primary neumorphic-radio flex-fill" for="rot270">90° CCW</label>
+
+                                     <input type="radio" class="btn-check" name="rotation_option" id="rotCustom" value="custom" autocomplete="off">
+                                     <label class="btn btn-outline-primary neumorphic-radio flex-fill" for="rotCustom">Custom</label>
+                                 </div>
+                             </div>
+
+                             {# Custom Angle Input (Show/Hide with JS) #}
+                             <div class="mb-3 d-none" id="customAngleDiv">
+                                 <label for="custom_angle" class="form-label fw-medium">Custom Angle (°):</label>
+                                 <input type="number" step="any" class="form-control neumorphic-inset" id="custom_angle" name="custom_angle" placeholder="e.g., 45">
+                             </div>
+
+                             {# Background Color Input (Show/Hide with JS) #}
+                              <div class="mb-3 d-none" id="bgColorDiv">
+                                 <label for="bgColorInputRotate" class="form-label fw-medium">Background Color (for custom angle):</label>
+                                 <input type="color" class="form-control form-control-color neumorphic-inset" id="bgColorInputRotate" name="bg_color_rotate" value="#ffffff" title="Choose background color">
+                             </div>
+
+                             {# Flip Options #}
+                             <div class="mb-3">
+                                 <label class="form-label d-block mb-2 fw-medium">Flip:</label>
+                                 <div class="d-flex gap-3">
+                                    <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="flip_horizontal" role="switch" id="flipHCheck">
+                                        <label class="form-check-label" for="flipHCheck">Horizontal</label>
+                                    </div>
+                                     <div class="form-check form-switch">
+                                        <input class="form-check-input" type="checkbox" name="flip_vertical" role="switch" id="flipVCheck">
+                                        <label class="form-check-label" for="flipVCheck">Vertical</label>
+                                    </div>
+                                 </div>
+                             </div>
+
+                             {# Output Format & Quality #}
+                             <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="outputFormatSelectRotate" class="form-label fw-medium">Output Format:</label>
+                                    <select class="form-select neumorphic-inset" id="outputFormatSelectRotate" name="output_format_rotate">
+                                        <option value="ORIGINAL" selected>Keep Original</option>
+                                        <option value="JPEG">JPG</option>
+                                        <option value="PNG">PNG</option>
+                                        <option value="WEBP">WEBP</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6" id="qualityDivRotate"> {# Show/hide based on format #}
+                                    <label for="qualityRangeRotate" class="form-label fw-medium">Quality: <span id="qualityValueRotate">90</span></label>
+                                    <input type="range" class="form-range" id="qualityRangeRotate" name="quality_rotate" min="10" max="95" value="90" step="5">
+                                    <div class="form-text">For JPG/WEBP output.</div>
+                                </div>
+                             </div>
+
+                             {# Submit Button #}
+                             <div class="d-grid mt-4 pt-3 border-top">
+                                <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                                    <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-arrow-clockwise me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path fill-rule="evenodd" d="M8 3a5 5 0 1 0 4.546 2.914.5.5 0 0 1 .908-.417A6 6 0 1 1 8 2z"/><path d="M8 4.466V.534a.25.25 0 0 1 .41-.192l2.36 1.966c.12.1.12.284 0 .384L8.41 4.658A.25.25 0 0 1 8 4.466"/></svg>
+                                    Apply Changes
+                                </button>
+                            </div>
+                        </div> {# End Right Column #}
+                    </div> {# End Row #}
+                </form>
+            </div> {# End Card #}
+
+            {# --- Results Section --- #}
+            {% if conversion_success %}
+            <div class="card p-4 mt-4 text-center neumorphic" id="resultsCard">
+                <h3 class="mb-3">Result</h3>
+                 <div class="qr-code-container mb-3 d-inline-block p-3 bg-white rounded"> {# Re-use class for white bg #}
+                     {# Display result image #}
+                     <img src="data:image/{{ qr_format|default:'png'|lower }};base64,{{ result_image_b64 }}" alt="Processed Image" class="img-fluid">
+                 </div>
+
+                {# Download Button Form #}
+                <form method="post" action="{% url 'image_tools:rotate_image' %}" class="d-inline-block me-2">
+                     {% csrf_token %}
+                     <input type="hidden" name="download_rotated" value="true">
+                     <button type="submit" class="btn btn-success">
+                         <svg class="bi bi-download me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg>
+                         Download {{ download_filename|default:"Image" }}
+                     </button>
+                </form>
+
+                {# Convert Another Button #}
+                <a href="{% url 'image_tools:rotate_image' %}" class="btn btn-outline-secondary clear-filters-btn d-inline-block">
+                    <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                    Process Another
+                </a>
+            </div>
+            {% endif %}
+            {# --- End Results Section --- #}
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Styles specific to Rotate Image page */
+
+/* Re-use styles from previous tools or custom.css where applicable */
+.drop-zone {
+    border: 2px dashed var(--border-color);
+    border-radius: var(--radius-main);
+    cursor: pointer;
+    transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+    background-color: var(--bg-color);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+}
+.drop-zone.dragover {
+    border-color: var(--link-color);
+    background-color: rgba(var(--link-color-rgb), 0.1);
+    box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+}
+#browseButton {
+    background-color: transparent;
+    border: 1px solid var(--muted-text-color);
+    color: var(--muted-text-color);
+    transition: all 0.2s ease-out;
+}
+#browseButton:hover {
+    background-color: rgba(var(--text-color-rgb), 0.1);
+    border-color: var(--text-color);
+    color: var(--text-color);
+}
+#selectedFileName {
+     transition: color 0.3s ease;
+     font-weight: 500;
+}
+
+/* Preview Image Specific */
+#previewContainer img#imagePreview { /* Target the preview img */
+    box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+    background-color: var(--bg-color); /* Match body bg */
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    border-radius: var(--radius-small); /* Add rounding */
+    padding: 0.25rem; /* Optional small padding */
+    border: 1px solid var(--border-color); /* Subtle border */
+}
+
+
+/* Form Control & Option Styles */
+.form-label.fw-medium { /* For option titles */
+     color: var(--text-color);
+     transition: color 0.3s ease;
+}
+.form-text { /* For helper text below options */
+     color: var(--muted-text-color);
+     transition: color 0.3s ease;
+     font-size: 0.8em;
+}
+
+/* Neumorphic Radio Buttons */
+.neumorphic-radio {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+    border: 1px solid transparent;
+    color: var(--muted-text-color);
+    transition: all 0.2s ease-out;
+    padding: .5rem 1rem; /* Default size */
+    margin-bottom: 0;
+    cursor: pointer;
+}
+/* Adjust padding for smaller option group */
+ .option-btn-group-sm .neumorphic-radio {
+     padding: .375rem .75rem; /* Smaller padding */
+     font-size: 0.9rem; /* Smaller font */
+}
+.btn-check:checked + .neumorphic-radio {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    border-color: transparent;
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+}
+ .neumorphic-radio:hover {
+    color: var(--text-color);
+    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+}
+ .btn-check:checked + .neumorphic-radio:hover {
+     color: var(--link-color);
+}
+ .btn-check:focus-visible + .neumorphic-radio {
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     z-index: 1;
+}
+.btn-group > .btn-check:checked + .neumorphic-radio {
+     z-index: 1;
+}
+
+/* Style number inputs (Custom Angle) */
+input[type="number"].neumorphic-inset {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--text-color);
+    padding: 0.75rem 1rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    height: auto;
+    -moz-appearance: textfield;
+}
+input[type=number].neumorphic-inset::-webkit-inner-spin-button,
+input[type=number].neumorphic-inset::-webkit-outer-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
+input[type="number"].neumorphic-inset:focus {
+     background-color: var(--bg-color);
+     box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+     color: var(--text-color);
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     border: none;
+}
+
+/* Style Color Picker */
+.form-control-color.neumorphic-inset {
+    min-height: calc(1.5em + .75rem + 2px); width: 100%; max-width: 100px;
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+    border: none;
+    padding: 0.2rem 0.3rem;
+    cursor: pointer;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.form-control-color.neumorphic-inset:focus {
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+}
+
+/* Style Range Slider */
+.form-range { padding: 0; cursor: pointer;}
+.form-range::-webkit-slider-runnable-track { width: 100%; height: 8px; cursor: pointer; background: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+.form-range::-moz-range-track { width: 100%; height: 8px; cursor: pointer; background: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+.form-range::-webkit-slider-thumb { height: 20px; width: 20px; border-radius: 50%; background: var(--bg-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); cursor: pointer; margin-top: -6px; -webkit-appearance: none; }
+.form-range::-moz-range-thumb { height: 20px; width: 20px; border-radius: 50%; background: var(--bg-color); box-shadow: 3px 3px 6px var(--shadow-dark), -3px -3px 6px var(--shadow-light); cursor: pointer; border: none; }
+.form-range:focus { outline: none; }
+.form-range:focus::-webkit-slider-thumb { outline: 2px solid var(--link-color); outline-offset: 2px; }
+.form-range:focus::-moz-range-thumb { outline: 2px solid var(--link-color); outline-offset: 2px; }
+
+/* Style Select Box */
+.form-select.neumorphic-inset {
+    background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right .75rem center; background-size: 16px 12px; appearance: none;
+}
+body.dark-mode .form-select.neumorphic-inset { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); }
+.form-select.neumorphic-inset:focus { background-color: var(--bg-color); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none; }
+
+/* Style Switches */
+.form-switch .form-check-input { background-color: var(--bg-color); background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); background-position: left center; border-radius: 2em; width: 2.75em; height: 1.5em; margin-top: 0.1em; box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); border: none; cursor: pointer; transition: background-color 0.3s ease, background-position .15s ease-in-out, box-shadow 0.3s ease, border-color 0.3s ease; -webkit-appearance: none; appearance: none; }
+body.dark-mode .form-switch .form-check-input { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); }
+.form-switch .form-check-input:checked { background-position: right center; border-color: transparent; background-color: var(--link-color); box-shadow: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e"); }
+.form-switch .form-check-input:focus { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); }
+body.dark-mode .form-switch .form-check-input:focus { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); }
+.form-switch .form-check-input:checked:focus { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e"); box-shadow: none; }
+
+/* --- Submit Button Styles --- */
+.btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+.btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+.btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+.btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+.btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+
+/* --- Success/Download Buttons --- */
+.btn-success { padding: 0.75rem 1.25rem; }
+.clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+.clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+
+/* Result Image Display */
+#resultsCard .qr-code-container { /* Re-use class name for styling */ background-color: #fff !important; display: inline-block; padding: 1rem; border-radius: var(--radius-small); box-shadow: var(--bs-box-shadow-sm); max-width: 100%; }
+#resultsCard .qr-code-container img { max-width: 100%; height: auto; display: block; max-height: 400px; }
+
+
+
+/* Add/Modify these rules in the <style> block */
+
+/* ... (Keep existing styles for dropzone, preview, buttons, form controls etc.) ... */
+
+/* --- Style for Section Headings (Upload/Options/Result) --- */
+/* Target h5 within the main card */
+#uploadCard h5,
+#resultsCard h3 { /* Target Result heading too */
+    color: var(--text-color);
+    transition: color 0.3s ease;
+    font-weight: 600; /* Make them stand out slightly */
+    /* Optional: Add some margin if needed */
+    /* margin-bottom: 1rem; */
+}
+
+/* Style for Option Sub-Labels (like "Rotation Angle:", "Flip:") */
+/* Targeting labels that are direct children of divs within the options row */
+#uploadCard .pt-4 .row > div > .form-label {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+    font-weight: 500; /* Normal weight */
+    display: block; /* Ensure block display if needed */
+    margin-bottom: .5rem; /* Match default label margin */
+}
+
+
+/* Ensure other labels and text also adapt */
+.form-label { /* General fallback */
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+.form-text {
+     color: var(--muted-text-color);
+     transition: color 0.3s ease;
+     font-size: 0.8em;
+}
+.form-check-label {
+     color: var(--text-color);
+     transition: color 0.3s ease;
+     cursor: pointer;
+}
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for file input, preview, and option visibility #}
+{# JS for file input, preview, and option visibility #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('imagefileInput');
+    const browseButton = document.getElementById('browseButton');
+    const previewContainer = document.getElementById('previewContainer'); // For preview img
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const imagePreview = document.getElementById('imagePreview'); // The img tag itself
+    const selectedFileNameDisplay = document.getElementById('selectedFileName'); // Display filename
+    const convertButton = document.getElementById('convertButton');
+    const dropZoneText = document.getElementById('dropZoneText');
+    let currentFile = null; // Store single file
+
+    // Options Refs
+    const rotationRadios = document.querySelectorAll('input[name="rotation_option"]');
+    const customAngleDiv = document.getElementById('customAngleDiv');
+    const customAngleInput = document.getElementById('custom_angle');
+    const bgColorDiv = document.getElementById('bgColorDiv');
+    const outputFormatSelect = document.getElementById('outputFormatSelectRotate');
+    const qualityDiv = document.getElementById('qualityDivRotate');
+    const qualityRange = document.getElementById('qualityRangeRotate');
+    const qualityValue = document.getElementById('qualityValueRotate');
+
+    // --- Quality Range Display ---
+    if (qualityRange && qualityValue) {
+        qualityRange.oninput = function() { qualityValue.textContent = this.value; }
+        qualityValue.textContent = qualityRange.value; // Initial value
+    }
+
+    // --- File Handling & UI Update ---
+    const updateUI = () => {
+        selectedFileNameDisplay.textContent = ''; // Clear filename display
+        if (currentFile) {
+            createPreviewElement(currentFile); // Show image preview
+            selectedFileNameDisplay.textContent = `Selected: ${currentFile.name}`;
+            previewPlaceholder.style.display = 'none';
+            dropZoneText.textContent = "Replace file by dropping or browsing";
+            convertButton.disabled = false;
+        } else {
+            if(imagePreview) imagePreview.src = "#"; // Clear preview image src
+            if(imagePreview) imagePreview.classList.add('d-none'); // Hide preview image element
+            previewPlaceholder.style.display = 'block';
+            dropZoneText.textContent = "Drag & Drop Image File Here";
+            convertButton.disabled = true;
+        }
+        // Update hidden input
+        try {
+            const dataTransfer = new DataTransfer();
+            if (currentFile) dataTransfer.items.add(currentFile);
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    const createPreviewElement = (file) => {
+        if (!file.type.startsWith('image/') || !imagePreview) {
+             console.warn("Cannot preview non-image file or preview element not found:", file.name);
+             if(imagePreview) imagePreview.classList.add('d-none'); // Hide img tag if not image
+             previewPlaceholder.textContent = 'Cannot preview this file type.';
+             previewPlaceholder.style.display = 'block';
+             return;
+         }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+             imagePreview.src = e.target.result;
+             imagePreview.alt = `Preview of ${file.name}`;
+             imagePreview.classList.remove('d-none'); // Show the preview
+             previewPlaceholder.style.display = 'none'; // Hide placeholder
+        }
+         reader.readAsDataURL(file);
+    };
+
+    const handleRemoveFile = () => { // Called if needed
+        currentFile = null; fileInput.value = ''; updateUI();
+    };
+
+    const handleFiles = (files) => {
+        if (files.length === 0) { handleRemoveFile(); return; }
+        const file = files[0]; // Only handle the first file
+        const allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/bmp', 'image/gif', 'image/tiff'];
+        const allowedExts = ['.jpg', '.jpeg', '.png', '.webp', '.bmp', '.gif', '.tiff'];
+        const fileNameParts = file.name.split('.');
+        const fileExt = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+
+        if (!allowedMimes.includes(file.type.toLowerCase()) && !allowedExts.includes(fileExt)) {
+             alert(`Please select a valid image file. Allowed types: ${allowedExts.join(', ')}`);
+             handleRemoveFile(); return;
+         }
+        currentFile = file; updateUI();
+    };
+
+    // --- Toggle Options Visibility ---
+    const toggleCustomAngle = () => {
+        // Check if the 'custom' radio button exists and is checked
+        const customRadio = document.getElementById('rotCustom');
+        const showCustom = customRadio ? customRadio.checked : false;
+
+        // Toggle visibility based on 'showCustom'
+        if (customAngleDiv) customAngleDiv.classList.toggle('d-none', !showCustom);
+        if (bgColorDiv) bgColorDiv.classList.toggle('d-none', !showCustom);
+
+        // Clear custom angle value if another option is selected
+        if (!showCustom && customAngleInput) {
+            customAngleInput.value = '';
+        }
+    };
+
+    const toggleQualitySliderRotate = () => {
+        const selectedFormat = outputFormatSelect.value.toUpperCase();
+        if (qualityDiv) {
+            qualityDiv.classList.toggle('d-none', !(selectedFormat === 'JPEG' || selectedFormat === 'WEBP'));
+        }
+    };
+
+
+    // --- Event Listeners ---
+    // File Handling
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    // Options Visibility
+    rotationRadios.forEach(radio => {
+        radio.addEventListener('change', toggleCustomAngle);
+    });
+    outputFormatSelect.addEventListener('change', toggleQualitySliderRotate);
+
+
+    // Initial State
+    updateUI();
+    toggleCustomAngle();
+    toggleQualitySliderRotate();
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{# Theme toggle inherited from base #}
+{% endblock %}

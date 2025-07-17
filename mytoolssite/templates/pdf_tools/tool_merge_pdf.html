@@ -1,0 +1,245 @@
+{# templates/pdf_tools/tool_merge_pdf.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">P+P</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Combine multiple PDF files into a single document. Files are merged in the order you upload them.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        {# Use name 'pdffiles' and allow multiple PDF files #}
+                        <input class="d-none" type="file" id="pdffilesInput" name="pdffiles" accept=".pdf,application/pdf" multiple required>
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cloud-arrow-up-fill mb-3 text-muted" viewBox="0 0 16 16"><path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z"/></svg>
+                             <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop PDF Files Here</p>
+                             <p class="mb-0 text-muted small">(Select 2 or more files)</p>
+                             <p class="mb-0 text-muted small">or</p>
+                             <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse Files</button>
+                        </div>
+
+                        {# File List Preview (No image previews) #}
+                        <div id="previewContainer" class="mt-3 mb-4">
+                             <ul id="fileList" class="list-group list-group-flush">
+                                 {# File names will be added here by JS #}
+                             </ul>
+                        </div>
+                        <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No files selected. Select 2 or more PDFs.</div>
+
+                        {# No options for V1 #}
+
+                        {# Merge Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                                 <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-union me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M0 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2 2v8a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2v-2H2a2 2 0 0 1-2-2zm5 4v2h2a2 2 0 0 1 2 2v2h2a2 2 0 0 1 2-2V6a2 2 0 0 1-2-2z"/></svg>
+                                Merge PDFs
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Download Section --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic">
+                    <h3 class="mb-3 text-success">Merge Complete!</h3>
+                    {% if original_filenames %}
+                        <p class="text-muted small mb-3">Merged {{ original_filenames|length }} files: {{ original_filenames|join:", " }}</p>
+                    {% endif %}
+                    <p class="text-muted mb-4">Your merged PDF file is ready.</p>
+
+                    <form method="post" action="{% url 'pdf_tools:merge_pdf' %}">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_merged" value="true">
+                         <button type="submit" class="btn btn-success btn-lg mb-3">
+                             <svg class="bi bi-download me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg>
+                             Download {{ download_filename|default:"Merged PDF" }}
+                         </button>
+                    </form>
+                    <a href="{% url 'pdf_tools:merge_pdf' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                         <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                        Merge More PDFs
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Re-use styles from previous tools */
+    .drop-zone { border: 2px dashed var(--border-color); border-radius: var(--radius-main); cursor: pointer; transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease; }
+    .drop-zone.dragover { border-color: var(--link-color); background-color: rgba(var(--link-color-rgb), 0.1); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); }
+    #browseButton { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); transition: all 0.2s ease-out; }
+    #browseButton:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+
+    /* Style for file list items */
+    #fileList .list-group-item {
+        background-color: transparent;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-color);
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 0.75rem 0.25rem; /* Less padding */
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+     #fileList .list-group-item:last-child {
+         border-bottom: none;
+     }
+    #fileList .file-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 1rem; /* Space before button */
+        font-size: 0.9em;
+    }
+    #fileList .remove-file-btn {
+        color: var(--accent-security); /* Use red for remove */
+        background: none;
+        border: none;
+        padding: 0.1rem 0.4rem;
+        font-size: 1.1em;
+        line-height: 1;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+    }
+     #fileList .remove-file-btn:hover {
+         opacity: 1;
+     }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS adapted for multiple file input 'pdffiles', list display #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const form = document.getElementById('uploadForm');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('pdffilesInput'); // Correct ID
+    const browseButton = document.getElementById('browseButton');
+    const previewContainer = document.getElementById('previewContainer'); // Container for list
+    const fileListUl = document.getElementById('fileList'); // The UL element
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const convertButton = document.getElementById('convertButton');
+    const dropZoneText = document.getElementById('dropZoneText');
+    let selectedFiles = []; // Array to hold multiple files
+
+    const updateUI = () => {
+        fileListUl.innerHTML = ''; // Clear existing list items
+        if (selectedFiles.length > 0) {
+            selectedFiles.forEach((file, index) => {
+                createFileListItem(file, index);
+            });
+            previewPlaceholder.style.display = 'none'; // Hide placeholder
+             // Enable button only if 2 or more files are selected
+            convertButton.disabled = selectedFiles.length < 2;
+            dropZoneText.textContent = `Add more files or drop here... (${selectedFiles.length} selected)`;
+        } else {
+            previewPlaceholder.style.display = 'block'; // Show placeholder
+            convertButton.disabled = true;
+            dropZoneText.textContent = "Drag & Drop PDF Files Here";
+        }
+        // Update hidden input with current file list
+        try {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    // Create list item for file display
+    const createFileListItem = (file, index) => {
+        const listItem = document.createElement('li');
+        listItem.classList.add('list-group-item');
+
+        const fileNameSpan = document.createElement('span');
+        fileNameSpan.classList.add('file-name');
+        fileNameSpan.textContent = file.name;
+        listItem.appendChild(fileNameSpan);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.classList.add('remove-file-btn');
+        removeBtn.innerHTML = '×'; // 'X' symbol
+        removeBtn.type = 'button';
+        removeBtn.setAttribute('aria-label', `Remove ${file.name}`);
+        removeBtn.dataset.index = index;
+        removeBtn.onclick = handleRemoveFile;
+        listItem.appendChild(removeBtn);
+
+        fileListUl.appendChild(listItem);
+    };
+
+    const handleRemoveFile = (event) => {
+        const indexToRemove = parseInt(event.target.dataset.index, 10);
+        if (!isNaN(indexToRemove)) {
+            selectedFiles.splice(indexToRemove, 1); // Remove file from array
+            updateUI(); // Refresh list and button state
+        }
+    };
+
+    const handleFiles = (files) => {
+        const newFiles = Array.from(files).filter(file => {
+            const allowedMimes = ['application/pdf'];
+            const allowedExts = ['.pdf'];
+            const fileExt = '.' + file.name.split('.').pop().toLowerCase();
+            // Check both MIME and Extension
+            return allowedMimes.includes(file.type.toLowerCase()) || allowedExts.includes(fileExt);
+        });
+
+        if (newFiles.length === 0 && files.length > 0) {
+            alert('Please select only PDF files.');
+            return; // Don't proceed if invalid files were dropped/selected
+        }
+
+        // Add only new valid files (could add duplicate checks if desired)
+        selectedFiles.push(...newFiles);
+        updateUI();
+    };
+
+    // Drag/Drop/Browse listeners
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    updateUI(); // Initial state
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

@@ -1,0 +1,247 @@
+{# templates/text_tools/tool_word_counter.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %} {# For potential number formatting later #}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-11"> {# Wider column for text area #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">WC</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Paste your text below to count words, characters, sentences, and paragraphs.</p>
+            </div>
+
+            {# Display Messages if needed later #}
+            {# {% if messages %} ... {% endif %} #}
+
+            {# --- Input Form Section --- #}
+            <div class="card p-4 p-md-5 mb-4" id="inputCard"> {# Use card for consistency #}
+                <form method="post" action="{% url 'text_tools:word_counter' %}" id="wordCountForm">
+                    {% csrf_token %}
+
+                    <div class="mb-3">
+                        <label for="text_input" class="form-label fw-medium">Enter Text:</label>
+                        <textarea class="form-control neumorphic-inset font-monospace" {# Use monospace for text #}
+                                  id="text_input"
+                                  name="text_input"
+                                  rows="10"
+                                  placeholder="Paste or type your text here..."
+                                  required>{{ text_input }}</textarea> {# Repopulate text area #}
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2"> {# Align buttons right #}
+                        <button type="button" class="btn btn-outline-secondary clear-filters-btn" id="clearTextButton">Clear Text</button>
+                        <button type="submit" class="btn btn-submit-tool" id="countButton"> {# Custom class #}
+                             <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-calculator-fill me-1" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M2 2a2 2 0 0 1 2-2h8a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2zm2 .5v2a.5.5 0 0 0 .5.5h7a.5.5 0 0 0 .5-.5v-2a.5.5 0 0 0-.5-.5h-7a.5.5 0 0 0-.5.5m0 4v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M4.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM4 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M7.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM7.5 9a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zM7 12.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5M10.5 6a.5.5 0 0 0-.5.5v1a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5zm-.5 3.5a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5zm.5 3.5a.5.5 0 0 0 .5.5h1a.5.5 0 0 0 .5-.5v-1a.5.5 0 0 0-.5-.5h-1a.5.5 0 0 0-.5.5"/></svg>
+                            Count Stats
+                        </button>
+                    </div>
+                </form>
+            </div>
+            {# --- End Input Form Section --- #}
+
+            {# --- Results Section --- #}
+            {% if stats is not None %} {# Display only if stats were calculated (even if zeros) #}
+            <div class="card p-4 mt-4" id="resultsCard"> {# Card style for results #}
+                <h3 class="text-center mb-4">Results</h3>
+                <div class="row text-center g-3">
+                    <div class="col-md-4 col-6">
+                        <div class="stat-box neumorphic-inset p-3">
+                            <div class="fs-2 fw-bold">{{ stats.word_count|intcomma }}</div>
+                            <div class="text-muted small">Words</div>
+                        </div>
+                    </div>
+                    <div class="col-md-4 col-6">
+                        <div class="stat-box neumorphic-inset p-3">
+                            <div class="fs-2 fw-bold">{{ stats.char_count_spaces|intcomma }}</div>
+                            <div class="text-muted small">Characters (incl. spaces)</div>
+                        </div>
+                    </div>
+                     <div class="col-md-4 col-12"> {# Span full width on small screens #}
+                        <div class="stat-box neumorphic-inset p-3">
+                            <div class="fs-2 fw-bold">{{ stats.char_count_no_spaces|intcomma }}</div>
+                            <div class="text-muted small">Characters (excl. spaces)</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-6"> {# Span half width on medium+ #}
+                        <div class="stat-box neumorphic-inset p-3">
+                            <div class="fs-2 fw-bold">{{ stats.sentence_count|intcomma }}</div>
+                            <div class="text-muted small">Sentences</div>
+                        </div>
+                    </div>
+                    <div class="col-md-6 col-6">
+                        <div class="stat-box neumorphic-inset p-3">
+                            <div class="fs-2 fw-bold">{{ stats.paragraph_count|intcomma }}</div>
+                            <div class="text-muted small">Paragraphs</div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+            {# --- End Results Section --- #}
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* Styles specific to Word Counter page */
+
+/* Style text area */
+#text_input {
+    min-height: 200px; /* Ensure decent starting height */
+    font-size: 1rem; /* Make text readable */
+    line-height: 1.6;
+     /* Use neumorphic inset style */
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--text-color);
+    padding: 0.75rem 1rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+}
+ #text_input:focus {
+     background-color: var(--bg-color);
+     box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+     color: var(--text-color);
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     border: none;
+}
+ #text_input::placeholder {
+     color: var(--muted-text-color);
+     opacity: 0.7;
+     transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+
+/* Style Stat Boxes */
+.stat-box {
+    border-radius: var(--radius-small);
+    /* Neumorphic inset */
+    background-color: var(--bg-color); /* Match background */
+    box-shadow: inset 3px 3px 6px var(--shadow-dark),
+                inset -3px -3px 6px var(--shadow-light);
+     transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+     min-height: 100px; /* Give boxes some height */
+     display: flex;
+     flex-direction: column;
+     justify-content: center;
+     align-items: center;
+}
+.stat-box .fs-2 { /* Result number */
+    color: var(--link-color); /* Make numbers stand out */
+    margin-bottom: 0.1rem;
+     transition: color 0.3s ease;
+}
+.stat-box .text-muted { /* Label */
+     color: var(--muted-text-color) !important; /* Ensure override */
+     transition: color 0.3s ease;
+}
+
+
+#resultsCard h3 {
+    color: var(--text-color); /* Use main text color variable */
+    transition: color 0.3s ease;
+    font-weight: 600; /* Make it slightly bolder */
+}
+
+/* Buttons (using existing neumorphic styles where possible) */
+.btn-submit-tool { /* Count Stats button */
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--link-color);
+    padding: 0.75rem 1rem;
+    font-weight: 500;
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-submit-tool:hover {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+}
+.btn-submit-tool:active {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+}
+.btn-submit-tool:disabled { /* Although not used here, keep for consistency */
+    box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    opacity: 0.6;
+    cursor: not-allowed;
+    color: var(--muted-text-color);
+}
+.btn-submit-tool:focus-visible {
+    outline: 2px solid var(--link-color);
+    outline-offset: 2px;
+    box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+}
+
+.clear-filters-btn { /* Re-using class for Clear Text button */
+    background-color: transparent;
+    border: 1px solid var(--muted-text-color);
+    color: var(--muted-text-color);
+    border-radius: var(--radius-small);
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.clear-filters-btn:hover {
+    background-color: rgba(var(--text-color-rgb), 0.1);
+    border-color: var(--text-color);
+    color: var(--text-color);
+}
+
+/* Ensure labels are visible */
+.form-label {
+    color: var(--text-color);
+    font-weight: 500;
+    transition: color 0.3s ease;
+}
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for clear button and maybe live counting later #}
+<script>
+// JS for clear button and maybe live counting later
+document.addEventListener('DOMContentLoaded', () => {
+    const clearButton = document.getElementById('clearTextButton');
+    const textArea = document.getElementById('text_input');
+    const resultsCard = document.getElementById('resultsCard'); // Get results card
+
+    if(clearButton && textArea) {
+        clearButton.addEventListener('click', () => {
+            textArea.value = ''; // Clear the text area
+            // Hide results card when clearing text
+            if (resultsCard) {
+                resultsCard.style.display = 'none';
+            }
+            textArea.focus(); // Put cursor back in text area
+        });
+    }
+
+    // Ensure results card is initially hidden if no stats are passed on load
+    // (unless stats exist, e.g. after form submission)
+    if (resultsCard && !resultsCard.querySelector('.fs-2')) { // Check if results numbers exist
+        {% if stats is None %} // Django template tag check
+            resultsCard.style.display = 'none';
+        {% endif %}
+    } else if (resultsCard) {
+         resultsCard.style.display = ''; // Ensure it's visible if stats ARE present
+    }
+
+});
+
+
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

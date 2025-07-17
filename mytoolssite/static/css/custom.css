@@ -1,0 +1,587 @@
+/* static/css/custom.css */
+
+/* --- Base and Color Variables --- */
+:root {
+    /* Light Mode Defaults */
+    --bg-color: #eef1f6;
+    --card-bg-color: #ffffff; /* White cards in light mode */
+    --navbar-bg-color: #e4e8ee;
+    --text-color: #34495e;
+    --muted-text-color: #5a6a7e;
+    --shadow-dark: #c8cdd5;
+    --shadow-light: #ffffff;
+    --link-color: #2979ff;
+    --link-hover-color: #1e60ff;
+    --border-color: #dee2e6;
+    --offcanvas-shadow: rgba(0,0,0,0.1);
+    --navbar-toggler-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(52, 73, 94, 0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    /* RGB versions for rgba() - Light */
+    --text-color-rgb: 52, 73, 94;
+    --shadow-dark-rgb: 200, 205, 213;
+    --link-color-rgb: 41, 121, 255;
+
+    --radius-main: 15px;
+    --radius-small: 10px;
+
+    /* Accent Colors */
+    --accent-primary: #2979ff;
+    --accent-pdf: #ff5722;
+    --accent-image: #4caf50;
+    --accent-audio: #ffc107;
+    --accent-video: #9c27b0;
+    --accent-text: #03a9f4;
+    --accent-document: #3f51b5;
+    --accent-archive: #795548;
+    --accent-developer: #607d8b;
+    --accent-utility: #009688;
+    --accent-security: #f44336;
+    --accent-webdev: #8bc34a;
+    --accent-ai: #1de9b6;
+    --accent-finance: #00796b;
+    --accent-network: #d32f2f;
+}
+
+body.dark-mode {
+    /* Dark Mode Overrides */
+    --bg-color: #2c3038;
+    --card-bg-color: #31353f;
+    --navbar-bg-color: #272a31;
+    --text-color: #e0e0e0;
+    --muted-text-color: #a0a0a0;
+    --shadow-dark: #21242b;
+    --shadow-light: #373c45;
+    --link-color: #5eadff;
+    --link-hover-color: #82c0ff;
+    --border-color: #373c45;
+    --offcanvas-shadow: rgba(0,0,0,0.3);
+    --navbar-toggler-icon: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 30 30'%3e%3cpath stroke='rgba(224, 224, 224, 0.7)' stroke-linecap='round' stroke-miterlimit='10' stroke-width='2' d='M4 7h22M4 15h22M4 23h22'/%3e%3c/svg%3e");
+    /* RGB versions for rgba() - Dark */
+    --text-color-rgb: 224, 224, 224;
+    --shadow-dark-rgb: 33, 36, 43;
+    --link-color-rgb: 94, 173, 255;
+}
+
+body {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    transition: background-color 0.3s ease, color 0.3s ease;
+    /* font-family: 'Inter', sans-serif; */
+}
+
+/* --- Styling Specific Elements (Using Variables) --- */
+
+/* Navbar */
+.navbar.navbar-light {
+    background-color: var(--navbar-bg-color) !important;
+    box-shadow: 6px 6px 12px var(--shadow-dark),
+               -6px -6px 12px var(--shadow-light);
+    border-bottom: none;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.navbar-light .navbar-brand,
+.navbar-light .nav-link {
+    color: var(--text-color);
+    opacity: 0.8;
+    transition: color 0.3s ease, opacity 0.3s ease;
+}
+.navbar-light .nav-link:hover,
+.navbar-light .nav-link:focus,
+.navbar-light .navbar-brand:hover {
+    color: var(--text-color);
+    opacity: 1;
+}
+.navbar-light .nav-link.active {
+    color: var(--link-color);
+    opacity: 1;
+    font-weight: 500;
+}
+.navbar-light .navbar-toggler {
+    border-color: rgba(var(--text-color-rgb), 0.3);
+    transition: border-color 0.3s ease;
+}
+.navbar-light .navbar-toggler-icon {
+     background-image: var(--navbar-toggler-icon);
+     transition: background-image 0.3s ease;
+}
+/* Dropdown menu */
+.navbar-light .dropdown-menu {
+     background-color: var(--navbar-bg-color);
+     border: none;
+     border-radius: var(--radius-small);
+     box-shadow: 4px 4px 8px var(--shadow-dark),
+                -4px -4px 8px var(--shadow-light);
+     margin-top: 0.5rem;
+     transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.navbar-light .dropdown-item {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+.navbar-light .dropdown-item:hover, .navbar-light .dropdown-item:focus {
+    color: var(--link-color);
+    background-color: transparent;
+}
+.navbar-light .dropdown-divider {
+    border-color: var(--shadow-dark);
+    transition: border-color 0.3s ease;
+}
+.navbar-light .dropdown-header {
+    color: var(--muted-text-color);
+    transition: color 0.3s ease;
+}
+/* Theme Toggle Button */
+#theme-toggle-btn {
+    color: var(--text-color);
+    opacity: 0.7;
+    transition: color 0.3s ease, opacity 0.3s ease;
+}
+#theme-toggle-btn:hover {
+    opacity: 1;
+}
+
+
+/* Sticky Filter Section */
+#sticky-filter-section {
+    position: -webkit-sticky; position: sticky;
+    top: 70px; /* Adjust based on navbar */
+    background-color: var(--bg-color);
+    padding: 1rem 0.5rem 0.5rem 0.5rem;
+    z-index: 1010;
+    box-shadow: 0 6px 12px rgba(var(--shadow-dark-rgb), 0.7);
+    border-bottom: none;
+    margin-bottom: 1.5rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+
+
+/* Search Input */
+#tool-search-input {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: inset 5px 5px 10px var(--shadow-dark),
+               inset -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--text-color);
+    padding: 0.75rem 1rem;
+    height: auto;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+}
+#tool-search-input:focus {
+    background-color: var(--bg-color);
+    box-shadow: inset 6px 6px 12px var(--shadow-dark),
+               inset -6px -6px 12px var(--shadow-light);
+    color: var(--text-color);
+    outline: none;
+}
+#tool-search-input::placeholder {
+    color: var(--muted-text-color);
+    opacity: 0.7;
+     transition: color 0.3s ease, opacity 0.3s ease;
+}
+
+/* Mobile Filter Button */
+.btn-primary[data-bs-target^="#offcanvasFilters"] {
+    background-color: var(--bg-color);
+    border-radius: var(--radius-small);
+    box-shadow: 5px 5px 10px var(--shadow-dark),
+               -5px -5px 10px var(--shadow-light);
+    border: none;
+    color: var(--link-color);
+    padding: 0.5rem 0.8rem;
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+.btn-primary[data-bs-target^="#offcanvasFilters"]:hover {
+     color: var(--link-color);
+     background-color: var(--bg-color);
+     box-shadow: 6px 6px 12px var(--shadow-dark),
+                -6px -6px 12px var(--shadow-light);
+}
+.btn-primary[data-bs-target^="#offcanvasFilters"]:active {
+    color: var(--link-color);
+    background-color: var(--bg-color);
+    box-shadow: inset 3px 3px 6px var(--shadow-dark),
+               inset -3px -3px 6px var(--shadow-light);
+}
+
+/* Offcanvas Menu */
+.offcanvas {
+    background-color: var(--bg-color);
+    color: var(--text-color);
+    box-shadow: 8px 0 15px var(--offcanvas-shadow);
+    transition: background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+}
+.offcanvas-header {
+    border-bottom-color: var(--border-color);
+     transition: border-color 0.3s ease;
+}
+.offcanvas-title {
+    color: var(--text-color);
+     transition: color 0.3s ease;
+}
+body.dark-mode .btn-close {
+    filter: invert(1) grayscale(100%) brightness(200%);
+}
+
+
+/* Checkboxes */
+.form-check-label {
+    color: var(--text-color);
+    padding-left: 0.3rem;
+    transition: color 0.3s ease;
+}
+.form-check-input {
+    background-color: var(--bg-color);
+    border-color: var(--border-color);
+    box-shadow: inset 1px 1px 2px var(--shadow-dark),
+               inset -1px -1px 2px var(--shadow-light);
+     transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.form-check-input:checked {
+    background-color: var(--link-color);
+    border-color: var(--link-color);
+    box-shadow: none;
+}
+.form-check-input:focus {
+    border-color: var(--link-color);
+    outline: 0;
+    box-shadow: 0 0 0 .25rem rgba(var(--link-color-rgb), .25);
+}
+
+
+/* Clear Buttons */
+.clear-filters-btn {
+    background-color: transparent;
+    border: 1px solid var(--muted-text-color);
+    color: var(--muted-text-color);
+    border-radius: var(--radius-small);
+    transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+}
+.clear-filters-btn:hover {
+    background-color: rgba(var(--text-color-rgb), 0.1);
+    border-color: var(--text-color);
+    color: var(--text-color);
+}
+
+
+/* --- Tool Cards / General Cards (Neumorphic) --- */
+.card {
+    background-color: var(--card-bg-color);
+    border-radius: var(--radius-main);
+    box-shadow: 8px 8px 16px var(--shadow-dark),
+               -8px -8px 16px var(--shadow-light);
+    border: none;
+    overflow: hidden;
+    transition: transform 0.2s ease-out, box-shadow 0.3s ease, background-color 0.3s ease;
+}
+#tools-grid .card:hover { /* Hover effect only for tool grid */
+    transform: translateY(-6px);
+    box-shadow: 10px 10px 20px var(--shadow-dark),
+               -10px -10px 20px var(--shadow-light);
+}
+.card .card-body {
+    padding: 1.5rem;
+    color: var(--text-color);
+}
+.card .card-title {
+    color: var(--text-color);
+    font-weight: 600;
+     transition: color 0.3s ease;
+}
+.card .card-subtitle {
+    color: var(--muted-text-color);
+    transition: color 0.3s ease;
+    font-size: 0.9em;
+}
+.card .card-text {
+    color: var(--muted-text-color);
+    font-size: 0.9rem;
+    flex-grow: 1;
+     transition: color 0.3s ease;
+}
+.card .icon-link {
+    text-decoration: none;
+    color: var(--link-color);
+    font-weight: 500;
+     transition: color 0.3s ease;
+}
+.card .icon-link:hover {
+    color: var(--link-hover-color);
+}
+.card .icon-link.disabled {
+     color: var(--muted-text-color);
+     opacity: 0.6;
+     pointer-events: none;
+      transition: color 0.3s ease, opacity 0.3s ease;
+}
+.card .bi {
+     vertical-align: -0.125em;
+ }
+
+/* Feature Icons (Inside Cards) */
+#tools-grid .feature-icon {
+    width: 122px; height: 50px;
+    display: inline-flex; align-items: center; justify-content: center;
+    border-radius: 50%;
+    box-shadow: 5px 5px 10px var(--shadow-dark),
+               -5px -5px 10px var(--shadow-light);
+    color: #fff;
+    font-size: 1.5rem;
+    margin-bottom: 1rem;
+    font-weight: bold;
+    transition: box-shadow 0.3s ease;
+}
+/* Assign background colors based on class */
+.icon-pdf { background-color: var(--accent-pdf); }
+.icon-image { background-color: var(--accent-image); }
+.icon-audio { background-color: var(--accent-audio); }
+.icon-video { background-color: var(--accent-video); }
+.icon-text { background-color: var(--accent-text); }
+.icon-document { background-color: var(--accent-document); }
+.icon-archive { background-color: var(--accent-archive); }
+.icon-developer { background-color: var(--accent-developer); }
+.icon-utility { background-color: var(--accent-utility); }
+.icon-security { background-color: var(--accent-security); }
+.icon-webdev { background-color: var(--accent-webdev); }
+.icon-converter { background-color: var(--accent-primary); }
+.icon-generator { background-color: var(--accent-utility); }
+.icon-finance { background-color: var(--accent-finance); }
+.icon-network { background-color: var(--accent-network); }
+.icon-ai { background-color: var(--accent-ai); color: #333; }
+
+
+/* AI Badge Styling */
+.badge.bg-info {
+    background-color: var(--accent-ai) !important;
+    color: #333 !important;
+    font-size: 0.7rem;
+    padding: 0.3em 0.5em;
+    vertical-align: middle;
+    border-radius: var(--radius-small);
+    margin-left: 0.3rem;
+    box-shadow: 2px 2px 4px var(--shadow-dark), -1px -1px 2px var(--shadow-light);
+    transition: box-shadow 0.3s ease, background-color 0.3s ease;
+}
+
+/* --- Blog Specific Styles & Dark Mode Fixes --- */
+.post-content {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+    line-height: 1.7; /* Improve readability */
+}
+.post-content p {
+     color: inherit; /* Ensure paragraphs inherit */
+     margin-bottom: 1.25rem; /* Space between paragraphs */
+}
+article header h1 {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+/* Override Bootstrap's muted color */
+.text-muted {
+    color: var(--muted-text-color) !important;
+    transition: color 0.3s ease;
+}
+
+
+/* Footer */
+.footer {
+    background-color: var(--navbar-bg-color);
+    padding: 1rem 0;
+    border-top: 1px solid var(--shadow-dark);
+    box-shadow: inset 0 4px 8px -4px var(--shadow-dark);
+    transition: background-color 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+}
+.footer .text-muted, .footer a {
+    color: var(--muted-text-color) !important;
+    font-size: 0.9rem;
+     transition: color 0.3s ease;
+}
+.footer a:hover {
+    color: var(--link-color) !important;
+}
+
+
+/* Accessibility Focus Styles */
+input:focus, button:focus, a:focus-visible, .form-check-input:focus {
+   outline: 2px solid var(--link-color);
+   outline-offset: 2px;
+   box-shadow: none;
+}
+#tool-search-input:focus {
+    outline: none;
+     box-shadow: inset 6px 6px 12px var(--shadow-dark),
+               inset -6px -6px 12px var(--shadow-light);
+}
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+/* static/css/custom.css */
+
+/* ... (Keep all existing CSS rules) ... */
+
+
+/* --- Blog Specific Styles & Dark Mode Fixes --- */
+
+/* Ensure blog post title in header adapts */
+article header h1 {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+}
+/* Override Bootstrap's muted color */
+.text-muted {
+    color: var(--muted-text-color) !important;
+    transition: color 0.3s ease;
+}
+
+/* --- Styles for Rendered Markdown Content --- */
+.post-content {
+    color: var(--text-color);
+    transition: color 0.3s ease;
+    line-height: 1.7;
+}
+.post-content h1, .post-content h2, .post-content h3, .post-content h4, .post-content h5, .post-content h6 {
+    color: var(--text-color); margin-top: 1.5em; margin-bottom: 0.75em; font-weight: 600; transition: color 0.3s ease;
+}
+.post-content p {
+    margin-bottom: 1.25rem; color: var(--text-color); transition: color 0.3s ease;
+}
+.post-content a {
+    color: var(--link-color); text-decoration: none; transition: color 0.3s ease;
+}
+.post-content a:hover {
+    color: var(--link-hover-color); text-decoration: underline;
+}
+/* Inline code */
+.post-content code:not([class*="language-"]) {
+    background-color: rgba(var(--muted-text-color-rgb, 90, 106, 126), 0.1);
+    color: var(--text-color); /* Use text color for inline code */
+    padding: 0.2em 0.4em;
+    border-radius: 3px;
+    font-size: 0.87em; /* Slightly smaller */
+    transition: background-color 0.3s ease, color 0.3s ease;
+}
+/* Code blocks */
+.post-content pre {
+    padding: 1em;
+    border-radius: var(--radius-small);
+    overflow-x: auto;
+    background-color: var(--bg-color); /* Use main bg for code blocks */
+    box-shadow: inset 2px 2px 5px var(--shadow-dark), inset -2px -2px 5px var(--shadow-light);
+    margin-bottom: 1.25rem;
+    transition: background-color 0.3s ease, box-shadow 0.3s ease;
+}
+.post-content pre code.hljs { /* Target highlighted code specifically */
+    background-color: transparent !important; /* Override hljs theme background */
+    padding: 0;
+    font-size: 0.9em;
+    color: var(--text-color); /* Default text color */
+    transition: color 0.3s ease;
+}
+.post-content blockquote {
+    border-left: 4px solid var(--border-color);
+    padding-left: 1rem;
+    margin-left: 0; margin-right: 0; margin-bottom: 1.25rem;
+    color: var(--muted-text-color);
+    font-style: italic;
+    transition: color 0.3s ease, border-color 0.3s ease;
+}
+.post-content ul, .post-content ol {
+    padding-left: 2em; margin-bottom: 1rem; color: var(--text-color); transition: color 0.3s ease;
+}
+.post-content li {
+    margin-bottom: 0.5em;
+}
+.post-content img {
+    max-width: 100%; height: auto; border-radius: var(--radius-small); margin-bottom: 1rem;
+}
+.post-content table {
+    width: 100%; margin-bottom: 1rem; border-collapse: collapse; color: var(--text-color); transition: color 0.3s ease;
+}
+.post-content th, .post-content td {
+    border: 1px solid var(--border-color); padding: 0.5rem 0.75rem; transition: border-color 0.3s ease;
+}
+.post-content thead th {
+    background-color: rgba(var(--text-color-rgb), 0.05); font-weight: 600; transition: background-color 0.3s ease;
+}
+body.dark-mode .post-content thead th {
+     background-color: rgba(var(--shadow-light-rgb), 0.3); /* Use shadow light for dark header */
+}
+.post-content hr {
+    border-top-color: var(--border-color); margin: 2rem 0; transition: border-color 0.3s ease;
+}
+
+/* --- Highlight.js Theme Overrides for Dark Mode --- */
+/* These rules ensure the code text color matches the general dark theme text */
+body.dark-mode .hljs { color: #c9d1d9; background: #22272e;}
+body.dark-mode .hljs-comment, body.dark-mode .hljs-quote { color: #8b949e; }
+body.dark-mode .hljs-variable, body.dark-mode .hljs-template-variable, body.dark-mode .hljs-tag, body.dark-mode .hljs-name, body.dark-mode .hljs-selector-id, body.dark-mode .hljs-selector-class, body.dark-mode .hljs-regexp, body.dark-mode .hljs-link, body.dark-mode .hljs-meta { color: #ff7b72; }
+body.dark-mode .hljs-number, body.dark-mode .hljs-literal, body.dark-mode .hljs-type, body.dark-mode .hljs-params, body.dark-mode .hljs-built_in, body.dark-mode .hljs-builtin-name { color: #79c0ff; }
+body.dark-mode .hljs-string, body.dark-mode .hljs-symbol, body.dark-mode .hljs-bullet, body.dark-mode .hljs-subst, body.dark-mode .hljs-section, body.dark-mode .hljs-selector-attr, body.dark-mode .hljs-selector-pseudo, body.dark-mode .hljs-addition { color: #a5d6ff; }
+body.dark-mode .hljs-keyword, body.dark-mode .hljs-selector-tag, body.dark-mode .hljs-attribute { color: #ffa657; }
+body.dark-mode .hljs-emphasis { font-style: italic; }
+body.dark-mode .hljs-strong { font-weight: bold; }
+/* Override code block text color if theme doesn't match body text well */
+body.dark-mode .post-content pre code.hljs {
+    color: #c9d1d9; /* Match hljs theme default */
+}
+
+
+/* ... (Rest of CSS: Footer, Accessibility) ... */
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+

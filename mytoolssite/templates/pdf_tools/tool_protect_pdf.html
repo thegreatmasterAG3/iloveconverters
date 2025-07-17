@@ -1,0 +1,296 @@
+{# templates/pdf_tools/tool_protect_pdf.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">P🔒</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Add password protection and encryption to your PDF document.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form Section --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        {# PDF File Input #}
+                        <div class="mb-4">
+                             <label class="form-label fw-medium">1. Upload PDF File:</label>
+                             {# Unique name 'pdffile_protect' #}
+                             {# Reintroduce Drop Zone UI #}
+                             <input class="d-none" type="file" id="pdffileInput" name="pdffile_protect" accept=".pdf,application/pdf" required>
+                             <div id="dropZonePdf" class="drop-zone neumorphic-inset text-center p-4 p-md-5">
+                                <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cloud-arrow-up-fill mb-3 text-muted" viewBox="0 0 16 16"><path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z"/></svg>
+                                <p id="dropZoneTextPdf" class="mb-0 text-muted">Drag & Drop PDF File Here</p>
+                                <p class="mb-0 text-muted small">(Select one PDF file)</p>
+                                <p class="mb-0 text-muted small">or</p>
+                                <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButtonPdf">Browse File</button>
+                             </div>
+                             <div id="selectedFileNamePdf" class="text-center text-muted small mt-2"></div>
+                             <div id="previewPlaceholderPdf" class="text-center text-muted mt-3" style="display: block;">No file selected.</div>
+                        </div>
+
+                        {# --- Password Options --- #}
+                        <div class="border-top pt-4 mb-4">
+                            <h5 class="mb-3 fw-medium">2. Set Password:</h5>
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="passwordInput" class="form-label">Password:</label>
+                                    <input type="password" class="form-control neumorphic-inset" id="passwordInput" name="password" required minlength="{{ MIN_PASSWORD_LENGTH|default:"6" }}">
+                                     <div class="form-text">Minimum {{ MIN_PASSWORD_LENGTH|default:"6" }} characters.</div>
+                                     <div class="invalid-feedback" id="passwordError"></div> {# For JS feedback #}
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="passwordConfirmInput" class="form-label">Confirm Password:</label>
+                                    <input type="password" class="form-control neumorphic-inset" id="passwordConfirmInput" name="password_confirm" required minlength="{{ MIN_PASSWORD_LENGTH|default:"6" }}">
+                                     <div class="invalid-feedback" id="confirmPasswordError">Passwords do not match.</div>
+                                </div>
+                            </div>
+                        </div>
+                        {# --- END: Password Options --- #}
+
+                        {# Submit Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="protectButton" disabled> {# Disabled initially by JS #}
+                               <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-lock-fill me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M8 1a2 2 0 0 1 2 2v4H6V3a2 2 0 0 1 2-2m3 6V3a3 3 0 0 0-6 0v4a2 2 0 0 0-2 2v5a2 2 0 0 0 2 2h6a2 2 0 0 0 2-2V9a2 2 0 0 0-2-2"/></svg>
+                                Protect PDF
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {# --- End Upload Form Section --- #}
+
+                {# --- Loading Indicator --- #}
+                <div id="loadingOverlay" class="text-center py-5" style="display: none;">
+                     <div class="spinner-border text-primary" role="status" style="width: 3rem; height: 3rem;"><span class="visually-hidden">Loading...</span></div>
+                     <p class="mt-3 text-muted">Encrypting your PDF, please wait...</p>
+                 </div>
+                {# --- End Loading Indicator --- #}
+
+            {% else %}
+                {# --- Download Section --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic" id="resultsCard">
+                    <h3 class="mb-3 text-success">Encryption Complete!</h3>
+                     {% if original_filename %} <p class="text-muted small mb-3">Original file: {{ original_filename }}</p> {% endif %}
+                    <p class="text-muted mb-4">Your password-protected PDF file is ready.</p>
+                    <form method="post" action="{% url 'pdf_tools:protect_pdf' %}">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_protected" value="true">
+                         <button type="submit" class="btn btn-success btn-lg mb-3">
+                             <svg class="bi bi-download me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><use xlink:href="#icon-download"/></svg>
+                             Download {{ download_filename|default:"Protected PDF" }}
+                         </button>
+                    </form>
+                    <a href="{% url 'pdf_tools:protect_pdf' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                        <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><use xlink:href="#icon-back-arrow"/></svg>
+                        Protect Another PDF
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Icon definitions if not in base #}
+<svg xmlns="http://www.w3.org/2000/svg" style="display: none;">
+    <symbol id="icon-download" viewBox="0 0 16 16"> <path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/> </symbol>
+    <symbol id="icon-back-arrow" viewBox="0 0 16 16"> <path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/> </symbol>
+</svg>
+
+
+{# Styles specific to this page #}
+<style>
+    /* --- Dropzone Styles --- */
+    .drop-zone { border: 2px dashed var(--border-color); border-radius: var(--radius-main); cursor: pointer; transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease; background-color: var(--bg-color); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); }
+    .drop-zone.dragover { border-color: var(--link-color); background-color: rgba(var(--link-color-rgb), 0.1); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); }
+    #browseButtonPdf { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); transition: all 0.2s ease-out; }
+    #browseButtonPdf:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+    #selectedFileNamePdf { transition: color 0.3s ease; font-weight: 500; color: var(--muted-text-color); }
+    #dropZonePdf p { color: var(--muted-text-color); transition: color 0.3s ease; }
+    #dropZonePdf svg { color: var(--muted-text-color); transition: color 0.3s ease; }
+
+    /* --- Form Control & Option Styles --- */
+    .form-label, .form-label.fw-medium { color: var(--text-color); transition: color 0.3s ease; font-weight: 500; }
+    .form-text { color: var(--muted-text-color); transition: color 0.3s ease; font-size: 0.8em; }
+    #uploadCard .border-top h5 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+    /* Input styling (password, file) */
+    .neumorphic-inset, input[type="password"].neumorphic-inset, input[type="file"].neumorphic-inset { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; height: auto; }
+    input[type="file"].neumorphic-inset { padding: 0.6rem 1rem; }
+    input[type="file"].neumorphic-inset::file-selector-button { color: var(--link-color); background-color: transparent; border: 1px solid var(--link-color); padding: 0.375rem .75rem; border-radius: var(--radius-small); margin-right: 1rem; transition: all .15s ease-in-out; cursor: pointer;}
+    input[type="file"].neumorphic-inset:hover::file-selector-button { background-color: rgba(var(--link-color-rgb), 0.1); }
+    .neumorphic-inset:focus, input[type="password"].neumorphic-inset:focus, input[type="file"].neumorphic-inset:focus { background-color: var(--bg-color); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none; }
+    .neumorphic-inset::placeholder { color: var(--muted-text-color); opacity: 0.7; transition: color 0.3s ease, opacity 0.3s ease; }
+    /* Input validation styles */
+    .form-control.is-invalid { border: 1px solid transparent !important; box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light), 0 0 0 .25rem rgba(220, 53, 69, .25) !important; }
+    .invalid-feedback { color: #dc3545; display: none; width: 100%; margin-top: .25rem; font-size: .875em; }
+    .form-control.is-invalid ~ .invalid-feedback { display: block; }
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+
+    /* --- Success/Download Buttons --- */
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+
+     /* --- Results Heading --- */
+     #resultsCard h3 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+
+     /* --- Loading Overlay Styles --- */
+     #loadingOverlay .spinner-border { color: var(--link-color) !important; width: 3rem; height: 3rem; }
+     #loadingOverlay p { color: var(--muted-text-color); transition: color 0.3s ease; }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for file input, filename display, password match validation, loading #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const uploadCard = document.getElementById('uploadCard');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    const fileInput = document.getElementById('pdffileInput'); // Correct ID
+    const dropZone = document.getElementById('dropZonePdf'); // Use specific ID
+    const browseButton = document.getElementById('browseButtonPdf'); // Use specific ID
+    const selectedFileNameDisplay = document.getElementById('selectedFileNamePdf'); // Correct ID
+    const previewPlaceholder = document.getElementById('previewPlaceholderPdf'); // Correct ID
+    const protectButton = document.getElementById('protectButton'); // Correct ID
+    const dropZoneText = document.getElementById('dropZoneTextPdf'); // Correct ID
+    const passwordInput = document.getElementById('passwordInput');
+    const confirmInput = document.getElementById('passwordConfirmInput');
+    const confirmError = document.getElementById('confirmPasswordError');
+    const passwordError = document.getElementById('passwordError'); // Assuming you add this div
+    const minLength = parseInt(passwordInput?.minLength || "6", 10); // Get min length from attribute or default
+
+    let currentFile = null;
+
+    // --- File Handling & UI Update (for main PDF) ---
+    const updateUI = () => {
+        selectedFileNameDisplay.textContent = '';
+        let fileSelected = currentFile !== null;
+        let passwordsValid = checkPasswordMatch(false); // Check validity silently
+
+        if (currentFile) {
+            selectedFileNameDisplay.textContent = `Selected: ${currentFile.name}`;
+            if(dropZoneText) dropZoneText.textContent = "Replace file by dropping or browsing";
+            if(previewPlaceholder) previewPlaceholder.style.display = 'none';
+        } else {
+            if(previewPlaceholder) previewPlaceholder.style.display = 'block';
+            if(dropZoneText) dropZoneText.textContent = "Drag & Drop PDF File Here";
+        }
+        // Enable button only if file selected AND passwords are valid
+        protectButton.disabled = !(fileSelected && passwordsValid);
+
+        // Update hidden input
+        try { const dataTransfer = new DataTransfer(); if (currentFile) dataTransfer.items.add(currentFile); fileInput.files = dataTransfer.files; }
+        catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    const handleMainPdfRemove = () => {
+        currentFile = null; fileInput.value = ''; updateUI();
+    };
+
+    const handleMainPdfFiles = (files) => {
+        if (files.length === 0) { handleMainPdfRemove(); return; }
+        const file = files[0];
+        const allowedMimes = ['application/pdf']; const allowedExts = ['.pdf'];
+        const fileNameParts = file.name.split('.'); const fileExt = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+        if (!allowedMimes.includes(file.type.toLowerCase()) && !allowedExts.includes(fileExt)) { alert(`Please select a valid PDF file.`); handleMainPdfRemove(); return; }
+        currentFile = file; updateUI();
+    };
+
+     // --- Password Validation ---
+     function checkPasswordMatch(showFeedback = true) {
+        let isValid = true;
+        const passVal = passwordInput.value;
+        const confVal = confirmInput.value;
+
+        // Clear previous errors visually
+        passwordInput.classList.remove('is-invalid');
+        confirmInput.classList.remove('is-invalid');
+        if (passwordError) passwordError.textContent = ''; // Clear any JS message div
+        if (confirmError) confirmError.style.display = 'none'; // Hide mismatch message
+
+        if(passVal.length > 0 && passVal.length < minLength) {
+             if(showFeedback && passwordError) passwordError.textContent = `Password must be at least ${minLength} characters.`; // Use if you add the div
+             passwordInput.classList.add('is-invalid');
+             isValid = false;
+        }
+        // Only show mismatch error if password itself meets length requirement
+        if (isValid && confVal.length > 0 && passVal !== confVal) {
+            if(showFeedback && confirmError) confirmError.style.display = 'block'; // Show the dedicated div
+            confirmInput.classList.add('is-invalid');
+            isValid = false;
+        }
+
+        // Button enabling logic needs both passwords filled and matching (and long enough)
+        if (passVal.length === 0 || confVal.length === 0 || passVal !== confVal || passVal.length < minLength){
+             isValid = false; // Need both fields filled, matching, and long enough
+         }
+
+        // Update button state based on file and password validity
+         protectButton.disabled = !(currentFile && isValid);
+         return isValid;
+     }
+
+    // --- Event Listeners ---
+    // File Input
+    if (dropZone) {
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+        ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+        ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+        dropZone.addEventListener('drop', (e) => { handleMainPdfFiles(e.dataTransfer.files); }, false);
+    }
+    if (fileInput) fileInput.addEventListener('change', (e) => { handleMainPdfFiles(e.target.files); });
+    if (browseButton) browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    // Password Validation Listeners
+    if(passwordInput) passwordInput.addEventListener('input', () => checkPasswordMatch(true));
+    if(confirmInput) confirmInput.addEventListener('input', () => checkPasswordMatch(true));
+
+    // --- Form Submission with Loading ---
+    if (form) {
+        form.addEventListener('submit', function(event) {
+            if (!currentFile) { event.preventDefault(); alert("Please select a PDF file."); return; }
+            if (!checkPasswordMatch(true)) { // Final check before submit
+                event.preventDefault();
+                // Errors shown by checkPasswordMatch
+                return;
+            }
+            // Show loading
+            if (uploadCard && loadingOverlay && protectButton) {
+                uploadCard.style.display = 'none'; loadingOverlay.style.display = 'block'; protectButton.disabled = true;
+            } else { console.error("Loading elements not found."); }
+        });
+    }
+
+    // Initial state
+    updateUI();
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

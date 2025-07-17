@@ -1,0 +1,153 @@
+{# templates/utility_tools/tool_screen_resolution.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-5">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-aspect-ratio" viewBox="0 0 16 16" style="vertical-align: -0.1em;"><path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h13A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5zM1.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5z"/><path d="M2 4.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1H3v1.5a.5.5 0 0 1-1 0zm12 7a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H13V9.5a.5.5 0 0 1 1 0z"/></svg>
+                 </div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Detect your display's screen resolution, viewport size, and other details.</p>
+            </div>
+
+            {# --- Display Area --- #}
+            <div class="card p-4 p-md-5 neumorphic" id="resolutionCard">
+                <h3 class="text-center mb-4">Your Display Information</h3>
+                <div class="row g-3 text-center">
+
+                    <div class="col-md-6">
+                         <div class="stat-box neumorphic-inset p-3">
+                             <div id="screenWidth" class="fs-2 fw-bold">-</div>
+                             <div class="text-muted small">Screen Width (px)</div>
+                         </div>
+                    </div>
+                    <div class="col-md-6">
+                         <div class="stat-box neumorphic-inset p-3">
+                             <div id="screenHeight" class="fs-2 fw-bold">-</div>
+                             <div class="text-muted small">Screen Height (px)</div>
+                         </div>
+                    </div>
+
+                    <div class="col-md-6">
+                         <div class="stat-box neumorphic-inset p-3">
+                             <div id="viewportWidth" class="fs-2 fw-bold">-</div>
+                             <div class="text-muted small">Viewport Width (px)</div>
+                         </div>
+                    </div>
+                     <div class="col-md-6">
+                         <div class="stat-box neumorphic-inset p-3">
+                             <div id="viewportHeight" class="fs-2 fw-bold">-</div>
+                             <div class="text-muted small">Viewport Height (px)</div>
+                         </div>
+                    </div>
+
+                     <div class="col-md-6">
+                         <div class="stat-box neumorphic-inset p-3">
+                             <div id="availWidth" class="fs-2 fw-bold">-</div>
+                             <div class="text-muted small">Available Width (px)</div>
+                         </div>
+                    </div>
+                     <div class="col-md-6">
+                         <div class="stat-box neumorphic-inset p-3">
+                             <div id="availHeight" class="fs-2 fw-bold">-</div>
+                             <div class="text-muted small">Available Height (px)</div>
+                         </div>
+                    </div>
+
+                    <div class="col-md-6">
+                         <div class="stat-box neumorphic-inset p-3">
+                             <div id="colorDepth" class="fs-2 fw-bold">-</div>
+                             <div class="text-muted small">Color Depth (bits)</div>
+                         </div>
+                    </div>
+                     <div class="col-md-6">
+                         <div class="stat-box neumorphic-inset p-3">
+                             <div id="pixelRatio" class="fs-2 fw-bold">-</div>
+                             <div class="text-muted small">Device Pixel Ratio</div>
+                         </div>
+                    </div>
+
+                </div>
+
+                <p class="text-center text-muted small mt-4">Note: Viewport size changes as you resize your browser window. Available size excludes OS taskbars/docks.</p>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Specific Styles #}
+<style>
+    /* Re-use stat-box styles */
+    .stat-box {
+        border-radius: var(--radius-small);
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        min-height: 100px;
+        display: flex;
+        flex-direction: column;
+        justify-content: center;
+        align-items: center;
+        padding: 1rem; /* Adjust padding */
+    }
+    .stat-box .fs-2 {
+        color: var(--link-color);
+        margin-bottom: 0.1rem;
+        transition: color 0.3s ease;
+        font-size: 1.75rem; /* Slightly smaller if needed */
+    }
+    .stat-box .text-muted {
+         color: var(--muted-text-color) !important;
+         transition: color 0.3s ease;
+    }
+    /* Ensure heading adapts */
+     #resolutionCard h3 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const screenWidthEl = document.getElementById('screenWidth');
+    const screenHeightEl = document.getElementById('screenHeight');
+    const viewportWidthEl = document.getElementById('viewportWidth');
+    const viewportHeightEl = document.getElementById('viewportHeight');
+    const availWidthEl = document.getElementById('availWidth');
+    const availHeightEl = document.getElementById('availHeight');
+    const colorDepthEl = document.getElementById('colorDepth');
+    const pixelRatioEl = document.getElementById('pixelRatio');
+
+    function updateDimensions() {
+        if (screenWidthEl) screenWidthEl.textContent = screen.width || '-';
+        if (screenHeightEl) screenHeightEl.textContent = screen.height || '-';
+        if (viewportWidthEl) viewportWidthEl.textContent = window.innerWidth || '-';
+        if (viewportHeightEl) viewportHeightEl.textContent = window.innerHeight || '-';
+        if (availWidthEl) availWidthEl.textContent = screen.availWidth || '-';
+        if (availHeightEl) availHeightEl.textContent = screen.availHeight || '-';
+        if (colorDepthEl) colorDepthEl.textContent = screen.colorDepth || '-';
+        // Round pixel ratio to 2 decimal places
+        if (pixelRatioEl) pixelRatioEl.textContent = window.devicePixelRatio ? window.devicePixelRatio.toFixed(2) : '-';
+    }
+
+    // Initial update
+    updateDimensions();
+
+    // Update viewport dimensions on window resize
+    window.addEventListener('resize', updateDimensions);
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

@@ -1,0 +1,270 @@
+{# templates/utility_tools/tool_barcode_generator.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %} {# Needed if showing sizes later #}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-11"> {# Wider column #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">||||</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Generate standard barcodes like Code 128, Code 39, EAN, and UPC.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not generation_success %}
+                {# --- Input Form Section --- #}
+                <div class="card p-4 p-md-5" id="inputCard">
+                    <form method="post" action="{% url 'utility_tools:barcode_generator' %}" id="barcodeForm">
+                        {% csrf_token %}
+
+                        <div class="mb-3">
+                            <label for="barcode_data" class="form-label fw-medium">Data to Encode:</label>
+                            <input type="text" class="form-control neumorphic-inset"
+                                      id="barcode_data"
+                                      name="barcode_data"
+                                      placeholder="Enter text, numbers, or ID"
+                                      value="{{ data_input }}" {# Use context variable #}
+                                      required>
+                             <div class="form-text">Enter the data for the barcode. Character requirements vary by type (e.g., EAN/UPC need specific digits).</div>
+                        </div>
+
+                        {# --- Options --- #}
+                        <div class="border-top pt-4 mb-4">
+                             <h5 class="text-center mb-3">Options</h5>
+                             <div class="row g-3 justify-content-start"> {# Align options left #}
+                                <div class="col-md-6 col-lg-4">
+                                     <label for="barcodeTypeSelect" class="form-label fw-medium">Barcode Type:</label>
+                                     <select class="form-select neumorphic-inset" id="barcodeTypeSelect" name="barcode_type">
+                                         {% for type_name in barcode_types %}
+                                             {# Use prev_options for repopulation #}
+                                             <option value="{{ type_name }}" {% if prev_options.barcode_type == type_name or not prev_options.barcode_type and type_name == 'Code128' %}selected{% endif %}>{{ type_name }}</option>
+                                         {% endfor %}
+                                     </select>
+                                </div>
+                                <div class="col-md-6 col-lg-4">
+                                     <label for="sizePresetSelect" class="form-label fw-medium">Size:</label>
+                                     <select class="form-select neumorphic-inset" id="sizePresetSelect" name="size_preset">
+                                         {% for size_key in size_presets %}
+                                             <option value="{{ size_key }}" {% if prev_options.size_preset == size_key or not prev_options.size_preset and size_key == 'M' %}selected{% endif %}>{{ size_key|capfirst }}</option>
+                                         {% endfor %}
+                                     </select>
+                                </div>
+                                 <div class="col-md-6 col-lg-4">
+                                     <label for="outputFormatSelect" class="form-label fw-medium">Format:</label>
+                                     <select class="form-select neumorphic-inset" id="outputFormatSelect" name="output_format">
+                                        <option value="PNG" {% if prev_options.output_format == 'PNG' or not prev_options.output_format %}selected{% endif %}>PNG</option>
+                                        <option value="SVG" {% if prev_options.output_format == 'SVG' %}selected{% endif %}>SVG (Vector)</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6 col-lg-4 align-self-center">
+                                     <div class="form-check form-switch mt-3 mt-lg-0">
+                                        {# Checkbox value is 'on' if checked, handle default in view or check prev_options #}
+                                        <input class="form-check-input" type="checkbox" name="include_text" role="switch" id="includeTextCheck" {% if prev_options.include_text != 'off' %}checked{% endif %}>
+                                        <label class="form-check-label" for="includeTextCheck">Show Text Below</label>
+                                     </div>
+                                </div>
+                             </div>
+                        </div>
+                        {# --- END: Options --- #}
+
+                        {# Generate Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="generateButton"> {# Button is enabled/disabled by JS #}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-upc-scan me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M1.5 1a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0v-3A1.5 1.5 0 0 1 1.5 0h3a.5.5 0 0 1 0 1zM11.5 0a.5.5 0 0 1 .5.5v3a.5.5 0 0 1-1 0v-3a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 1 0-1zM.5 11.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1h-3a.5.5 0 0 0-.5.5v3a.5.5 0 0 1-1 0zM15.5 11a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1h3a.5.5 0 0 0 .5-.5v-3a.5.5 0 0 1 1 0zM3 4.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zM5 4.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zM7 4.5a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0zm2 0a.5.5 0 0 1 1 0v7a.5.5 0 0 1-1 0z"/></svg>
+                                Generate Barcode
+                            </button>
+                        </div>
+                    </form>
+                </div>
+                {# --- End Input Form Section --- #}
+
+            {% else %}
+                {# --- Results Section --- #}
+                <div class="card p-4 mt-4 text-center neumorphic" id="resultsCard">
+                    <h3 class="mb-3">Your Barcode</h3>
+                    <div class="barcode-container mb-3 d-inline-block p-3 bg-white rounded">
+                        {# Display SVG directly or use img tag for PNG #}
+                        {% if barcode_format == 'SVG' %}
+                             {# SVG Option - Assumes Base64 encoded SVG string #}
+                             <img id="barcodeDisplay" src="data:image/svg+xml;base64,{{ barcode_image_b64 }}" alt="Generated Barcode" class="img-fluid barcode-image">
+                
+                        {% else %} {# Assume PNG #}
+                             {# --- THIS IS THE CRUCIAL LINE FOR PNG --- #}
+                            <img id="barcodeDisplay" src="data:image/png;base64,{{ barcode_image_b64 }}" alt="Generated Barcode" class="img-fluid barcode-image">
+                             {# --- END CRUCIAL LINE --- #}
+                        {% endif %}
+                    </div>
+
+                    {# Download Button Form #}
+                    <form method="post" action="{% url 'utility_tools:barcode_generator' %}" class="d-inline-block me-2">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_barcode" value="true">
+                         <button type="submit" class="btn btn-success">
+                             <svg class="bi bi-download me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg>
+                             Download {{ download_filename|default:"Barcode" }}
+                         </button>
+                    </form>
+
+                    {# Generate Another Button #}
+                    <a href="{% url 'utility_tools:barcode_generator' %}" class="btn btn-outline-secondary clear-filters-btn d-inline-block">
+                        <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                        Generate Another
+                    </a>
+                </div>
+                 {# --- End Results Section --- #}
+            {% endif %}
+            {# --- End Conditional Display --- #}
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* --- Input & Option Styles --- */
+    .form-label.fw-medium { color: var(--text-color); transition: color 0.3s ease; }
+    .form-text { color: var(--muted-text-color); transition: color 0.3s ease; font-size: 0.8em; }
+    input[type="text"].neumorphic-inset,
+    .form-select.neumorphic-inset { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; height: auto; }
+    input[type="text"].neumorphic-inset:focus,
+    .form-select.neumorphic-inset:focus { background-color: var(--bg-color); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none; }
+    input[type="text"].neumorphic-inset::placeholder { color: var(--muted-text-color); opacity: 0.7; transition: color 0.3s ease, opacity 0.3s ease; }
+    .form-select.neumorphic-inset { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right .75rem center; background-size: 16px 12px; appearance: none; }
+    body.dark-mode .form-select.neumorphic-inset { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); }
+    /* Styles for Form Check Label and Form Switch Input */
+
+.form-check-label {
+    color: var(--text-color);
+    padding-left: 0.4em; /* Add slightly more space than Bootstrap default */
+    transition: color 0.3s ease;
+    cursor: pointer; /* Make label clickable */
+    vertical-align: middle; /* Align better with input */
+    margin-bottom: 0; /* Align with switch */
+    line-height: 1.5em; /* Match approx switch height */
+}
+
+/* Switch specific styles */
+.form-switch .form-check-input {
+     background-color: var(--bg-color);
+     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); /* Thumb color based on text */
+     background-position: left center;
+     border-radius: 2em;
+     width: 2.75em;
+     height: 1.5em;
+     margin-top: 0.1em; /* Adjust vertical alignment with label */
+     /* Neumorphic inset track */
+     box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                 inset -2px -2px 4px var(--shadow-light);
+     border: none; /* Remove default border */
+     cursor: pointer;
+     transition: background-color 0.3s ease, background-position .15s ease-in-out, box-shadow 0.3s ease, border-color 0.3s ease;
+     -webkit-appearance: none;
+     appearance: none;
+     vertical-align: middle; /* Align better with label */
+}
+body.dark-mode .form-switch .form-check-input {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:checked {
+     background-position: right center;
+     border-color: transparent; /* No border needed when checked */
+     background-color: var(--link-color); /* Use link color for checked track */
+     box-shadow: none; /* Remove inset */
+      /* White thumb for checked state */
+     background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+}
+/* Focus style for switch */
+.form-switch .form-check-input:focus {
+     outline: 2px solid var(--link-color);
+     outline-offset: 2px;
+     box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); /* Keep inset shadow on focus */
+     /* Ensure background image rule exists for focus state */
+      background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+}
+body.dark-mode .form-switch .form-check-input:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e");
+}
+.form-switch .form-check-input:checked:focus {
+    background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e");
+    box-shadow: none; /* Remove inset on checked focus */
+}
+/* Optional: Slightly dim when disabled */
+.form-switch .form-check-input:disabled {
+    opacity: 0.6;
+    cursor: not-allowed;
+    box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); /* Keep base shadow */
+}
+.form-switch .form-check-input:disabled:checked {
+    background-color: var(--muted-text-color); /* Use muted color */
+    border-color: transparent;
+    box-shadow: none;
+}
+.form-switch .form-check-input:disabled ~ .form-check-label {
+     opacity: 0.6;
+     cursor: not-allowed;
+}
+
+#inputCard .border-top h5 { /* Target h5 within the options section */
+        color: var(--text-color); /* Use main text color variable */
+        transition: color 0.3s ease;
+        font-weight: 600; /* Optional: make it bolder */
+    }
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+
+    /* --- Results Section Styles --- */
+     #resultsCard h3 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+    .barcode-container { background-color: #fff !important; display: inline-block; padding: 1rem; border-radius: var(--radius-small); box-shadow: var(--bs-box-shadow-sm); max-width: 100%; overflow-x: auto;  }
+    #barcodeDisplay img, #barcodeDisplay svg { max-width: 100%; height: auto; display: block; margin: 0 auto; max-height: 150px; /* Adjust max display height */ }
+    #barcodeDisplay svg { width: auto; /* Allow SVG to size naturally */ }
+
+     /* Download/Generate Another Buttons */
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS to enable button #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const dataInput = document.getElementById('barcode_data');
+    const generateButton = document.getElementById('generateButton');
+
+    const toggleGenerateButton = () => {
+        if(generateButton && dataInput){
+            generateButton.disabled = dataInput.value.trim() === '';
+        }
+    }
+
+    if (dataInput) {
+        dataInput.addEventListener('input', toggleGenerateButton);
+    }
+
+    // Initial state
+    toggleGenerateButton();
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

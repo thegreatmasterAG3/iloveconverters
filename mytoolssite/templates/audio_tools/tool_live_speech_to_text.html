@@ -1,0 +1,541 @@
+{# templates/audio_tools/tool_live_speech_to_text.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-10"> {# Wider column #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">🎤→Txt</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Select your language, click "Start Listening", and speak clearly into your microphone.</p>
+                 {% if browser_note %}
+                 <p class="small text-warning"><small><strong>Note:</strong> {{ browser_note }} Language support varies by browser.</small></p>
+                 {% endif %}
+            </div>
+
+            {# Main Card #}
+            <div class="card p-4 p-md-5" id="speechCard">
+
+                {# Compatibility Message Area #}
+                <div id="compatibilityWarning" class="alert alert-warning text-center" style="display: none;">
+                    Your browser does not support the Web Speech API needed for this tool. Please try Chrome or Edge.
+                </div>
+
+                {# Controls Row #}
+                <div class="d-flex justify-content-center flex-wrap gap-3 mb-4 align-items-center">
+                    {# Language Selector #}
+                    <div class="flex-grow-1 flex-lg-grow-0">
+                        <label for="languageSelect" class="form-label visually-hidden">Language</label>
+                        <select class="form-select neumorphic-inset" id="languageSelect" aria-label="Select language">
+                            {# --- Extensive Language List --- #}
+                            <option value="af-ZA">Afrikaans (South Africa)</option>
+                            <option value="am-ET">አማርኛ (Amharic - Ethiopia)</option>
+                            <option value="ar-AE">العربية (Arabic - UAE)</option>
+                            <option value="ar-BH">العربية (Arabic - Bahrain)</option>
+                            <option value="ar-DZ">العربية (Arabic - Algeria)</option>
+                            <option value="ar-EG">العربية (Arabic - Egypt)</option>
+                            <option value="ar-IL">العربية (Arabic - Israel)</option>
+                            <option value="ar-IQ">العربية (Arabic - Iraq)</option>
+                            <option value="ar-JO">العربية (Arabic - Jordan)</option>
+                            <option value="ar-KW">العربية (Arabic - Kuwait)</option>
+                            <option value="ar-LB">العربية (Arabic - Lebanon)</option>
+                            <option value="ar-MA">العربية (Arabic - Morocco)</option>
+                            <option value="ar-OM">العربية (Arabic - Oman)</option>
+                            <option value="ar-PS">العربية (Arabic - Palestine)</option>
+                            <option value="ar-QA">العربية (Arabic - Qatar)</option>
+                            <option value="ar-SA">العربية (Arabic - Saudi Arabia)</option>
+                            <option value="ar-TN">العربية (Arabic - Tunisia)</option>
+                            <option value="az-AZ">Azərbaycan (Azerbaijani - Azerbaijan)</option>
+                            <option value="bg-BG">Български (Bulgarian - Bulgaria)</option>
+                            <option value="bn-BD">বাংলা (Bengali - Bangladesh)</option>
+                            <option value="bn-IN">বাংলা (Bengali - India)</option>
+                            <option value="bs-BA">Bosanski (Bosnian - Bosnia and Herzegovina)</option>
+                            <option value="ca-ES">Català (Catalan - Spain)</option>
+                            <option value="cs-CZ">Čeština (Czech - Czech Republic)</option>
+                            <option value="cy-GB">Cymraeg (Welsh - United Kingdom)</option>
+                            <option value="da-DK">Dansk (Danish - Denmark)</option>
+                            <option value="de-AT">Deutsch (German - Austria)</option>
+                            <option value="de-CH">Deutsch (German - Switzerland)</option>
+                            <option value="de-DE">Deutsch (German - Germany)</option>
+                            <option value="el-GR">Ελληνικά (Greek - Greece)</option>
+                            <option value="en-AU">English (Australia)</option>
+                            <option value="en-CA">English (Canada)</option>
+                            <option value="en-GH">English (Ghana)</option>
+                            <option value="en-GB">English (United Kingdom)</option>
+                            <option value="en-HK">English (Hong Kong)</option>
+                            <option value="en-IE">English (Ireland)</option>
+                            <option value="en-IN">English (India)</option>
+                            <option value="en-KE">English (Kenya)</option>
+                            <option value="en-NG">English (Nigeria)</option>
+                            <option value="en-NZ">English (New Zealand)</option>
+                            <option value="en-PH">English (Philippines)</option>
+                            <option value="en-PK">English (Pakistan)</option>
+                            <option value="en-SG">English (Singapore)</option>
+                            <option value="en-TZ">English (Tanzania)</option>
+                            <option value="en-US" selected>English (United States)</option>
+                            <option value="en-ZA">English (South Africa)</option>
+                            <option value="es-AR">Español (Spanish - Argentina)</option>
+                            <option value="es-BO">Español (Spanish - Bolivia)</option>
+                            <option value="es-CL">Español (Spanish - Chile)</option>
+                            <option value="es-CO">Español (Spanish - Colombia)</option>
+                            <option value="es-CR">Español (Spanish - Costa Rica)</option>
+                            <option value="es-DO">Español (Spanish - Dominican Republic)</option>
+                            <option value="es-EC">Español (Spanish - Ecuador)</option>
+                            <option value="es-SV">Español (Spanish - El Salvador)</option>
+                            <option value="es-ES">Español (Spanish - Spain)</option>
+                            <option value="es-US">Español (Spanish - United States)</option>
+                            <option value="es-GT">Español (Spanish - Guatemala)</option>
+                            <option value="es-HN">Español (Spanish - Honduras)</option>
+                            <option value="es-MX">Español (Spanish - Mexico)</option>
+                            <option value="es-NI">Español (Spanish - Nicaragua)</option>
+                            <option value="es-PA">Español (Spanish - Panama)</option>
+                            <option value="es-PY">Español (Spanish - Paraguay)</option>
+                            <option value="es-PE">Español (Spanish - Peru)</option>
+                            <option value="es-PR">Español (Spanish - Puerto Rico)</option>
+                            <option value="es-UY">Español (Spanish - Uruguay)</option>
+                            <option value="es-VE">Español (Spanish - Venezuela)</option>
+                            <option value="et-EE">Eesti (Estonian - Estonia)</option>
+                            <option value="eu-ES">Euskara (Basque - Spain)</option>
+                            <option value="fa-IR">فارسی (Persian - Iran)</option>
+                            <option value="fi-FI">Suomi (Finnish - Finland)</option>
+                            <option value="fil-PH">Filipino (Philippines)</option>
+                            <option value="fr-BE">Français (French - Belgium)</option>
+                            <option value="fr-CA">Français (French - Canada)</option>
+                            <option value="fr-FR">Français (French - France)</option>
+                            <option value="fr-CH">Français (French - Switzerland)</option>
+                            <option value="gl-ES">Galego (Galician - Spain)</option>
+                            <option value="gu-IN">ગુજરાતી (Gujarati - India)</option>
+                            <option value="he-IL">עברית (Hebrew - Israel)</option>
+                            <option value="hi-IN">हिन्दी (Hindi - India)</option>
+                            <option value="hr-HR">Hrvatski (Croatian - Croatia)</option>
+                            <option value="hu-HU">Magyar (Hungarian - Hungary)</option>
+                            <option value="hy-AM">Հայերեն (Armenian - Armenia)</option>
+                            <option value="id-ID">Bahasa Indonesia (Indonesian - Indonesia)</option>
+                            <option value="is-IS">Íslenska (Icelandic - Iceland)</option>
+                            <option value="it-IT">Italiano (Italian - Italy)</option>
+                            <option value="ja-JP">日本語 (Japanese - Japan)</option>
+                            <option value="jv-ID">Basa Jawa (Javanese - Indonesia)</option>
+                            <option value="ka-GE">ქართული (Georgian - Georgia)</option>
+                            <option value="km-KH">ខ្មែរ (Khmer - Cambodia)</option>
+                            <option value="kn-IN">ಕನ್ನಡ (Kannada - India)</option>
+                            <option value="ko-KR">한국어 (Korean - South Korea)</option>
+                            <option value="lo-LA">ລາວ (Lao - Laos)</option>
+                            <option value="lt-LT">Lietuvių (Lithuanian - Lithuania)</option>
+                            <option value="lv-LV">Latviešu (Latvian - Latvia)</option>
+                            <option value="mk-MK">Македонски (Macedonian - North Macedonia)</option>
+                            <option value="ml-IN">മലയാളം (Malayalam - India)</option>
+                            <option value="mn-MN">Монгол (Mongolian - Mongolia)</option>
+                            <option value="mr-IN">मराठी (Marathi - India)</option>
+                            <option value="ms-MY">Bahasa Melayu (Malay - Malaysia)</option>
+                            <option value="my-MM">မြန်မာ (Burmese - Myanmar)</option>
+                            <option value="nb-NO">Norsk bokmål (Norwegian Bokmål - Norway)</option>
+                            <option value="ne-NP">नेपाली (Nepali - Nepal)</option>
+                            <option value="nl-BE">Nederlands (Dutch - Belgium)</option>
+                            <option value="nl-NL">Nederlands (Dutch - Netherlands)</option>
+                            <option value="pa-Guru-IN">ਪੰਜਾਬੀ (Punjabi - India)</option>
+                            <option value="pl-PL">Polski (Polish - Poland)</option>
+                            <option value="pt-BR">Português (Portuguese - Brazil)</option>
+                            <option value="pt-PT">Português (Portuguese - Portugal)</option>
+                            <option value="ro-RO">Română (Romanian - Romania)</option>
+                            <option value="ru-RU">Русский (Russian - Russia)</option>
+                            <option value="si-LK">සිංහල (Sinhala - Sri Lanka)</option>
+                            <option value="sk-SK">Slovenčina (Slovak - Slovakia)</option>
+                            <option value="sl-SI">Slovenščina (Slovenian - Slovenia)</option>
+                            <option value="sq-AL">Shqip (Albanian - Albania)</option>
+                            <option value="sr-RS">Српски (Serbian - Serbia)</option>
+                            <option value="su-ID">Basa Sunda (Sundanese - Indonesia)</option>
+                            <option value="sv-SE">Svenska (Swedish - Sweden)</option>
+                            <option value="sw-KE">Kiswahili (Swahili - Kenya)</option>
+                            <option value="sw-TZ">Kiswahili (Swahili - Tanzania)</option>
+                            <option value="ta-IN">தமிழ் (Tamil - India)</option>
+                            <option value="ta-LK">தமிழ் (Tamil - Sri Lanka)</option>
+                            <option value="ta-MY">தமிழ் (Tamil - Malaysia)</option>
+                            <option value="ta-SG">தமிழ் (Tamil - Singapore)</option>
+                            <option value="te-IN">తెలుగు (Telugu - India)</option>
+                            <option value="th-TH">ไทย (Thai - Thailand)</option>
+                            <option value="tr-TR">Türkçe (Turkish - Turkey)</option>
+                            <option value="uk-UA">Українська (Ukrainian - Ukraine)</option>
+                            <option value="ur-IN">اردو (Urdu - India)</option>
+                            <option value="ur-PK">اردو (Urdu - Pakistan)</option>
+                            <option value="uz-UZ">O‘zbekcha (Uzbek - Uzbekistan)</option>
+                            <option value="vi-VN">Tiếng Việt (Vietnamese - Vietnam)</option>
+                            <option value="yue-Hant-HK">粵語 (Cantonese - Hong Kong)</option>
+                            <option value="zh-CN">中文 (Mandarin - China, Simplified)</option>
+                            <option value="zh-TW">中文 (Mandarin - Taiwan, Traditional)</option>
+                            <option value="zh-HK">中文 (Cantonese - Hong Kong, Traditional)</option>
+                            <option value="zu-ZA">IsiZulu (Zulu - South Africa)</option>
+                        </select>
+                    </div>
+                    {# Start/Stop Buttons & Status #}
+                    <button class="btn btn-success btn-lg" id="startButton">
+                         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-mic-fill me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M5 3a3 3 0 0 1 6 0v5a3 3 0 0 1-6 0z"/><path d="M3.5 6.5A.5.5 0 0 1 4 7v1a4 4 0 0 0 8 0V7a.5.5 0 0 1 1 0v1a5 5 0 0 1-4.5 4.975V15h3a.5.5 0 0 1 0 1h-7a.5.5 0 0 1 0-1h3v-2.025A5 5 0 0 1 3 8V7a.5.5 0 0 1 .5-.5"/></svg>
+                        Start Listening
+                    </button>
+                    <button class="btn btn-danger btn-lg" id="stopButton" disabled>
+                         <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-stop-circle-fill me-2" viewBox="0 0 16 16" style="vertical-align: -0.15em;"><path d="M16 8A8 8 0 1 1 0 8a8 8 0 0 1 16 0M6.5 5A.5.5 0 0 0 6 5.5v5a.5.5 0 0 0 .5.5h3a.5.5 0 0 0 .5-.5v-5A.5.5 0 0 0 9.5 5z"/></svg>
+                        Stop Listening
+                    </button>
+                    <span id="statusIndicator" class="badge rounded-pill text-bg-secondary ms-lg-3">Idle</span>
+                </div>
+
+                {# Transcript Display Area #}
+                <div class="mb-3">
+                    <label for="transcriptOutput" class="form-label fw-medium">Transcript:</label>
+                    <textarea class="form-control neumorphic-inset" id="transcriptOutput" rows="10" placeholder="Your spoken words will appear here..."></textarea>
+                </div>
+
+                {# Action Buttons Row #}
+                <div class="text-end">
+                     <div class="btn-group" role="group" aria-label="Transcript Actions">
+                        <button class="btn btn-outline-secondary btn-sm clear-filters-btn" id="copyButton" type="button" title="Copy to Clipboard" disabled>
+                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard me-1" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M10 .5a.5.5 0 0 0-.5-.5h-3a.5.5 0 0 0-.5.5.5.5 0 0 1-.5.5.5.5 0 0 0-.5.5V2a.5.5 0 0 0 .5.5h5A.5.5 0 0 0 11 2v-.5a.5.5 0 0 0-.5-.5.5.5 0 0 1-.5-.5M10 1h-3v-.5h3z"/></svg>
+                            Copy
+                        </button>
+                        <button class="btn btn-outline-secondary btn-sm clear-filters-btn" id="downloadButton" type="button" title="Download as Text File" disabled>
+                           <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-download me-1" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg>
+                            Download (.txt)
+                        </button>
+                        <button class="btn btn-outline-danger btn-sm clear-filters-btn" id="clearButton" type="button" title="Clear Transcript">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-trash3 me-1" viewBox="0 0 16 16"> <path d="M6.5 1h3a.5.5 0 0 1 .5.5v1H6v-1a.5.5 0 0 1 .5-.5M11 2.5v-1A1.5 1.5 0 0 0 9.5 0h-3A1.5 1.5 0 0 0 5 1.5v1H1.5a.5.5 0 0 0 0 1h.538l.853 10.66A2 2 0 0 0 4.885 16h6.23a2 2 0 0 0 1.994-1.84l.853-10.66h.538a.5.5 0 0 0 0-1zm-1.115 1.858L10 4.2l.5 8.5a.5.5 0 1 1-.998.06L9 4.705l-.5 8.355a.5.5 0 0 1-.998-.06l-.5-8.5-1.435 1.148a.5.5 0 0 1-.708-.708l2-1.6a.5.5 0 0 1 .708 0z"/> </svg>
+                            Clear
+                        </button>
+                    </div>
+                </div>
+
+            </div>
+        </div>
+    </div>
+</div>
+
+{# Styles for this tool #}
+<style>
+    /* Style transcript area */
+    #transcriptOutput { background-color: var(--card-bg-color); border-radius: var(--radius-small); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; min-height: 200px; }
+    #transcriptOutput:focus { background-color: var(--card-bg-color); box-shadow: inset 4px 4px 8px var(--shadow-dark), inset -4px -4px 8px var(--shadow-light); color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none; }
+    #transcriptOutput::placeholder { color: var(--muted-text-color); opacity: 0.7; transition: color 0.3s ease, opacity 0.3s ease; }
+
+    /* Style label */
+     #speechCard .form-label.fw-medium { color: var(--text-color); transition: color 0.3s ease; }
+
+    /* Style control buttons */
+     #startButton, #stopButton { padding: 0.6rem 1.2rem; border: none; border-radius: var(--radius-small); box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; color: #fff; }
+     #startButton:hover, #stopButton:hover { box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); filter: brightness(1.1); }
+     #startButton:active, #stopButton:active { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); filter: brightness(0.95); }
+     #startButton:disabled, #stopButton:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.65; cursor: not-allowed; filter: grayscale(50%); }
+
+    /* Style status indicator */
+    #statusIndicator { transition: background-color 0.3s ease; }
+    #statusIndicator.status-listening { background-color: var(--bs-success); }
+    #statusIndicator.status-error { background-color: var(--bs-danger); }
+    #statusIndicator.status-idle { background-color: var(--bs-secondary); }
+
+     /* Style language select */
+     #languageSelect.neumorphic-inset { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.6rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right .75rem center; background-size: 16px 12px; appearance: none; max-width: 250px; /* Limit width slightly */ }
+    body.dark-mode #languageSelect.neumorphic-inset { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); }
+
+    /* Style the action buttons group */
+    .btn-group > .btn { /* Inherit clear-filters-btn style or define new one */ }
+    #clearButton.btn-outline-danger { color: var(--bs-danger); border-color: var(--bs-danger); }
+    #clearButton.btn-outline-danger:hover { color: #fff; background-color: var(--bs-danger); border-color: var(--bs-danger); }
+     .btn svg.bi { vertical-align: -0.125em; }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# --- Speech Recognition Script --- #}
+
+
+{# --- Speech Recognition Script --- #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- DOM Element References ---
+    const startButton = document.getElementById('startButton');
+    const stopButton = document.getElementById('stopButton');
+    const clearButton = document.getElementById('clearButton');
+    const transcriptOutput = document.getElementById('transcriptOutput');
+    const statusIndicator = document.getElementById('statusIndicator');
+    const compatibilityWarning = document.getElementById('compatibilityWarning');
+    const languageSelect = document.getElementById('languageSelect');
+    const copyButton = document.getElementById('copyButton');
+    const downloadButton = document.getElementById('downloadButton');
+
+    // --- Feature Detection ---
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (!SpeechRecognition) {
+        // Display warning and disable controls if API not supported
+        if(compatibilityWarning) compatibilityWarning.style.display = 'block';
+        if(startButton) startButton.disabled = true;
+        if(stopButton) stopButton.disabled = true;
+        if(clearButton) clearButton.disabled = true;
+        if(languageSelect) languageSelect.disabled = true;
+        if(copyButton) copyButton.disabled = true;
+        if(downloadButton) downloadButton.disabled = true;
+        console.error("Web Speech API is not supported in this browser.");
+        return; // Stop script execution
+    }
+
+    // --- Speech Recognition Setup ---
+    const recognition = new SpeechRecognition();
+    recognition.continuous = true; // Attempt continuous listening
+    recognition.interimResults = true; // Get results as they come in
+    // recognition.lang is set before starting based on the dropdown
+
+    // --- State Variables ---
+    let isListening = false;       // Is recognition currently active?
+    let finalTranscript = '';    // Concatenated final results
+    let interimTranscript = '';  // Current hypothesis
+    let userStopped = false;     // Did the user explicitly click stop?
+
+    // --- Helper Function: Update Status Indicator ---
+    const updateStatus = (statusText, statusClass) => {
+        if (statusIndicator) {
+            statusIndicator.textContent = statusText;
+            // Ensure base classes are kept, only change the status class
+            statusIndicator.className = `badge rounded-pill ms-lg-3 status-${statusClass}`;
+        }
+    };
+
+    // --- Helper Function: Update Button/Action States ---
+    const updateControlsState = () => {
+        const hasText = transcriptOutput.value.trim().length > 0;
+        if (startButton) startButton.disabled = isListening;
+        if (stopButton) stopButton.disabled = !isListening;
+        if (languageSelect) languageSelect.disabled = isListening; // Disable lang change while listening
+        if (copyButton) copyButton.disabled = !hasText || isListening; // Disable if no text OR listening
+        if (downloadButton) downloadButton.disabled = !hasText || isListening;
+    };
+
+    // --- Speech Recognition Event Handlers ---
+
+    recognition.onstart = () => {
+        isListening = true;
+        userStopped = false; // Reset user stop flag
+        updateStatus('Listening...', 'listening');
+        updateControlsState();
+        console.log('Speech recognition started.');
+    };
+
+    recognition.onresult = (event) => {
+        interimTranscript = ''; // Reset interim for current event results
+        for (let i = event.resultIndex; i < event.results.length; ++i) {
+            const transcriptPart = event.results[i][0].transcript;
+            if (event.results[i].isFinal) {
+                // Add a space after each finalized part for better sentence structure
+                finalTranscript += transcriptPart + ' ';
+            } else {
+                interimTranscript += transcriptPart;
+            }
+        }
+        // Update display (trim start/end whitespace from final part for neatness)
+        transcriptOutput.value = finalTranscript.trimStart() + interimTranscript;
+        // Auto-scroll to bottom
+        transcriptOutput.scrollTop = transcriptOutput.scrollHeight;
+        // Update button states based on text presence (but only if not listening - onend/onerror handles this)
+         if (!isListening) {
+             updateControlsState();
+         }
+    };
+
+    recognition.onerror = (event) => {
+        console.error('Speech recognition error:', event.error, event.message);
+        let errorMessage = event.error;
+        let isCriticalError = false; // Flag critical errors that should prevent restart
+
+        // Map error codes to user-friendly messages
+        switch (event.error) {
+            case 'no-speech':
+                errorMessage = 'No speech detected.';
+                break; // Allow restart attempts
+            case 'audio-capture':
+                errorMessage = 'Microphone error.';
+                isCriticalError = true;
+                break;
+            case 'not-allowed':
+                errorMessage = 'Permission denied.';
+                isCriticalError = true;
+                break;
+            case 'language-not-supported':
+                 errorMessage = 'Language not supported.';
+                 isCriticalError = true;
+                 break;
+            case 'network':
+                 errorMessage = 'Network error.';
+                 isCriticalError = true; // Assume critical, may retry later if desired
+                 break;
+            case 'service-not-allowed':
+                 errorMessage = 'Service unavailable.';
+                 isCriticalError = true;
+                 break;
+             case 'aborted':
+                 errorMessage = 'Listening aborted.'; // Often happens before stop click processed
+                 break; // Don't treat as critical, let onend handle based on userStopped
+            default:
+                errorMessage = `Unknown error (${event.error})`;
+                isCriticalError = true; // Treat unknown errors as critical initially
+        }
+
+        updateStatus(`Error: ${errorMessage}`, 'error');
+        isListening = false; // Recognition has stopped
+
+        // If it's a critical error, prevent restart attempts from onend
+        if (isCriticalError) {
+            userStopped = true;
+        }
+
+        // Update controls state after error (onend will likely fire immediately after too)
+        updateControlsState();
+    };
+
+    recognition.onend = () => {
+        console.log('Speech recognition ended.');
+        const wasListeningBeforeEnd = isListening; // Capture if we thought we were listening
+        isListening = false; // Ensure state is false
+
+        // --- CONTINUOUS LISTENING RESTART LOGIC ---
+        // Check if the user didn't explicitly stop AND if the last state before end wasn't triggered by a critical error setting userStopped=true
+        if (!userStopped) {
+            console.log('Attempting to restart recognition...');
+            // Short delay before restarting
+            setTimeout(() => {
+                // Double-check if the user clicked stop DURING the timeout
+                if (!userStopped) {
+                    try {
+                        // Ensure language is current before restart
+                        if (languageSelect) {
+                            recognition.lang = languageSelect.value;
+                        }
+                        recognition.start();
+                        // The onstart event will update button states etc.
+                    } catch(e) {
+                        console.error("Error restarting recognition:", e);
+                        updateStatus('Restart Error', 'error');
+                        userStopped = true; // Prevent further restart loops on this error
+                        updateControlsState(); // Update controls on restart failure
+                    }
+                } else {
+                     // User clicked stop during the timeout, ensure UI reflects stopped state
+                     if (!statusIndicator.classList.contains('status-error')) { updateStatus('Idle', 'idle'); }
+                     updateControlsState();
+                }
+            }, 250); // Delay in ms
+        } else {
+             // Normal stop sequence (user click or critical error)
+             if (!statusIndicator.classList.contains('status-error')) { updateStatus('Idle', 'idle'); }
+             updateControlsState(); // Update controls for stopped state
+        }
+        // --- END CONTINUOUS LISTENING RESTART LOGIC ---
+
+        // Clean up final transcript display (remove trailing interim part if any)
+        if (interimTranscript) {
+             transcriptOutput.value = finalTranscript.trim(); // Trim final result
+             interimTranscript = '';
+        } else {
+             transcriptOutput.value = finalTranscript.trim(); // Ensure it's trimmed
+        }
+        // Re-evaluate button states based on final text content after stop
+        updateControlsState();
+    };
+
+
+    // --- Button Event Listeners ---
+
+    if (startButton) {
+        startButton.addEventListener('click', () => {
+            if (!isListening) {
+                 // Prepend space only if there's existing text to continue sentence
+                 finalTranscript = transcriptOutput.value ? transcriptOutput.value.trim() + ' ' : '';
+                 interimTranscript = '';
+                 transcriptOutput.value = finalTranscript; // Show existing text immediately
+
+                 if (languageSelect) {
+                    recognition.lang = languageSelect.value;
+                    console.log(`Setting language to: ${recognition.lang}`);
+                 }
+                 userStopped = false; // <<< User wants to start/resume
+
+                 try {
+                    recognition.start();
+                 } catch (e) {
+                     console.error("Error starting recognition:", e);
+                     updateStatus('Start Error', 'error');
+                     isListening = false; userStopped = true; // Mark as stopped on start error
+                     updateControlsState(); // Update buttons on start error
+                 }
+            }
+         });
+    }
+
+    if (stopButton) {
+        stopButton.addEventListener('click', () => {
+            if (isListening) {
+                userStopped = true; // <<< User explicitly stopped it <<<
+                recognition.stop();
+                // onend handler will finalize UI state
+            }
+         });
+    }
+
+    if (clearButton) {
+        clearButton.addEventListener('click', () => {
+            finalTranscript = '';
+            interimTranscript = '';
+            transcriptOutput.value = '';
+            // Disable actions after clearing
+            if (copyButton) copyButton.disabled = true;
+            if (downloadButton) downloadButton.disabled = true;
+            // If listening, stop it
+            if (isListening) {
+                 userStopped = true; // Treat clear while listening as a stop
+                 recognition.stop();
+            }
+         });
+    }
+
+    if (copyButton) {
+        copyButton.addEventListener('click', () => {
+            const textToCopy = transcriptOutput.value;
+            if (textToCopy && navigator.clipboard) {
+                navigator.clipboard.writeText(textToCopy).then(() => {
+                    const originalText = copyButton.innerHTML;
+                    copyButton.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg me-1" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg> Copied!';
+                    setTimeout(() => { copyButton.innerHTML = originalText; }, 1500);
+                }).catch(err => {
+                    console.error('Failed to copy text: ', err);
+                    alert('Failed to copy text.');
+                });
+            } else if (!navigator.clipboard) {
+                 alert('Clipboard API not available in this browser.');
+            }
+         });
+    }
+
+    if (downloadButton) {
+        downloadButton.addEventListener('click', () => {
+            const textToDownload = transcriptOutput.value;
+            if (textToDownload) {
+                const blob = new Blob([textToDownload], { type: 'text/plain;charset=utf-8' });
+                const url = URL.createObjectURL(blob);
+                const link = document.createElement('a');
+                link.href = url;
+                link.download = 'transcript.txt';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+                URL.revokeObjectURL(url);
+            }
+         });
+    }
+
+    // Initial UI state check
+    updateStatus('Idle', 'idle');
+    updateControlsState(); // Set initial button disabled states
+
+}); // End DOMContentLoaded
+</script>
+
+{% endblock %}

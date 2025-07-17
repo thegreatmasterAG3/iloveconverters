@@ -1,0 +1,370 @@
+{# templates/image_tools/tool_remove_background.html #}
+{% extends 'base.html' %}
+{% load static %}
+{% load humanize %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-ai icon-image d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">I∅</div>
+                 <h1 class="fw-bold">{{ page_title }} <span class="badge bg-info text-dark ms-1 align-middle fs-6">✨ AI</span></h1>
+                 <p class="lead text-muted">Automatically remove the background from your image using Artificial Intelligence.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.level == 40 %}danger{% elif message.level == 30 %}warning{% elif message.level == 25 %}success{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        <input class="d-none" type="file" id="imagefileInput" name="imagefile_bgremove" accept=".jpg,.jpeg,.png,.webp" required>
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                            <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-cloud-arrow-up-fill mb-3 text-muted" viewBox="0 0 16 16"><path d="M8 2a5.53 5.53 0 0 0-3.594 1.342c-.766.66-1.321 1.52-1.464 2.383C1.266 6.095 0 7.555 0 9.318 0 11.366 1.708 13 3.781 13h8.906C14.502 13 16 11.57 16 9.773c0-1.636-1.242-2.969-2.834-3.194C12.923 3.999 10.69 2 8 2m2.354 5.146a.5.5 0 0 1-.708.708L8.5 6.707V10.5a.5.5 0 0 1-1 0V6.707L6.354 7.854a.5.5 0 1 1-.708-.708l2-2a.5.5 0 0 1 .708 0z"/></svg>
+                            <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop Image File Here</p>
+                            <p class="mb-0 text-muted small">(JPG, PNG, WEBP - Max 10MB Recommended)</p>
+                            <p class="mb-0 text-muted small">or</p>
+                            <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse File</button>
+                        </div>
+
+                        {# Preview Area #}
+                        <div id="previewContainer" class="mt-3 d-flex flex-wrap gap-3 justify-content-center mb-4"></div>
+                        <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No file selected.</div>
+
+                        {# --- Options --- #}
+                        <div class="border-top pt-4 mb-4">
+                            <h5 class="text-center mb-3">Options</h5>
+                             <div class="row g-3 justify-content-center align-items-start">
+                                 {# Model Selection #}
+                                 <div class="col-md-6 mb-3">
+                                     <label for="modelSelect" class="form-label fw-medium">AI Model:</label>
+                                     <select class="form-select neumorphic-inset" id="modelSelect" name="model_name">
+                                         {# Values should match model names supported by rembg backend logic #}
+                                        <option value="u2net" {% if prev_options.model_name == 'u2net' or not prev_options %}selected{% endif %}>u2net (General Purpose)</option>
+                                        <option value="u2netp" {% if prev_options.model_name == 'u2netp' %}selected{% endif %}>u2netp (Lightweight)</option>
+                                        {# Add others like 'silueta' if supported/desired #}
+                                     </select>
+                                     <div class="form-text">Different models have varying accuracy and speed.</div>
+                                 </div>
+
+                                 {# Alpha Matting #}
+                                 <div class="col-md-6 mb-3 pt-md-4"> {# Add padding top on medium+ for alignment #}
+                                     <div class="form-check form-switch">
+                                         <input class="form-check-input" type="checkbox" name="alpha_matting" role="switch" id="alphaMattingCheck" {% if prev_options.alpha_matting == 'on' %}checked{% endif %}>
+                                         <label class="form-check-label" for="alphaMattingCheck">Alpha Matting (Refine Edges)</label>
+                                         <div class="form-text">Improves edges like hair, but significantly increases processing time.</div>
+                                     </div>
+                                 </div>
+
+                                {# Background Options #}
+                                <div class="col-12 mb-2">
+                                     <label class="form-label d-block fw-medium">Background:</label>
+                                     <div class="btn-group w-100" role="group" aria-label="Background type">
+                                         {# Transparent Radio #}
+                                         <input type="radio" class="btn-check" name="bg_mode" id="bgTransparent" value="transparent" autocomplete="off" {% if prev_options.bg_mode != 'color' %}checked{% endif %}>
+                                         <label class="btn btn-outline-secondary neumorphic-radio" for="bgTransparent">Transparent</label>
+                                         {# Color Radio #}
+                                         <input type="radio" class="btn-check" name="bg_mode" id="bgColorMode" value="color" autocomplete="off" {% if prev_options.bg_mode == 'color' %}checked{% endif %}>
+                                         <label class="btn btn-outline-secondary neumorphic-radio" for="bgColorMode">Solid Color</label>
+                                     </div>
+                                 </div>
+                                 {# Color Picker (Show only when 'color' mode is selected) #}
+                                 <div class="col-md-6 mb-3" id="bgColorPickerDiv" {% if prev_options.bg_mode != 'color' %}style="display: none;"{% endif %}>
+                                      <label for="bgColorInput" class="form-label fw-medium">Choose Color:</label>
+                                      <input type="color" class="form-control form-control-color neumorphic-inset" id="bgColorInput" name="bg_color" value="{{ prev_options.bg_color|default:'#FFFFFF' }}" title="Choose background color">
+                                 </div>
+
+                             </div>
+                        </div>
+                        {# --- END: Options --- #}
+
+                        {# Process Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                                <div class="spinner-border spinner-border-sm me-2 d-none" role="status" id="loadingSpinner"> <span class="visually-hidden">Loading...</span> </div>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-magic me-2 icon-main" viewBox="0 0 16 16"><path d="M9.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.015a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zM11.293 4.293a.5.5 0 0 0 .707-.707L11.414 3a.5.5 0 1 0-.707.707zm-7.586 0a.5.5 0 1 0-.707-.707L3 3.586a.5.5 0 1 0 .707.707zM6.5 2.672a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zm4.5.015a.5.5 0 1 0 1 0V.843a.5.5 0 0 0-1 0zM1.5 4.687a.5.5 0 1 0 1 0V3.843a.5.5 0 0 0-1 0zM13.5 4.687a.5.5 0 1 0 1 0V3.843a.5.5 0 0 0-1 0zM11.39 14.25l-2.14-2.14a1 1 0 0 0-1.414 0l-2.14 2.14a.5.5 0 0 0 0 .707l.531.531a.5.5 0 0 0 .707 0L8 14.207l1.207 1.207a.5.5 0 0 0 .707 0l.531-.531a.5.5 0 0 0 0-.707M5.61 14.25l2.14-2.14a1 1 0 0 1 1.414 0l2.14 2.14a.5.5 0 0 1 0 .707l-.531.531a.5.5 0 0 1-.707 0L8 14.207 6.793 15.414a.5.5 0 0 1-.707 0l-.531-.531a.5.5 0 0 1 0-.707m6.347-8.485L10.5 7.22l1.457-1.457a.5.5 0 0 0 0-.707l-.531-.531a.5.5 0 0 0-.707 0zm-7.586 0L3 5.765l1.457 1.457a.5.5 0 0 0 .707 0l.531-.531a.5.5 0 0 0 0-.707L4.207 4.53zm8.485 3.604L13 9.672l-1.457 1.457a.5.5 0 0 1-.707 0l-.531-.531a.5.5 0 0 1 0-.707l1.457-1.457zM2.036 8.068l1.457 1.457a.5.5 0 0 0 .707 0l.531-.531a.5.5 0 0 0 0-.707L3.273 6.828a.5.5 0 0 0-.707 0l-.531.531a.5.5 0 0 0 0 .707"/></svg>
+                                <span class="button-text">Remove Background</span>
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Result Display & Download Section --- #}
+                <div class="card p-4 mt-4 text-center neumorphic" id="resultsCard">
+                     <h3 class="mb-3 text-success">Background Removed!</h3>
+                     <div class="qr-code-container mb-3 d-inline-block p-3 rounded">
+                         <img id="resultImage" src="data:image/png;base64,{{ result_image_b64 }}" alt="Image with background removed" class="img-fluid result-image-preview">
+                     </div>
+                     <br/>
+                     <form method="post" action="{% url 'image_tools:remove_background' %}" class="d-inline-block me-2">
+                          {% csrf_token %}
+                          <input type="hidden" name="download_bgremoved" value="true">
+                          <button type="submit" class="btn btn-success">
+                              <svg class="bi bi-download me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg>
+                              Download {{ download_filename|default:"Image" }}
+                          </button>
+                     </form>
+                     <a href="{% url 'image_tools:remove_background' %}" class="btn btn-outline-secondary clear-filters-btn d-inline-block">
+                         <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                         Remove Another
+                     </a>
+                 </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* --- Dropzone/File Input Styles --- */
+    .drop-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-main);
+        cursor: pointer;
+        transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        background-color: var(--bg-color);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+    }
+    .drop-zone.dragover {
+        border-color: var(--link-color);
+        background-color: rgba(var(--link-color-rgb), 0.1);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+    }
+    #browseButton {
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out;
+    }
+    #browseButton:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+    #selectedFileName { /* Style for showing selected filename */
+         transition: color 0.3s ease;
+         font-weight: 500;
+         color: var(--muted-text-color); /* Use muted color */
+    }
+
+     /* --- Preview Item Styles --- */
+    .preview-item {
+        position: relative;
+        border-radius: var(--radius-small);
+        overflow: hidden;
+        box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+        background-color: var(--bg-color);
+        transition: box-shadow 0.3s ease, background-color 0.3s ease;
+    }
+    .preview-image {
+        display: block;
+        width: 100px; /* Or adjust as needed */
+        height: 100px;
+        object-fit: cover;
+    }
+    .preview-remove-btn {
+        position: absolute; top: 2px; right: 2px; width: 20px; height: 20px;
+        border-radius: 50%; background-color: rgba(0, 0, 0, 0.6); color: white;
+        border: none; font-size: 12px; font-weight: bold; line-height: 18px;
+        text-align: center; cursor: pointer; opacity: 0.8; transition: opacity 0.2s ease;
+    }
+    .preview-remove-btn:hover { opacity: 1; }
+
+
+    /* --- Form Control & Option Styles --- */
+    .form-label.fw-medium {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+    }
+    .form-text {
+        color: var(--muted-text-color);
+        transition: color 0.3s ease;
+        font-size: 0.8em;
+    }
+     /* Options heading */
+    #uploadCard .border-top h5 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+    /* Select boxes */
+    .form-select.neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+        background-repeat: no-repeat;
+        background-position: right .75rem center;
+        background-size: 16px 12px;
+        appearance: none;
+    }
+    body.dark-mode .form-select.neumorphic-inset {
+        background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e");
+    }
+    .form-select.neumorphic-inset:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+    /* Switch */
+    .form-switch .form-check-input { background-color: var(--bg-color); background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); background-position: left center; border-radius: 2em; width: 2.75em; height: 1.5em; margin-top: 0.1em; box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); border: none; cursor: pointer; transition: background-color 0.3s ease, background-position .15s ease-in-out, box-shadow 0.3s ease, border-color 0.3s ease; -webkit-appearance: none; appearance: none; }
+    body.dark-mode .form-switch .form-check-input { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); }
+    .form-switch .form-check-input:checked { background-position: right center; border-color: transparent; background-color: var(--link-color); box-shadow: none; background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e"); }
+    .form-switch .form-check-input:focus { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); }
+    body.dark-mode .form-switch .form-check-input:focus { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='rgba(var(--text-color-rgb),.25)'/%3e%3c/svg%3e"); }
+    .form-switch .form-check-input:checked:focus { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='-4 -4 8 8'%3e%3ccircle r='3' fill='%23fff'/%3e%3c/svg%3e"); box-shadow: none; }
+    .form-check-input:disabled { opacity: 0.6; cursor: not-allowed; box-shadow: inset 1px 1px 2px var(--shadow-dark), inset -1px -1px 2px var(--shadow-light); }
+    .form-switch .form-check-input:disabled { box-shadow: inset 2px 2px 4px var(--shadow-dark), inset -2px -2px 4px var(--shadow-light); }
+    .form-check-input:disabled:checked { background-color: var(--muted-text-color); border-color: transparent; box-shadow: none; }
+    .form-switch .form-check-input:disabled:checked { background-color: var(--muted-text-color); }
+    .form-check-input:disabled ~ .form-check-label { opacity: 0.6; cursor: not-allowed; }
+    .form-check-label { color: var(--text-color); padding-left: 0.4em; transition: color 0.3s ease; cursor: pointer; vertical-align: middle; }
+    /* Neumorphic Radio Buttons */
+    .neumorphic-radio { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); border: 1px solid transparent; color: var(--muted-text-color); transition: all 0.2s ease-out; padding: .5rem 1rem; margin-bottom: 0; }
+    .btn-check:checked + .neumorphic-radio { color: var(--link-color); background-color: var(--bg-color); border-color: transparent; box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .neumorphic-radio:hover { color: var(--text-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-check:checked + .neumorphic-radio:hover { color: var(--link-color); }
+    .btn-check:focus-visible + .neumorphic-radio { outline: 2px solid var(--link-color); outline-offset: 2px; z-index: 1; }
+    .btn-group > .btn-check:checked + .neumorphic-radio { z-index: 1; }
+    /* Color Picker */
+     .form-control-color { min-height: calc(1.5em + .75rem + 2px); width: 100%; max-width: 100px; background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; padding: 0.2rem 0.3rem; cursor: pointer; transition: background-color 0.3s ease, box-shadow 0.3s ease; }
+     .form-control-color:focus { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); }
+
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+     /* Adjust button content alignment when spinner active */
+     .btn-submit-tool .spinner-border { vertical-align: -0.15em; }
+     .btn-submit-tool.processing .icon-main, .btn-submit-tool.processing .button-text { /* Use spans in HTML if hiding text */ display: none; }
+
+    /* --- Result Display Styles --- */
+    .qr-code-container { /* Re-using class for styling result container */ background-color: #fff !important; display: inline-block; padding: 1rem; border-radius: var(--radius-small); box-shadow: var(--bs-box-shadow-sm); }
+    .result-image-preview { max-width: 100%; max-height: 400px; height: auto; display: block; margin: 0 auto; background-image: linear-gradient(45deg, #ccc 25%, transparent 25%), linear-gradient(-45deg, #ccc 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #ccc 75%), linear-gradient(-45deg, transparent 75%, #ccc 75%); background-size: 20px 20px; background-position: 0 0, 0 10px, 10px -10px, -10px 0px; border: 1px solid var(--border-color); transition: border-color 0.3s ease; }
+    body.dark-mode .result-image-preview { background-image: linear-gradient(45deg, #444 25%, transparent 25%), linear-gradient(-45deg, #444 25%, transparent 25%), linear-gradient(45deg, transparent 75%, #444 75%), linear-gradient(-45deg, transparent 75%, #444 75%); }
+     #resultsCard h3 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+
+    /* --- Success/Download Buttons --- */
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS including options toggle #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('imagefileInput');
+    const browseButton = document.getElementById('browseButton');
+    const previewContainer = document.getElementById('previewContainer');
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const convertButton = document.getElementById('convertButton');
+    const dropZoneText = document.getElementById('dropZoneText');
+    const loadingSpinner = document.getElementById('loadingSpinner');
+    const bgTransparentRadio = document.getElementById('bgTransparent');
+    const bgColorModeRadio = document.getElementById('bgColorMode');
+    const bgColorPickerDiv = document.getElementById('bgColorPickerDiv');
+    let currentFile = null;
+
+    // --- Define allowed types ---
+    const allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+    const allowedExts = ['.jpg', '.jpeg', '.png', '.webp'];
+
+    // --- File Handling & UI Update ---
+    const updateUI = () => { /* ... same as before ... */
+        previewContainer.innerHTML = '';
+        if (currentFile) { createPreviewElement(currentFile); previewPlaceholder.style.display = 'none'; dropZoneText.textContent = "Replace file"; convertButton.disabled = false; }
+        else { previewPlaceholder.style.display = 'block'; dropZoneText.textContent = "Drag & Drop..."; convertButton.disabled = true; }
+        try { const dt = new DataTransfer(); if (currentFile) dt.items.add(currentFile); fileInput.files = dt.files; } catch (e) { console.error("DataTransfer error:", e); }
+    };
+    const createPreviewElement = (file) => { /* ... same as before ... */
+        if (!file.type.startsWith('image/')) { return; }
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const item = document.createElement('div'); item.classList.add('preview-item');
+            const img = document.createElement('img'); img.classList.add('preview-image'); img.src = e.target.result; img.alt = `Preview`; item.appendChild(img);
+            const btn = document.createElement('button'); btn.classList.add('preview-remove-btn'); btn.innerHTML = '×'; btn.type = 'button'; btn.onclick = handleRemoveFile; item.appendChild(btn);
+            previewContainer.appendChild(item);
+        }
+         reader.readAsDataURL(file);
+     };
+    const handleRemoveFile = () => { /* ... same as before ... */ currentFile = null; fileInput.value = ''; updateUI(); };
+    const handleFiles = (files) => { /* ... same validation as before ... */
+         if (files.length === 0) { handleRemoveFile(); return; }
+         const file = files[0];
+         const fileNameParts = file.name.split('.'); const fileExt = fileNameParts.length > 1 ? '.' + fileNameParts.pop().toLowerCase() : '';
+         if (!allowedMimes.includes(file.type.toLowerCase()) && !allowedExts.includes(fileExt)) { alert(`Allowed types: ${allowedExts.join(', ')}`); handleRemoveFile(); return; }
+         currentFile = file; updateUI();
+     };
+
+    // --- Toggle Background Color Picker Visibility ---
+    const toggleColorPicker = () => {
+        if (bgColorModeRadio && bgColorModeRadio.checked) {
+            bgColorPickerDiv.style.display = 'block';
+        } else {
+            bgColorPickerDiv.style.display = 'none';
+        }
+    };
+
+    // --- Event Listeners ---
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    // Listener for background mode radio buttons
+    if (bgTransparentRadio) bgTransparentRadio.addEventListener('change', toggleColorPicker);
+    if (bgColorModeRadio) bgColorModeRadio.addEventListener('change', toggleColorPicker);
+
+    // Spinner on Submit
+    if (form && convertButton && loadingSpinner) { /* ... same spinner logic ... */
+         form.addEventListener('submit', (e) => {
+            if(currentFile){
+                 convertButton.disabled = true;
+                 loadingSpinner.classList.remove('d-none');
+                 convertButton.classList.add('processing'); // Add class to potentially hide text/icon via CSS
+                 convertButton.querySelector('.icon-main')?.classList.add('d-none');
+                 convertButton.querySelector('.button-text')?.classList.add('d-none');
+            } else { e.preventDefault(); alert("Please select a file first."); }
+        });
+     }
+
+    // Initial State
+    updateUI();
+    toggleColorPicker(); // Set initial visibility of color picker
+
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

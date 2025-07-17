@@ -1,0 +1,481 @@
+{# templates/image_tools/tool_image_color_picker.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-10 col-md-12"> {# Wider column #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">🎨</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Upload an image and click on it to pick colors and get their HEX/RGB codes.</p>
+            </div>
+
+            {# Display Messages if needed later #}
+
+            {# --- Tool Layout (Input, Canvas, Results) --- #}
+            <div class="card p-4 p-md-5" id="toolCard">
+                <div class="row g-4">
+
+                    {# --- Left Column: Upload & Image Canvas --- #}
+                    <div class="col-lg-7">
+                        <div class="mb-3">
+                            <label for="imageUploadInput" class="form-label fw-medium">Upload Image:</label>
+                            <input class="form-control neumorphic-inset" type="file" id="imageUploadInput" accept="image/*">
+                        </div>
+
+                        <div id="canvasContainer" class="text-center mt-3 position-relative neumorphic" style="min-height: 200px; display: flex; align-items: center; justify-content: center;">
+                            <canvas id="imageCanvas" class="image-canvas" style="max-width: 100%; height: auto; display: block;"></canvas>
+                            <div id="canvasPlaceholder" class="text-muted p-5">Please upload an image to pick colors.</div>
+                        </div>
+                    </div>
+
+                    {# --- Right Column: Color Details & History --- #}
+                    <div class="col-lg-5">
+                        <h4 class="text-center mb-3">Color Details</h4>
+
+                        <div class="d-flex align-items-center mb-3">
+                            <div id="colorSwatch" class="color-swatch me-3 neumorphic"></div>
+                            <div class="flex-grow-1">
+                                <div class="mb-2">
+                                     <label for="hexValue" class="form-label form-label-sm mb-1">HEX:</label>
+                                     <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control form-control-sm neumorphic-inset font-monospace" id="hexValue" readonly placeholder="#RRGGBB">
+                                        <button class="btn btn-outline-secondary copy-btn" type="button" id="copyHexBtn" data-clipboard-target="#hexValue" title="Copy HEX" disabled>
+                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg>
+                                        </button>
+                                     </div>
+                                </div>
+                                <div>
+                                     <label for="rgbValue" class="form-label form-label-sm mb-1">RGB:</label>
+                                      <div class="input-group input-group-sm">
+                                        <input type="text" class="form-control form-control-sm neumorphic-inset font-monospace" id="rgbValue" readonly placeholder="rgb(R, G, B)">
+                                         <button class="btn btn-outline-secondary copy-btn" type="button" id="copyRgbBtn" data-clipboard-target="#rgbValue" title="Copy RGB" disabled>
+                                             <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-clipboard" viewBox="0 0 16 16"><path d="M4 1.5H3a2 2 0 0 0-2 2V14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V3.5a2 2 0 0 0-2-2h-1v1h1a1 1 0 0 1 1 1V14a1 1 0 0 1-1 1H3a1 1 0 0 1-1-1V3.5a1 1 0 0 1 1-1h1z"/><path d="M9.5 1a.5.5 0 0 1 .5.5v1a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1-.5-.5v-1a.5.5 0 0 1 .5-.5zm-3-1A1.5 1.5 0 0 0 5 1.5v1A1.5 1.5 0 0 0 6.5 4h3A1.5 1.5 0 0 0 11 2.5v-1A1.5 1.5 0 0 0 9.5 0z"/></svg>
+                                        </button>
+                                      </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <hr class="my-4">
+
+                        <h5 class="text-center mb-3">Picked Colors History</h5>
+                        <ul id="colorHistoryList" class="list-unstyled d-flex flex-wrap gap-2 justify-content-center">
+                            {# History swatches added by JS #}
+                            <li id="historyPlaceholder" class="text-muted small">Click on the image to pick colors.</li>
+                        </ul>
+
+                    </div>
+                </div>
+            </div>
+
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    
+    /* --- Form Control Styles (File Input) --- */
+    .form-control.neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        height: auto;
+    }
+    .form-control.neumorphic-inset:focus {
+        background-color: var(--bg-color);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+        color: var(--text-color);
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        border: none;
+    }
+     .form-label.fw-medium { /* Label above file input */
+        color: var(--text-color);
+        transition: color 0.3s ease;
+    }
+
+
+    /* --- Canvas Styling --- */
+    .image-canvas {
+        cursor: crosshair; /* Dropper style cursor */
+        /* Ensure canvas doesn't exceed its container */
+        max-width: 100%;
+        height: auto;
+        display: block; /* Remove extra space below canvas */
+        border-radius: var(--radius-small); /* Optional: round canvas corners */
+    }
+    #canvasContainer.neumorphic { /* Style container */
+        padding: 0.5rem; /* Padding around canvas */
+        background-color: var(--bg-color); /* Ensure bg for shadow */
+        /* Applies base neumorphic shadow from custom.css .card style */
+         transition: background-color 0.3s ease, box-shadow 0.3s ease;
+         /* Ensure flex settings are applied */
+         display: flex;
+         align-items: center;
+         justify-content: center;
+         position: relative; /* For placeholder positioning */
+         overflow: hidden; /* Clip canvas if it exceeds container bounds */
+    }
+    #canvasPlaceholder {
+        /* Styles defined in HTML, ensure text color adapts */
+         color: var(--muted-text-color);
+         transition: color 0.3s ease;
+         position: absolute;
+         inset: 0;
+         display: flex; /* Keep flex settings */
+         align-items: center;
+         justify-content: center;
+         z-index: 1; /* Behind canvas when image loaded */
+    }
+
+
+    /* --- Color Swatch & Results --- */
+    .color-swatch {
+        width: 60px;
+        height: 60px;
+        border-radius: var(--radius-small);
+        background-color: #eee; /* Default placeholder color */
+        border: none; /* Remove border for neumorphic */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+     .color-swatch.neumorphic { /* Apply neumorphic shadow */
+         box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light);
+    }
+
+    /* Result Inputs (HEX/RGB) */
+    #hexValue, #rgbValue {
+        font-size: 0.9em;
+        /* Apply neumorphic inset style */
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                   inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.375rem 0.75rem; /* Bootstrap small input padding */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+    }
+     #hexValue:focus, #rgbValue:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark),
+                     inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+     }
+     #hexValue::placeholder, #rgbValue::placeholder {
+         color: var(--muted-text-color);
+         opacity: 0.7;
+         transition: color 0.3s ease, opacity 0.3s ease;
+     }
+    /* Labels for result inputs */
+     label[for="hexValue"], label[for="rgbValue"] {
+         color: var(--text-color);
+         transition: color 0.3s ease;
+         font-size: 0.85em; /* Smaller label */
+     }
+
+    /* Copy buttons */
+    .copy-btn {
+        opacity: 0.7;
+        transition: opacity 0.2s ease, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+        /* Style as outline secondary */
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+    }
+    .copy-btn:hover {
+         opacity: 1;
+         background-color: rgba(var(--text-color-rgb), 0.1);
+         border-color: var(--text-color);
+         color: var(--text-color);
+    }
+    .copy-btn.copied {
+        background-color: #198754 !important;
+        border-color: #198754 !important;
+        color: white !important;
+        opacity: 1;
+    }
+    .copy-btn:disabled {
+         opacity: 0.5;
+         cursor: not-allowed;
+         box-shadow: none;
+    }
+     .copy-btn:focus-visible {
+         outline: 2px solid var(--link-color);
+         outline-offset: 1px;
+         box-shadow: none;
+     }
+
+    #toolCard .col-lg-5 h4,
+    #toolCard .col-lg-5 h5 {
+    color: var(--text-color); /* Use main text color variable */
+    transition: color 0.3s ease;
+    font-weight: 600; /* Optional: Make them bolder */
+    /* Add margin/padding adjustments if needed */
+    margin-bottom: 1rem; /* Example margin */
+}
+
+
+    /* --- Color History --- */
+     #resultsCard h4, #resultsCard h5 { /* Ensure headings adapt */
+         color: var(--text-color);
+         transition: color 0.3s ease;
+     }
+     #historyPlaceholder {
+         color: var(--muted-text-color);
+         transition: color 0.3s ease;
+     }
+    #colorHistoryList .history-swatch {
+        width: 30px;
+        height: 30px;
+        border-radius: var(--radius-small);
+        border: none; /* Remove border for neumorphic */
+        cursor: pointer;
+        transition: transform 0.1s ease-out, border-color 0.3s ease, box-shadow 0.3s ease;
+        box-shadow: 3px 3px 5px var(--shadow-dark), -3px -3px 5px var(--shadow-light); /* Subtle shadow */
+    }
+    #colorHistoryList .history-swatch:hover {
+        transform: scale(1.1);
+        box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); /* Enhance shadow slightly */
+    }
+     #colorHistoryList .history-swatch:focus-visible {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+     }
+     #historyPlaceholder {
+    color: var(--muted-text-color);
+    transition: color 0.3s ease;
+    }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for File Upload, Canvas Drawing, Color Picking, Copying #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const imageUploadInput = document.getElementById('imageUploadInput');
+    const canvas = document.getElementById('imageCanvas');
+    const ctx = canvas.getContext('2d', { willReadFrequently: true }); // Important for performance
+    const canvasPlaceholder = document.getElementById('canvasPlaceholder');
+    const colorSwatch = document.getElementById('colorSwatch');
+    const hexValueInput = document.getElementById('hexValue');
+    const rgbValueInput = document.getElementById('rgbValue');
+    const copyHexBtn = document.getElementById('copyHexBtn');
+    const copyRgbBtn = document.getElementById('copyRgbBtn');
+    const colorHistoryList = document.getElementById('colorHistoryList');
+    const historyPlaceholder = document.getElementById('historyPlaceholder');
+
+    let pickedColors = []; // Array to store hex codes of picked colors
+    const MAX_HISTORY = 15; // Max number of colors to show in history
+
+    // --- Helper Functions ---
+    function componentToHex(c) {
+        const hex = c.toString(16);
+        return hex.length == 1 ? "0" + hex : hex;
+    }
+
+    function rgbToHex(r, g, b) {
+        return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+    }
+
+    function updateColorDisplay(r, g, b) {
+        const hex = rgbToHex(r, g, b);
+        const rgb = `rgb(${r}, ${g}, ${b})`;
+
+        colorSwatch.style.backgroundColor = rgb;
+        hexValueInput.value = hex.toUpperCase();
+        rgbValueInput.value = rgb;
+
+        // Enable copy buttons
+        copyHexBtn.disabled = false;
+        copyRgbBtn.disabled = false;
+
+        // Add to history (avoid duplicates at start)
+        if (!pickedColors.includes(hex)) {
+             if (historyPlaceholder) { // Hide placeholder on first pick
+                historyPlaceholder.style.display = 'none';
+             }
+             pickedColors.unshift(hex); // Add to beginning
+             if (pickedColors.length > MAX_HISTORY) {
+                 pickedColors.pop(); // Remove the oldest
+             }
+             renderColorHistory();
+        }
+    }
+
+    function renderColorHistory() {
+        // Clear existing swatches except placeholder
+        while (colorHistoryList.firstChild && colorHistoryList.firstChild !== historyPlaceholder) {
+            colorHistoryList.removeChild(colorHistoryList.firstChild);
+        }
+
+        pickedColors.forEach(hexColor => {
+            const li = document.createElement('li');
+            li.classList.add('history-swatch');
+            li.style.backgroundColor = hexColor;
+            li.title = hexColor.toUpperCase(); // Tooltip with hex value
+            li.dataset.hex = hexColor; // Store hex for potential re-click
+            li.setAttribute('role', 'button');
+            li.setAttribute('tabindex', '0'); // Make it focusable
+            li.addEventListener('click', handleHistoryClick);
+            li.addEventListener('keydown', (e) => { if(e.key === 'Enter' || e.key === ' ') { handleHistoryClick(e); } }); // Keyboard accessible
+            colorHistoryList.appendChild(li);
+        });
+         // Show placeholder if history is empty
+         if (pickedColors.length === 0 && historyPlaceholder) {
+            historyPlaceholder.style.display = 'block';
+        }
+    }
+
+     function handleHistoryClick(event) {
+         const hex = event.target.dataset.hex;
+         if (hex) {
+             // Convert hex back to RGB to update display consistently
+             const bigint = parseInt(hex.substring(1), 16);
+             const r = (bigint >> 16) & 255;
+             const g = (bigint >> 8) & 255;
+             const b = bigint & 255;
+             updateColorDisplay(r, g, b);
+             // Optionally move clicked color to front of history
+             // const index = pickedColors.indexOf(hex);
+             // if (index > -1) pickedColors.splice(index, 1);
+             // pickedColors.unshift(hex);
+             // renderColorHistory();
+         }
+     }
+
+    // --- Event Listeners ---
+
+    // File Input Change
+    imageUploadInput.addEventListener('change', (event) => {
+        const files = event.target.files;
+        if (files && files[0]) {
+            const file = files[0];
+            if (!file.type.startsWith('image/')) {
+                alert('Please select a valid image file.');
+                return;
+            }
+
+            const reader = new FileReader();
+            reader.onload = (e) => {
+                const img = new Image();
+                img.onload = () => {
+                    console.log(`Image loaded: ${img.width}x${img.height}`);
+                    // Set canvas size to image size
+                    canvas.width = img.naturalWidth; // Use natural dimensions
+                    canvas.height = img.naturalHeight;
+                    // Draw image onto canvas
+                    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
+                    canvasPlaceholder.style.display = 'none'; // Hide placeholder
+                    canvas.style.display = 'block'; // Make canvas visible
+                    // Clear previous results
+                    colorSwatch.style.backgroundColor = '#eee';
+                    hexValueInput.value = '';
+                    rgbValueInput.value = '';
+                    copyHexBtn.disabled = true;
+                    copyRgbBtn.disabled = true;
+                    // Clear history for new image? Or keep it? User preference. Let's clear it.
+                    // pickedColors = [];
+                    // renderColorHistory();
+                };
+                img.onerror = () => {
+                     alert('Failed to load the image.');
+                     canvasPlaceholder.style.display = 'block';
+                     canvas.style.display = 'none';
+                };
+                img.src = e.target.result; // Set image source AFTER onload is defined
+            };
+            reader.onerror = () => {
+                 alert('Failed to read the file.');
+                 canvasPlaceholder.style.display = 'block';
+                 canvas.style.display = 'none';
+            };
+            reader.readAsDataURL(file); // Read the file
+        } else {
+             // Clear if no file selected
+             ctx.clearRect(0, 0, canvas.width, canvas.height);
+             canvasPlaceholder.style.display = 'block';
+             canvas.style.display = 'none';
+             colorSwatch.style.backgroundColor = '#eee';
+             hexValueInput.value = '';
+             rgbValueInput.value = '';
+             copyHexBtn.disabled = true;
+             copyRgbBtn.disabled = true;
+        }
+    });
+
+    // Canvas Click Listener
+    canvas.addEventListener('click', (event) => {
+        // Get click coordinates relative to the canvas element
+        const rect = canvas.getBoundingClientRect();
+        // Calculate scale factor if canvas is displayed smaller than its actual size
+        const scaleX = canvas.width / rect.width;
+        const scaleY = canvas.height / rect.height;
+        // Get the actual pixel coordinates on the canvas's bitmap
+        const x = Math.floor((event.clientX - rect.left) * scaleX);
+        const y = Math.floor((event.clientY - rect.top) * scaleY);
+
+        try {
+            // Get the ImageData object for the 1x1 pixel at the click location
+            const pixelData = ctx.getImageData(x, y, 1, 1).data;
+            // data is an array [R, G, B, A]
+            const r = pixelData[0];
+            const g = pixelData[1];
+            const b = pixelData[2];
+            // Alpha (pixelData[3]) is ignored for HEX/RGB display usually
+            console.log(`Clicked at (${x}, ${y}), Color: RGB(${r}, ${g}, ${b})`);
+            updateColorDisplay(r, g, b);
+        } catch (e) {
+             console.error("Error getting pixel data (possibly CORS issue if image source is external):", e);
+             // This usually only happens if the image source violates security policies
+             alert("Could not pick color from this location. Ensure the image was uploaded correctly.")
+        }
+    });
+
+     // Copy Button Logic (Using Clipboard API)
+     function setupCopyButton(buttonId, targetInputId) {
+         const button = document.getElementById(buttonId);
+         const targetInput = document.getElementById(targetInputId);
+         if (!button || !targetInput) return;
+
+         button.addEventListener('click', () => {
+             if (!targetInput.value) return; // Don't copy empty
+
+             if (navigator.clipboard) {
+                 navigator.clipboard.writeText(targetInput.value).then(() => {
+                    const originalText = button.innerHTML;
+                    button.innerHTML = '<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-check-lg" viewBox="0 0 16 16"><path d="M12.736 3.97a.733.733 0 0 1 1.047 0c.286.289.29.756.01 1.05L7.88 12.01a.733.733 0 0 1-1.065.02L3.217 8.384a.757.757 0 0 1 0-1.06.733.733 0 0 1 1.047 0l3.052 3.093 5.4-6.425z"/></svg>';
+                    button.classList.add('copied');
+                    setTimeout(() => {
+                         button.innerHTML = originalText;
+                         button.classList.remove('copied');
+                    }, 1500);
+                 }).catch(err => {
+                     console.error('Failed to copy: ', err);
+                     alert('Failed to copy. Please select manually.');
+                 });
+             } else { /* Fallback logic if needed */ }
+         });
+     }
+
+     setupCopyButton('copyHexBtn', 'hexValue');
+     setupCopyButton('copyRgbBtn', 'rgbValue');
+
+});
+</script>
+{% endblock %}

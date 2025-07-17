@@ -1,0 +1,436 @@
+{# templates/archive_tools/tool_create_zip.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-archive d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">Zip↑</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Select multiple files to compress them into a single downloadable ZIP archive.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not creation_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5 mb-4 position-relative" id="uploadCard">
+
+                     {# Loading Overlay #}
+                     <div id="loadingOverlay" class="loading-overlay justify-content-center align-items-center" style="display: none;">
+                         <div class="spinner-border text-primary" role="status"><span class="visually-hidden">Loading...</span></div>
+                         <p class="text-muted mt-2">Creating ZIP file...</p>
+                     </div>
+
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+                        {# Unique name 'files_to_zip', allow multiple #}
+                        <input class="d-none" type="file" id="filesInput" name="files_to_zip" multiple required>
+
+                        {# Drop Zone #}
+                        <div id="dropZone" class="drop-zone neumorphic-inset text-center p-4 p-md-5 mb-3">
+                             <svg xmlns="http://www.w3.org/2000/svg" width="50" height="50" fill="currentColor" class="bi bi-folder-plus mb-3 text-muted" viewBox="0 0 16 16"><path d="m.5 3 .04.87a2 2 0 0 0-.342 1.311l.637 7A2 2 0 0 0 2.826 14h10.348a2 2 0 0 0 1.991-1.819l.637-7A2 2 0 0 0 13.81 4H2.19a1.99 1.99 0 0 1-.342-1.311L1.5 3zm4.096-1.24a.5.5 0 0 0-.577-.375L1.5 4.26V1.5a.5.5 0 0 1 .5-.5h3.5a.5.5 0 0 1 .577.408zM8.5 1a.5.5 0 0 0-1 0v1.5H6a.5.5 0 0 0 0 1h1.5V5a.5.5 0 0 0 1 0V3.5H10a.5.5 0 0 0 0-1H8.5z"/><path d="M5.828 3a1.5 1.5 0 0 1 1.06-.44l.854-.853A.5.5 0 0 1 8.172 1h.656a.5.5 0 0 1 .354.146l.854.853a1.5 1.5 0 0 1 1.06.44H13.5a1.5 1.5 0 0 1 1.5 1.5v.619c-.43-.444-1.06-.768-1.824-.878a4 4 0 0 0-.274-.004l-.13.003c-.45.027-.896.113-1.305.27-1.018.4-1.76 1.15-1.94 2.093-.06.31-.09.63-.09.954v.667c0 .325.03.644.09.954.18 1.102.96 1.94 2.05 2.352.434.166.886.255 1.34.27l.133.002c.11.002.22.003.33.003.78 0 1.43-.31 1.95-.84v2.19a1.5 1.5 0 0 1-1.5 1.5h-11A1.5 1.5 0 0 1 1 12.5V4.5A1.5 1.5 0 0 1 2.5 3z"/></svg>
+                             <p id="dropZoneText" class="mb-0 text-muted">Drag & Drop Files Here</p>
+                             <p class="mb-0 text-muted small">(Select multiple files)</p>
+                             <p class="mb-0 text-muted small">or</p>
+                             <button type="button" class="btn btn-secondary btn-sm mt-2" id="browseButton">Browse Files</button>
+                        </div>
+
+                        {# File List Preview Area #}
+                        <div id="previewContainer" class="mt-3 mb-4">
+                             <ul id="fileList" class="list-group list-group-flush file-list-display">
+                                 {# File names will be added here by JS #}
+                             </ul>
+                        </div>
+                        <div id="previewPlaceholder" class="text-center text-muted mt-3" style="display: block;">No files selected.</div>
+
+                        {# --- Options --- #}
+                        <div class="border-top pt-4 mb-4">
+                             <div class="row g-3 justify-content-center">
+                                <div class="col-md-8">
+                                     <label for="outputFilenameInput" class="form-label fw-medium">Output ZIP Filename:</label>
+                                     <input type="text" class="form-control neumorphic-inset" id="outputFilenameInput" name="output_filename" value="{{ prev_output_filename|default:'archive' }}" placeholder="archive">
+                                     <div class="form-text">The `.zip` extension will be added automatically.</div>
+                                </div>
+                             </div>
+                        </div>
+                        {# --- END: Options --- #}
+
+                        {# Create Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="createButton" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-file-earmark-zip-fill me-2" viewBox="0 0 16 16"><path d="M5.5 9.438V8.5h1v.938a1 1 0 0 0 .03.243l.4 1.598-.93.62-.93-.62.4-1.598a1 1 0 0 0 .03-.243z"/><path d="M9.293 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.707A1 1 0 0 0 13.707 4L10 .293A1 1 0 0 0 9.293 0M9.5 3.5v-2l3 3h-2a1 1 0 0 1-1-1M6.5 7.5h1v1h-1zm-1 0h1v1h-1zm1 1.75V11h1v-1.75a.75.75 0 0 0-1 0M4.5 9.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm0 1.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm4-3h1v1h-1zm-1 0h1v1h-1zm1 1.75V11h1v-1.75a.75.75 0 0 0-1 0zM8.5 9.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1zm0 1.5a.5.5 0 0 1 0-1h3a.5.5 0 0 1 0 1z"/></svg>
+                                Create ZIP Archive
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Download Section --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic">
+                    <h3 class="mb-3 text-success">ZIP Archive Created!</h3>
+                    {% if original_filenames %}
+                        <p class="text-muted small mb-3">Included {{ original_filenames|length }} files.</p>
+                    {% endif %}
+                    <p class="text-muted mb-4">Your archive is ready for download.</p>
+
+                    <form method="post" action="{% url 'archive_tools:create_zip' %}">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_created_zip" value="true">
+                         <button type="submit" class="btn btn-success btn-lg mb-3">
+                            <svg class="bi bi-download me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg>
+                             Download {{ download_filename|default:"archive.zip" }}
+                         </button>
+                    </form>
+                    <a href="{% url 'archive_tools:create_zip' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                        <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                        Create Another ZIP
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* --- Dropzone/File Input Styles --- */
+    .drop-zone {
+        border: 2px dashed var(--border-color);
+        border-radius: var(--radius-main);
+        cursor: pointer;
+        transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease;
+        /* Neumorphic Inset */
+        background-color: var(--bg-color);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+    }
+    .drop-zone.dragover {
+        border-color: var(--link-color);
+        background-color: rgba(var(--link-color-rgb), 0.1);
+        box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light);
+    }
+    #browseButton {
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        transition: all 0.2s ease-out;
+    }
+    #browseButton:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+    #selectedFileName { /* Placeholder style if needed, but we use the list now */
+         /* transition: color 0.3s ease; */
+         /* font-weight: 500; */
+         /* color: var(--muted-text-color); */
+    }
+
+     /* --- Form Control & Option Styles --- */
+    .form-label.fw-medium { /* For option titles */
+         color: var(--text-color);
+         transition: color 0.3s ease;
+    }
+    .form-text { /* For helper text below options */
+         color: var(--muted-text-color);
+         transition: color 0.3s ease;
+         font-size: 0.8em;
+    }
+    /* Style text input for filename */
+    input[type="text"].neumorphic-inset {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 5px 5px 10px var(--shadow-dark),
+                    inset -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--text-color);
+        padding: 0.75rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease;
+        height: auto;
+    }
+     input[type="text"].neumorphic-inset:focus {
+         background-color: var(--bg-color);
+         box-shadow: inset 6px 6px 12px var(--shadow-dark),
+                     inset -6px -6px 12px var(--shadow-light);
+         color: var(--text-color);
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         border: none;
+    }
+     input[type="text"].neumorphic-inset::placeholder {
+         color: var(--muted-text-color);
+         opacity: 0.7;
+         transition: color 0.3s ease, opacity 0.3s ease;
+    }
+
+    /* --- File List Preview Area --- */
+    .file-list-display {
+        max-height: 250px; /* Adjust as needed */
+        overflow-y: auto;
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        padding: 0.5rem 1rem;
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+        list-style: none;
+        margin-bottom: 0;
+    }
+    .file-list-display .list-group-item {
+        background-color: transparent;
+        border: none;
+        border-bottom: 1px solid var(--border-color);
+        color: var(--text-color);
+        padding: 0.6rem 0.25rem;
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        transition: background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .file-list-display .list-group-item:last-child {
+        border-bottom: none;
+    }
+    .file-list-display .file-name {
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        margin-right: 1rem;
+        font-size: 0.9em;
+        flex-grow: 1; /* Allow filename to take space */
+    }
+    .file-list-display .remove-file-btn {
+        color: var(--accent-security);
+        background: none;
+        border: none;
+        padding: 0.1rem 0.4rem;
+        font-size: 1.1em;
+        line-height: 1;
+        cursor: pointer;
+        opacity: 0.7;
+        transition: opacity 0.2s ease;
+        flex-shrink: 0; /* Prevent button shrinking */
+    }
+    .file-list-display .remove-file-btn:hover {
+        opacity: 1;
+    }
+    /* Icon styling within list */
+     .file-list-display .list-group-item .bi {
+        color: var(--muted-text-color);
+        flex-shrink: 0;
+        margin-right: 0.5rem; /* Space after icon */
+        vertical-align: -0.15em;
+     }
+
+    /* --- Submit Button Styles --- */
+    .btn-submit-tool {
+        background-color: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+        border: none;
+        color: var(--link-color);
+        padding: 0.75rem 1rem;
+        font-weight: 500;
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
+    }
+    .btn-submit-tool:hover {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light);
+    }
+    .btn-submit-tool:active {
+        color: var(--link-color);
+        background-color: var(--bg-color);
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+    }
+    .btn-submit-tool:disabled {
+        box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light);
+        opacity: 0.6;
+        cursor: not-allowed;
+        color: var(--muted-text-color);
+    }
+    .btn-submit-tool:focus-visible {
+        outline: 2px solid var(--link-color);
+        outline-offset: 2px;
+        box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light);
+    }
+
+    /* --- Results Section Styles --- */
+     #resultsCard h3 {
+        color: var(--text-color);
+        transition: color 0.3s ease;
+        font-weight: 600;
+    }
+     #resultsCard h3 .text-muted {
+        color: var(--muted-text-color) !important;
+        transition: color 0.3s ease;
+        font-style: italic;
+     }
+     /* Download/Create Another Buttons */
+    .btn-success {
+        padding: 0.75rem 1.25rem;
+    }
+    .clear-filters-btn { /* For Create Another button */
+        background-color: transparent;
+        border: 1px solid var(--muted-text-color);
+        color: var(--muted-text-color);
+        border-radius: var(--radius-small);
+        transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease;
+    }
+    .clear-filters-btn:hover {
+        background-color: rgba(var(--text-color-rgb), 0.1);
+        border-color: var(--text-color);
+        color: var(--text-color);
+    }
+
+     /* --- Loading Overlay --- */
+    .loading-overlay {
+        position: absolute; inset: 0;
+        background-color: rgba(var(--card-bg-color-rgb, 255, 255, 255), 0.8);
+        z-index: 10; display: flex; flex-direction: column;
+        border-radius: var(--radius-main); backdrop-filter: blur(2px);
+        transition: background-color 0.3s ease;
+        justify-content: center; align-items: center; /* Center content */
+    }
+    body.dark-mode .loading-overlay {
+        background-color: rgba(var(--card-bg-color-rgb-dark, 49, 53, 63), 0.8);
+    }
+    .loading-overlay .spinner-border { width: 3rem; height: 3rem; color: var(--link-color); }
+    .loading-overlay p { color: var(--muted-text-color); font-weight: 500; transition: color 0.3s ease; }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS adapted for multiple file input 'files_to_zip', list display, loading #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    const dropZone = document.getElementById('dropZone');
+    const fileInput = document.getElementById('filesInput'); // Correct ID
+    const browseButton = document.getElementById('browseButton');
+    const fileListUl = document.getElementById('fileList'); // The UL element
+    const previewPlaceholder = document.getElementById('previewPlaceholder');
+    const convertButton = document.getElementById('createButton'); // Correct ID
+    const dropZoneText = document.getElementById('dropZoneText');
+    const loadingOverlay = document.getElementById('loadingOverlay');
+    let selectedFiles = []; // Array to hold multiple files
+
+    // --- File Handling & UI Update ---
+    const updateUI = () => {
+        fileListUl.innerHTML = ''; // Clear existing list items
+        if (selectedFiles.length > 0) {
+            selectedFiles.forEach((file, index) => {
+                createFileListItem(file, index);
+            });
+            previewPlaceholder.style.display = 'none'; // Hide placeholder
+            convertButton.disabled = false; // Enable button if ANY files selected
+            dropZoneText.textContent = `Add more files or drop here... (${selectedFiles.length} selected)`;
+        } else {
+            previewPlaceholder.style.display = 'block'; // Show placeholder
+            convertButton.disabled = true;
+            dropZoneText.textContent = "Drag & Drop Files Here";
+        }
+        // Update hidden input with current file list
+        try {
+            const dataTransfer = new DataTransfer();
+            selectedFiles.forEach(file => dataTransfer.items.add(file));
+            fileInput.files = dataTransfer.files;
+        } catch (e) { console.error("DataTransfer error:", e); }
+    };
+
+    // Create list item for file display
+    const createFileListItem = (file, index) => {
+        const listItem = document.createElement('li');
+        listItem.classList.add('list-group-item');
+
+        // Icon (Optional - generic file icon)
+        const icon = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+        icon.setAttribute('width', '1em'); icon.setAttribute('height', '1em');
+        icon.setAttribute('fill', 'currentColor'); icon.classList.add('bi', 'bi-file-earmark-text', 'me-2');
+        icon.style.verticalAlign = '-0.15em'; icon.style.color = 'var(--muted-text-color)';
+        icon.innerHTML = '<path d="M5.5 7a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zM5 9.5a.5.5 0 0 0 0 1h5a.5.5 0 0 0 0-1zm0 2.5a.5.5 0 0 0 0 1h2a.5.5 0 0 0 0-1z"/><path d="M9.5 0H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4.5zm0 1v2A1.5 1.5 0 0 0 11 4.5h2V14a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V2a1 1 0 0 1 1-1z"/>';
+        listItem.appendChild(icon);
+
+        const fileNameSpan = document.createElement('span');
+        fileNameSpan.classList.add('file-name');
+        fileNameSpan.textContent = file.name;
+        listItem.appendChild(fileNameSpan);
+
+        const removeBtn = document.createElement('button');
+        removeBtn.classList.add('remove-file-btn');
+        removeBtn.innerHTML = '×'; // 'X' symbol
+        removeBtn.type = 'button';
+        removeBtn.setAttribute('aria-label', `Remove ${file.name}`);
+        removeBtn.dataset.index = index;
+        removeBtn.onclick = handleRemoveFile;
+        listItem.appendChild(removeBtn);
+
+        fileListUl.appendChild(listItem);
+    };
+
+    const handleRemoveFile = (event) => {
+        const indexToRemove = parseInt(event.target.dataset.index, 10);
+        if (!isNaN(indexToRemove)) {
+            selectedFiles.splice(indexToRemove, 1); // Remove file from array
+            updateUI(); // Refresh list and button state
+        }
+    };
+
+    const handleFiles = (files) => {
+        const newFiles = Array.from(files); // Accept all file types
+
+        if (newFiles.length === 0) return;
+
+        // Add only new files (simple duplicate check based on name & size)
+        newFiles.forEach(newFile => {
+            const isDuplicate = selectedFiles.some(existingFile =>
+                existingFile.name === newFile.name && existingFile.size === newFile.size
+            );
+            if (!isDuplicate) {
+                selectedFiles.push(newFile);
+            }
+        });
+        updateUI();
+    };
+
+    // Drag/Drop/Browse listeners
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZone.addEventListener(ev, () => dropZone.classList.remove('dragover'), false); });
+    dropZone.addEventListener('drop', (e) => { handleFiles(e.dataTransfer.files); }, false);
+    fileInput.addEventListener('change', (e) => { handleFiles(e.target.files); });
+    browseButton.addEventListener('click', () => { fileInput.click(); });
+
+    // Loading Indicator on Submit
+    if (form && loadingOverlay && convertButton) {
+        form.addEventListener('submit', () => {
+            if (selectedFiles.length > 0) { // Check if files are actually selected
+                loadingOverlay.style.display = 'flex';
+                convertButton.disabled = true;
+            } else {
+                // Optionally prevent submission if needed, though 'required' on input helps
+                // event.preventDefault();
+                // alert("Please select files to archive.");
+            }
+        });
+    }
+
+    updateUI(); // Initial state
+});
+</script>
+{# Theme toggle inherited from base #}
+{% endblock %}

@@ -1,0 +1,483 @@
+{# templates/image_tools/tool_add_watermark.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }} - ToolSite{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-9 col-md-11"> {# Wider column #}
+            <div class="text-center mb-4">
+                 <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-1 mb-3 p-2 rounded">IMG™</div>
+                 <h1 class="fw-bold">{{ page_title }}</h1>
+                 <p class="lead text-muted">Add a custom text or image watermark to your photos.</p>
+            </div>
+
+            {# Display Messages #}
+            {% if messages %}
+                {% for message in messages %}
+                <div class="alert alert-{% if message.tags %}{{ message.tags }}{% else %}info{% endif %} alert-dismissible fade show text-center" role="alert">
+                    {{ message }}
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                {% endfor %}
+            {% endif %}
+
+            {% if not conversion_success %}
+                {# --- Upload Form --- #}
+                <div class="card p-4 p-md-5" id="uploadCard">
+                    <form method="post" enctype="multipart/form-data" id="uploadForm">
+                        {% csrf_token %}
+
+                        {# --- Base Image Input --- #}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold fs-5 mb-2">1. Upload Base Image:</label>
+                            <input class="d-none" type="file" id="baseImageInput" name="base_image" accept="image/*" required>
+                            <div id="dropZoneBase" class="drop-zone neumorphic-inset text-center p-4">
+                                 <svg width="40" height="40" fill="currentColor" class="bi bi-image-fill mb-2 text-muted"><path d="M.002 3a2 2 0 0 1 2-2h12a2 2 0 0 1 2 2v10a2 2 0 0 1-2 2h-12a2 2 0 0 1-2-2zm1 9v1a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V9.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062z"/></svg>
+                                 <p id="dropZoneBaseText" class="mb-0 text-muted small">Drag & Drop Base Image (JPG, PNG, etc.) or <button type="button" class="btn btn-link p-0 align-baseline" id="browseBaseButton">Browse</button></p>
+                            </div>
+                             <div id="previewBaseContainer" class="mt-3 text-center"> {# Preview will appear here #} </div>
+                             <div id="previewBasePlaceholder" class="text-center text-muted small mt-1" style="display: none;"></div> {# Filename shown here if no preview #}
+                        </div>
+
+                        {# --- Watermark Type Selection --- #}
+                        <div class="mb-4">
+                            <label class="form-label fw-bold fs-5 mb-2">2. Choose Watermark Type:</label>
+                            <div class="btn-group w-100" role="group" aria-label="Watermark type">
+                                <input type="radio" class="btn-check" name="watermark_type" id="typeText" value="text" autocomplete="off" {% if not prev_options.watermark_type or prev_options.watermark_type == 'text' %}checked{% endif %}>
+                                <label class="btn btn-outline-primary neumorphic-radio" for="typeText">Text</label>
+
+                                <input type="radio" class="btn-check" name="watermark_type" id="typeImage" value="image" autocomplete="off" {% if prev_options.watermark_type == 'image' %}checked{% endif %}>
+                                <label class="btn btn-outline-primary neumorphic-radio" for="typeImage">Image</label>
+                            </div>
+                        </div>
+
+                         {# --- Text Watermark Options (Conditional) --- #}
+                        <div id="textOptions" class="options-section border-top pt-3 mb-3">
+                            <h5 class="mb-3 fw-medium">Text Watermark Options:</h5>
+                             <div class="mb-3">
+                                <label for="watermark_text" class="form-label">Watermark Text:</label>
+                                <textarea class="form-control neumorphic-inset" id="watermark_text" name="watermark_text" rows="2">{{ prev_options.watermark_text|default:"Your Watermark" }}</textarea>
+                            </div>
+                             <div class="row g-3">
+                                <div class="col-md-6">
+                                     <label for="text_color" class="form-label">Color:</label>
+                                     <input type="color" class="form-control form-control-color neumorphic-inset" id="text_color" name="text_color" value="{{ prev_options.text_color|default:'#808080' }}">
+                                </div>
+                                <div class="col-md-6">
+                                     <label for="text_size" class="form-label">Size:</label>
+                                     <select class="form-select neumorphic-inset" name="text_size" id="text_size">
+                                         <option value="S" {% if prev_options.text_size == 'S' %}selected{% endif %}>Small</option>
+                                         <option value="M" {% if not prev_options.text_size or prev_options.text_size == 'M' %}selected{% endif %}>Medium</option>
+                                         <option value="L" {% if prev_options.text_size == 'L' %}selected{% endif %}>Large</option>
+                                     </select>
+                                </div>
+                             </div>
+                        </div>
+
+                        {# --- Image Watermark Options (Conditional) --- #}
+                        <div id="imageOptions" class="options-section border-top pt-3 mb-3" style="display: none;"> {# Initially hidden #}
+                            <h5 class="mb-3 fw-medium">Image Watermark Options:</h5>
+                             <div class="mb-3">
+                                <label class="form-label d-block mb-2">Upload Watermark Image:</label>
+                                <input class="d-none" type="file" id="watermarkImageInput" name="watermark_image" accept=".png"> {# Prefer PNG #}
+                                <div id="dropZoneWatermark" class="drop-zone neumorphic-inset text-center p-4">
+                                     <svg width="40" height="40" fill="currentColor" class="bi bi-image mb-2 text-muted"><path d="M6.002 5.5a1.5 1.5 0 1 1-3 0 1.5 1.5 0 0 1 3 0"/><path d="M2.002 1a2 2 0 0 0-2 2v10a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V3a2 2 0 0 0-2-2zm12 1a1 1 0 0 1 1 1v6.5l-3.777-1.947a.5.5 0 0 0-.577.093l-3.71 3.71-2.66-1.772a.5.5 0 0 0-.63.062L1.002 12V3a1 1 0 0 1 1-1z"/></svg>
+                                     <p id="dropZoneWatermarkText" class="mb-0 text-muted small">Drag & Drop Watermark (PNG) or <button type="button" class="btn btn-link p-0 align-baseline" id="browseWatermarkButton">Browse</button></p>
+                                </div>
+                                 <div id="previewWatermarkContainer" class="mt-2 text-center"></div>{# Preview will appear here #}
+                                 <div id="previewWatermarkPlaceholder" class="text-center text-muted small mt-1" style="display: none;"></div>
+                                 <div class="form-text">Use a PNG file with transparency for best results.</div>
+                             </div>
+                            <div class="mb-3">
+                                 <label for="imageScaleRange" class="form-label">Scale: <span id="imageScaleValue">{{ prev_options.image_scale|default:"15" }}</span>%</label>
+                                 <input type="range" class="form-range" id="imageScaleRange" name="image_scale" min="5" max="50" value="{{ prev_options.image_scale|default:"15" }}" step="1">
+                                 <div class="form-text">Size relative to base image width.</div>
+                            </div>
+                        </div>
+
+                        {# --- Common Options --- #}
+                        <div class="border-top pt-4 mb-4">
+                            <h5 class="text-center mb-3">Placement & Transparency</h5> {# Updated text #}
+                             <div class="row g-3">
+                                 <div class="col-md-6">
+                                    <label for="positionSelect" class="form-label fw-medium">Position:</label>
+                                    <select class="form-select neumorphic-inset" name="position" id="positionSelect">
+                                        <option value="BR" {% if not prev_options.position or prev_options.position == 'BR' %}selected{% endif %}>Bottom Right</option>
+                                        <option value="BL" {% if prev_options.position == 'BL' %}selected{% endif %}>Bottom Left</option>
+                                        <option value="TR" {% if prev_options.position == 'TR' %}selected{% endif %}>Top Right</option>
+                                        <option value="TL" {% if prev_options.position == 'TL' %}selected{% endif %}>Top Left</option>
+                                        <option value="C" {% if prev_options.position == 'C' %}selected{% endif %}>Center</option>
+                                        <option value="TILE" {% if prev_options.position == 'TILE' %}selected{% endif %}>Tile</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-6">
+                                    <label for="opacityRange" class="form-label fw-medium">Opacity: <span id="opacityValue">{{ prev_options.opacity|default:"0.5" }}</span></label>
+                                    <input type="range" class="form-range" id="opacityRange" name="opacity" min="0.1" max="1.0" value="{{ prev_options.opacity|default:"0.5" }}" step="0.05">
+                                </div>
+                             </div>
+                         </div>
+
+                        {# Submit Button #}
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-submit-tool btn-lg" id="convertButton" disabled>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-vector-pen me-2" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M10.646.646a.5.5 0 0 1 .708 0l4 4a.5.5 0 0 1 0 .708l-1.902 1.902-.829 3.313a1.5 1.5 0 0 1-1.024 1.073L10.5 15.5h-1.293a1.5 1.5 0 0 1-1.06-.44L4.81 10.81l-.283-.85a.5.5 0 0 1 .134-.625L10.5 1.5zm-.64 1.643L4.17 7.96l.85 1.273 5.657-5.657zM11.828 3L9.7 5.128l1.414 1.414 2.128-2.128zM10.5 13.5a.5.5 0 0 1 .5-.5h1.293l.64-2.559a.5.5 0 0 1 .33-.29l3.313-.828L11.5 8.086zm-1.5.5L11.5 13h1.293l.64-2.559a.5.5 0 0 1 .33-.29l3.313-.828L11.5 8.086z"/><path fill-rule="evenodd" d="M12.5 15a1.5 1.5 0 0 0 1.5-1.5v-1.293l-.642 2.569a.5.5 0 0 1-.29.33l-3.313.828a.5.5 0 0 1-.478-.11l-1.44-1.44a.5.5 0 0 1 .11-.69l2.56-1.024a.5.5 0 0 1 .53-.026l.892.447A1.5 1.5 0 0 0 12.5 15"/></svg>
+                                Add Watermark
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            {% else %}
+                {# --- Download Section --- #}
+                <div class="card p-4 p-md-5 text-center neumorphic">
+                    <h3 class="mb-3 text-success">Watermark Added!</h3>
+                    <p class="text-muted mb-4">Your watermarked image is ready.</p>
+                    {# Optional: Display small preview of result? #}
+                     {# <div class="qr-code-container mb-3"> <img src="data:image/...;base64,{{ watermarked_data_b64 }}" alt="Watermarked Image Preview" class="img-fluid" style="max-height: 200px;"> </div> #}
+                    <form method="post" action="{% url 'image_tools:add_watermark' %}">
+                         {% csrf_token %}
+                         <input type="hidden" name="download_watermarked" value="true">
+                         <button type="submit" class="btn btn-success btn-lg mb-3">
+                             <svg class="bi bi-download me-2" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path d="M.5 9.9a.5.5 0 0 1 .5.5v2.5a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1v-2.5a.5.5 0 0 1 1 0v2.5a2 2 0 0 1-2 2H2a2 2 0 0 1-2-2v-2.5a.5.5 0 0 1 .5-.5"/><path d="M7.646 11.854a.5.5 0 0 0 .708 0l3-3a.5.5 0 0 0-.708-.708L8.5 10.293V1.5a.5.5 0 0 0-1 0v8.793L5.354 8.146a.5.5 0 1 0-.708.708z"/></svg>
+                             Download {{ download_filename|default:"Image" }}
+                         </button>
+                    </form>
+                    <a href="{% url 'image_tools:add_watermark' %}" class="btn btn-outline-secondary clear-filters-btn mt-2">
+                        <svg class="bi bi-arrow-left-short me-1" width="1em" height="1em" fill="currentColor" viewBox="0 0 16 16"><path fill-rule="evenodd" d="M12 8a.5.5 0 0 1-.5.5H5.707l2.147 2.146a.5.5 0 0 1-.708.708l-3-3a.5.5 0 0 1 0-.708l3-3a.5.5 0 1 1 .708.708L5.707 7.5H11.5a.5.5 0 0 1 .5.5"/></svg>
+                        Add Another Watermark
+                    </a>
+                </div>
+            {% endif %}
+        </div>
+    </div>
+</div>
+
+{# Styles specific to this page #}
+<style>
+    /* --- Dropzone/Preview Styles --- */
+    .drop-zone { border: 2px dashed var(--border-color); border-radius: var(--radius-main); cursor: pointer; transition: border-color 0.3s ease, background-color 0.3s ease, box-shadow 0.3s ease; background-color: var(--bg-color); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); }
+    .drop-zone.dragover { border-color: var(--link-color); background-color: rgba(var(--link-color-rgb), 0.1); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); }
+    .preview-item { position: relative; display: inline-block; /* Allow multiple previews side-by-side */ border-radius: var(--radius-small); overflow: hidden; box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); background-color: var(--bg-color); transition: box-shadow 0.3s ease, background-color 0.3s ease; }
+    .preview-image { display: block; max-width: 150px; max-height: 150px; height: auto; width: auto; object-fit: contain; }
+    .preview-remove-btn { position: absolute; top: -5px; right: -5px; width: 24px; height: 24px; border-radius: 50%; background-color: rgba(0, 0, 0, 0.7); color: white; border: none; font-size: 14px; font-weight: bold; line-height: 22px; text-align: center; cursor: pointer; opacity: 0.8; transition: opacity 0.2s ease; z-index: 10;}
+    .preview-remove-btn:hover { opacity: 1; }
+    #browseButton, #browseBaseButton, #browseWatermarkButton { background: none; border: none; padding: 0; color: var(--link-color); text-decoration: underline; vertical-align: baseline; cursor: pointer; }
+    #browseButton:hover, #browseBaseButton:hover, #browseWatermarkButton:hover { color: var(--link-hover-color); }
+    #previewWatermarkContainer .text-muted { transition: color 0.3s ease; }
+    #previewWatermarkContainer .remove-file-btn { color: var(--accent-security); background: none; border: none; padding: 0.1rem 0.4rem; font-size: 1.1em; line-height: 1; cursor: pointer; opacity: 0.7; transition: opacity 0.2s ease; vertical-align: middle; }
+    #previewWatermarkContainer .remove-file-btn:hover { opacity: 1; }
+
+    /* Form Control & Option Styles */
+    .form-label, .form-label.fw-medium { color: var(--text-color); transition: color 0.3s ease; font-weight: 500; }
+    /* --- Fix for Options Heading --- */
+    .options-section h5, .border-top h5 { color: var(--text-color); transition: color 0.3s ease; font-weight: 600; }
+    .form-text { color: var(--muted-text-color); transition: color 0.3s ease; font-size: 0.8em; }
+    .form-select.neumorphic-inset, .form-control.neumorphic-inset, textarea.neumorphic-inset, input[type="color"].neumorphic-inset, input.form-control[type=file].neumorphic-inset /* Style file input too */ { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: inset 5px 5px 10px var(--shadow-dark), inset -5px -5px 10px var(--shadow-light); border: none; color: var(--text-color); padding: 0.75rem 1rem; transition: background-color 0.3s ease, box-shadow 0.3s ease, color 0.3s ease; height: auto; }
+    textarea.neumorphic-inset { line-height: 1.6; min-height: 80px; }
+    .form-select.neumorphic-inset { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23343a40' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right .75rem center; background-size: 16px 12px; appearance: none; }
+    body.dark-mode .form-select.neumorphic-inset { background-image: url("data:image/svg+xml,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 16 16'%3e%3cpath fill='none' stroke='%23dee2e6' stroke-linecap='round' stroke-linejoin='round' stroke-width='2' d='m2 5 6 6 6-6'/%3e%3c/svg%3e"); }
+    .form-select.neumorphic-inset:focus, .form-control.neumorphic-inset:focus, textarea.neumorphic-inset:focus, input[type="color"].neumorphic-inset:focus { background-color: var(--bg-color); box-shadow: inset 6px 6px 12px var(--shadow-dark), inset -6px -6px 12px var(--shadow-light); color: var(--text-color); outline: 2px solid var(--link-color); outline-offset: 2px; border: none; }
+    .form-control-color { min-height: calc(1.5em + .75rem + 2px); width: 100%; max-width: 100px; padding: 0.2rem 0.3rem; cursor: pointer; }
+    .form-range { padding: 0; cursor: pointer;}
+        /* Style Range Slider */
+        .form-range {
+        padding: 0; /* Remove Bootstrap default padding */
+        cursor: pointer;
+        width: 100%; /* Ensure it takes full width */
+        height: 20px; /* Overall height area for interaction */
+        background: transparent; /* Hide default track visually */
+        -webkit-appearance: none; /* Override default */
+        appearance: none;
+    }
+    /* --- Webkit Track Styling (Chrome, Safari, Edge) --- */
+    .form-range::-webkit-slider-runnable-track {
+        width: 100%;
+        height: 8px; /* Track height */
+        cursor: pointer;
+        background: var(--bg-color); /* Match background */
+        border-radius: var(--radius-small); /* Rounded track */
+        /* Neumorphic inset track */
+        box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                    inset -2px -2px 4px var(--shadow-light);
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    /* --- Mozilla Track Styling (Firefox) --- */
+    .form-range::-moz-range-track {
+        width: 100%;
+        height: 8px;
+        cursor: pointer;
+        background: var(--bg-color);
+        border-radius: var(--radius-small);
+        box-shadow: inset 2px 2px 4px var(--shadow-dark),
+                    inset -2px -2px 4px var(--shadow-light);
+        border: none; /* Firefox might add a border */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    /* --- Webkit Thumb Styling --- */
+    .form-range::-webkit-slider-thumb {
+        height: 20px; /* Thumb diameter */
+        width: 20px;
+        border-radius: 50%; /* Circular thumb */
+        background: var(--bg-color); /* Match background */
+        /* Neumorphic thumb */
+        box-shadow: 3px 3px 6px var(--shadow-dark),
+                   -3px -3px 6px var(--shadow-light);
+        cursor: pointer;
+        margin-top: -6px; /* Vertically center thumb on track ( (thumbHeight - trackHeight) / 2 * -1 ) */
+        -webkit-appearance: none; /* Override default */
+        transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    /* --- Mozilla Thumb Styling --- */
+    .form-range::-moz-range-thumb {
+         height: 20px;
+         width: 20px;
+         border-radius: 50%;
+         background: var(--bg-color);
+         box-shadow: 3px 3px 6px var(--shadow-dark),
+                    -3px -3px 6px var(--shadow-light);
+         cursor: pointer;
+         border: none; /* Remove Firefox border */
+         transition: background-color 0.3s ease, box-shadow 0.3s ease;
+    }
+    /* --- Focus Styles (Using outline on thumb) --- */
+     .form-range:focus {
+         outline: none; /* Remove default outline on the track itself */
+    }
+     /* Webkit Focus */
+    .form-range:focus::-webkit-slider-thumb {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+    }
+    /* Mozilla Focus */
+    .form-range:focus::-moz-range-thumb {
+         outline: 2px solid var(--link-color);
+         outline-offset: 2px;
+         /* Firefox might need explicit border removal on focus too */
+         /* border: none; */
+    }
+    /* Neumorphic Radio Buttons */
+    .neumorphic-radio { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 4px 4px 8px var(--shadow-dark), -4px -4px 8px var(--shadow-light); border: 1px solid transparent; color: var(--muted-text-color); transition: all 0.2s ease-out; padding: .5rem 1rem; margin-bottom: 0; }
+    .btn-check:checked + .neumorphic-radio { color: var(--link-color); background-color: var(--bg-color); border-color: transparent; box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .neumorphic-radio:hover { color: var(--text-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-check:checked + .neumorphic-radio:hover { color: var(--link-color); }
+    .btn-check:focus-visible + .neumorphic-radio { outline: 2px solid var(--link-color); outline-offset: 2px; z-index: 1; }
+    .btn-group > .btn-check:checked + .neumorphic-radio { z-index: 1; }
+
+    /* Submit/Download/Action Buttons */
+    .btn-submit-tool { background-color: var(--bg-color); border-radius: var(--radius-small); box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); border: none; color: var(--link-color); padding: 0.75rem 1rem; font-weight: 500; transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, box-shadow 0.3s ease; }
+    .btn-submit-tool:hover { color: var(--link-color); background-color: var(--bg-color); box-shadow: 6px 6px 12px var(--shadow-dark), -6px -6px 12px var(--shadow-light); }
+    .btn-submit-tool:active { color: var(--link-color); background-color: var(--bg-color); box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); }
+    .btn-submit-tool:disabled { box-shadow: inset 3px 3px 6px var(--shadow-dark), inset -3px -3px 6px var(--shadow-light); opacity: 0.6; cursor: not-allowed; color: var(--muted-text-color); }
+    .btn-submit-tool:focus-visible { outline: 2px solid var(--link-color); outline-offset: 2px; box-shadow: 5px 5px 10px var(--shadow-dark), -5px -5px 10px var(--shadow-light); }
+    .btn-success { padding: 0.75rem 1.25rem; }
+    .clear-filters-btn { background-color: transparent; border: 1px solid var(--muted-text-color); color: var(--muted-text-color); border-radius: var(--radius-small); transition: all 0.2s ease-out, background-color 0.3s ease, color 0.3s ease, border-color 0.3s ease; }
+    .clear-filters-btn:hover { background-color: rgba(var(--text-color-rgb), 0.1); border-color: var(--text-color); color: var(--text-color); }
+
+</style>
+{% endblock %}
+
+
+{% block extra_js %}
+{# JS for drag/drop/preview and option toggling #}
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    // --- Element Refs ---
+    const form = document.getElementById('uploadForm');
+    // Base Image Elements
+    const baseImageInput = document.getElementById('baseImageInput');
+    const dropZoneBase = document.getElementById('dropZoneBase');
+    const browseBaseButton = document.getElementById('browseBaseButton');
+    const previewBaseContainer = document.getElementById('previewBaseContainer');
+    const previewBasePlaceholder = document.getElementById('previewBasePlaceholder');
+    const dropZoneBaseText = document.getElementById('dropZoneBaseText');
+    // Watermark Type & Options
+    const watermarkTypeRadios = document.querySelectorAll('input[name="watermark_type"]');
+    const textOptionsDiv = document.getElementById('textOptions');
+    const imageOptionsDiv = document.getElementById('imageOptions');
+    // Watermark Image Elements
+    const watermarkImageInput = document.getElementById('watermarkImageInput');
+    const dropZoneWatermark = document.getElementById('dropZoneWatermark'); // Assuming you add this ID if needed
+    const browseWatermarkButton = document.getElementById('browseWatermarkButton'); // Assuming you add this ID if needed
+    const previewWatermarkContainer = document.getElementById('previewWatermarkContainer');
+    const previewWatermarkPlaceholder = document.getElementById('previewWatermarkPlaceholder'); // Add this if needed
+    const dropZoneWatermarkText = document.getElementById('dropZoneWatermarkText'); // Assuming you add this ID if needed
+    // Other Options
+    const opacityRange = document.getElementById('opacityRange');
+    const opacityValue = document.getElementById('opacityValue');
+    const imageScaleRange = document.getElementById('imageScaleRange');
+    const imageScaleValue = document.getElementById('imageScaleValue');
+    // Submit Button
+    const convertButton = document.getElementById('convertButton');
+
+    // --- File Storage ---
+    let currentBaseFile = null;
+    let currentWatermarkFile = null;
+
+    // --- Option Sliders ---
+    if(opacityRange && opacityValue) {
+        opacityRange.oninput = function() { opacityValue.textContent = this.value; }
+        opacityValue.textContent = opacityRange.value; // Initial value
+    }
+     if(imageScaleRange && imageScaleValue) {
+        imageScaleRange.oninput = function() { imageScaleValue.textContent = this.value; }
+        imageScaleValue.textContent = imageScaleRange.value; // Initial value
+    }
+
+    // --- UI Update Functions ---
+    const updateSubmitButton = () => {
+        const type = document.querySelector('input[name="watermark_type"]:checked').value;
+        let requiredMet = false;
+        if (currentBaseFile) {
+            if (type === 'text') { requiredMet = true; }
+            else if (type === 'image') { requiredMet = !!currentWatermarkFile; }
+        }
+        convertButton.disabled = !requiredMet;
+    };
+
+    const createPreviewElement = (file, container, type) => {
+        // Check if it's actually an image type the browser can render
+        if (!file.type.startsWith('image/')) {
+             console.warn("Cannot preview non-image file:", file.name);
+             const placeholder = (type === 'base') ? previewBasePlaceholder : previewWatermarkPlaceholder;
+             if(placeholder) {
+                 placeholder.textContent = `Selected: ${file.name} (Cannot preview)`;
+                 placeholder.style.display = 'block';
+             }
+             // Add remove button next to placeholder text
+             const removeBtn = document.createElement('button');
+             removeBtn.classList.add('preview-remove-btn', 'ms-2');
+             removeBtn.innerHTML = '×'; removeBtn.type = 'button'; removeBtn.dataset.target=type; removeBtn.onclick = handleRemoveFile;
+             placeholder.appendChild(removeBtn);
+             return; // Stop here
+        }
+
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const previewItem = document.createElement('div');
+            previewItem.classList.add('preview-item');
+            const img = document.createElement('img');
+            img.classList.add('preview-image');
+            img.src = e.target.result;
+            img.alt = `Preview`;
+            previewItem.appendChild(img);
+            const removeBtn = document.createElement('button');
+            removeBtn.classList.add('preview-remove-btn');
+            removeBtn.innerHTML = '×';
+            removeBtn.type = 'button';
+            removeBtn.setAttribute('aria-label', `Remove ${file.name}`);
+            removeBtn.dataset.target = type; // Indicate 'base' or 'watermark'
+            removeBtn.onclick = handleRemoveFile;
+            previewItem.appendChild(removeBtn);
+            container.appendChild(previewItem);
+        }
+         reader.readAsDataURL(file);
+    };
+
+    const updateBasePreview = () => {
+        previewBaseContainer.innerHTML = ''; // Clear previous preview
+        previewBasePlaceholder.style.display = 'none'; // Hide placeholder initially
+        if (currentBaseFile) {
+            createPreviewElement(currentBaseFile, previewBaseContainer, 'base');
+            dropZoneBaseText.textContent = "Replace base image by dropping or browsing";
+        } else {
+             previewBasePlaceholder.style.display = 'block'; // Show placeholder
+             previewBasePlaceholder.textContent = 'No base image selected.';
+             dropZoneBaseText.innerHTML = "Drag & Drop Base Image (JPG, PNG, etc.) or <button type='button' class='btn btn-link p-0 align-baseline' id='browseBaseButton'>Browse</button>";
+             // Re-attach listener to the new browse button
+             document.getElementById('browseBaseButton').addEventListener('click', () => baseImageInput.click());
+        }
+        updateSubmitButton();
+    };
+
+     const updateWatermarkPreview = () => {
+        previewWatermarkContainer.innerHTML = ''; // Clear preview/text
+        previewWatermarkPlaceholder.style.display = 'none';
+        if (currentWatermarkFile) {
+            createPreviewElement(currentWatermarkFile, previewWatermarkContainer, 'watermark');
+            if (dropZoneWatermarkText) dropZoneWatermarkText.textContent = "Replace watermark image by dropping or browsing";
+        } else {
+            if (dropZoneWatermarkText) {
+                 dropZoneWatermarkText.innerHTML = "Drag & Drop Watermark (PNG) or <button type='button' class='btn btn-link p-0 align-baseline' id='browseWatermarkButton'>Browse</button>";
+                 // Re-attach listener
+                 document.getElementById('browseWatermarkButton').addEventListener('click', () => watermarkImageInput.click());
+            }
+             if (previewWatermarkPlaceholder) previewWatermarkPlaceholder.style.display = 'block'; // Show placeholder if it exists
+             if (previewWatermarkPlaceholder) previewWatermarkPlaceholder.textContent = 'No watermark image selected.';
+        }
+        updateSubmitButton();
+     };
+
+    // --- File Removal ---
+    const handleRemoveFile = (event) => {
+        const targetType = event.target.dataset.target;
+        if (targetType === 'base') {
+            currentBaseFile = null; baseImageInput.value = ''; updateBasePreview();
+        } else if (targetType === 'watermark') {
+             currentWatermarkFile = null; watermarkImageInput.value = ''; updateWatermarkPreview();
+        }
+    };
+
+    // --- Handle File Selection/Drop ---
+    const handleBaseFile = (files) => {
+        if (files.length === 0) { handleRemoveFile({target:{dataset:{target:'base'}}}); return; }
+        const file = files[0];
+        if (!file.type.startsWith('image/')) { alert('Please select a valid image file for the base image.'); handleRemoveFile({target:{dataset:{target:'base'}}}); return; }
+        currentBaseFile = file; updateBasePreview();
+    };
+     const handleWatermarkFile = (files) => {
+        if (files.length === 0) { handleRemoveFile({target:{dataset:{target:'watermark'}}}); return; }
+        const file = files[0];
+        // Optional: Stronger check for PNG only
+        if (file.type !== 'image/png') { alert('Warning: For best results (transparency), please upload a PNG file as the watermark.'); }
+        currentWatermarkFile = file; updateWatermarkPreview();
+    };
+
+     // --- Toggle Option Sections ---
+    const toggleOptionSections = () => {
+        const selectedType = document.querySelector('input[name="watermark_type"]:checked').value;
+        if (selectedType === 'text') {
+            textOptionsDiv.style.display = 'block';
+            imageOptionsDiv.style.display = 'none';
+            watermarkImageInput.required = false;
+        } else { // Image type
+            textOptionsDiv.style.display = 'none';
+            imageOptionsDiv.style.display = 'block';
+            watermarkImageInput.required = true;
+        }
+        updateSubmitButton(); // Re-check if submit should be enabled
+    };
+
+    // --- Event Listeners ---
+    // Base Image Dropzone/Input
+    ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZoneBase.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+    ['dragenter', 'dragover'].forEach(ev => { dropZoneBase.addEventListener(ev, () => dropZoneBase.classList.add('dragover'), false); });
+    ['dragleave', 'drop'].forEach(ev => { dropZoneBase.addEventListener(ev, () => dropZoneBase.classList.remove('dragover'), false); });
+    dropZoneBase.addEventListener('drop', (e) => { handleBaseFile(e.dataTransfer.files); }, false);
+    baseImageInput.addEventListener('change', (e) => { handleBaseFile(e.target.files); });
+    // Initial browse button listener (will be re-attached in updateBasePreview)
+    if(browseBaseButton) browseBaseButton.addEventListener('click', () => baseImageInput.click());
+
+    // Watermark Image Dropzone/Input (assuming elements exist)
+    if(dropZoneWatermark){
+        ['dragenter', 'dragover', 'dragleave', 'drop'].forEach(ev => { dropZoneWatermark.addEventListener(ev, (e) => { e.preventDefault(); e.stopPropagation(); }, false); });
+        ['dragenter', 'dragover'].forEach(ev => { dropZoneWatermark.addEventListener(ev, () => dropZoneWatermark.classList.add('dragover'), false); });
+        ['dragleave', 'drop'].forEach(ev => { dropZoneWatermark.addEventListener(ev, () => dropZoneWatermark.classList.remove('dragover'), false); });
+        dropZoneWatermark.addEventListener('drop', (e) => { handleWatermarkFile(e.dataTransfer.files); }, false);
+    }
+    if(watermarkImageInput) watermarkImageInput.addEventListener('change', (e) => { handleWatermarkFile(e.target.files); });
+    // Initial browse button listener (will be re-attached in updateWatermarkPreview)
+     if(browseWatermarkButton) browseWatermarkButton.addEventListener('click', () => watermarkImageInput.click());
+
+    // Watermark Type Radios
+    watermarkTypeRadios.forEach(radio => radio.addEventListener('change', toggleOptionSections));
+
+    // --- Initial State ---
+    updateBasePreview();
+    updateWatermarkPreview();
+    toggleOptionSections();
+
+});
+</script>
+{% endblock %}

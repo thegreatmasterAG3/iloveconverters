@@ -1,0 +1,286 @@
+{# templates/core/category_pdf.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}{{ page_title }}{% endblock %}
+
+{% block content %}
+<div class="container px-4 py-2"> {# Reduced top padding #}
+    <h1 class="pb-2 border-bottom text-center mb-4">{{ page_title }}</h1> {# Reduced bottom margin #}
+    <p class="text-center lead mb-4">Tools for converting, editing, and managing PDF documents.</p>
+
+    <!-- ================== Filter Section for PDF Tools ================== -->
+    <div class="container mb-4" id="sticky-filter-section"> {# Re-use sticky ID #}
+        <!-- Row for Search and Mobile Filter Button -->
+        <div class="row justify-content-center align-items-center mb-3">
+            <div class="col">
+                <input type="search" id="tool-search-input" class="form-control form-control-lg" placeholder="Search PDF tools..." aria-label="Search PDF tools">
+            </div>
+            <div class="col-auto d-lg-none">
+                <button class="btn btn-primary" type="button" data-bs-toggle="offcanvas" data-bs-target="#offcanvasFiltersPdf" aria-controls="offcanvasFiltersPdf">
+                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" fill="currentColor" class="bi bi-funnel" viewBox="0 0 16 16"> <path d="M1.5 1.5A.5.5 0 0 1 2 1h12a.5.5 0 0 1 .5.5v2a.5.5 0 0 1-.128.334L10 8.692V13.5a.5.5 0 0 1-.342.474l-3 1A.5.5 0 0 1 6 14.5V8.692L1.628 3.834A.5.5 0 0 1 1.5 3.5z"/> </svg>
+                    Filter Type
+                </button>
+            </div>
+        </div>
+
+        <!-- Inline Type Filters Container (Hidden on small screens) -->
+        <div class="row justify-content-center gy-3 d-none d-lg-flex" id="inline-filters-container">
+            <div class="col-12 col-lg text-center text-lg-start">
+                <span class="me-3 fw-bold">Tool Type:</span>
+                 <div class="form-check form-check-inline">
+                    <input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeSimpleInlinePdf" value="simple" checked>
+                    <label class="form-check-label" for="filterTypeSimpleInlinePdf">Simple</label>
+                </div>
+                 <div class="form-check form-check-inline">
+                    <input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeAiInlinePdf" value="ai" checked>
+                    <label class="form-check-label" for="filterTypeAiInlinePdf">AI ✨</label>
+                </div>
+            </div>
+             <!-- Clear Button (Inline) -->
+             <div class="col-12 col-lg-auto text-center text-lg-end">
+                 <button id="clear-filters-btn-inline-pdf" class="btn btn-sm btn-outline-secondary clear-filters-btn" type="button">Clear Type Filter</button>
+             </div>
+        </div>
+    </div><!-- End Sticky Filter Section -->
+
+    <!-- Offcanvas Filter Menu for PDF Tools -->
+    <div class="offcanvas offcanvas-start" tabindex="-1" id="offcanvasFiltersPdf" aria-labelledby="offcanvasFiltersLabelPdf">
+      <div class="offcanvas-header border-bottom">
+        <h5 class="offcanvas-title" id="offcanvasFiltersLabelPdf">Filter Tool Type</h5>
+        <button type="button" class="btn-close text-reset" data-bs-dismiss="offcanvas" aria-label="Close"></button>
+      </div>
+      <div class="offcanvas-body">
+        <!-- Type Filters (Offcanvas) -->
+        <div class="mb-3">
+            <h6>Tool Type:</h6>
+            <div class="form-check"><input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeSimpleOffcanvasPdf" value="simple" checked><label class="form-check-label" for="filterTypeSimpleOffcanvasPdf">Simple</label></div>
+            <div class="form-check"><input class="form-check-input type-filter-checkbox" type="checkbox" id="filterTypeAiOffcanvasPdf" value="ai" checked><label class="form-check-label" for="filterTypeAiOffcanvasPdf">AI ✨</label></div>
+        </div>
+        <!-- Clear Button (Offcanvas) -->
+        <div class="d-grid gap-2">
+            <button id="clear-filters-btn-offcanvas-pdf" class="btn btn-outline-secondary clear-filters-btn" type="button">Clear Type Filter</button>
+        </div>
+      </div>
+    </div>
+    <!-- ================== End Filter Section ================== -->
+
+
+    <!-- Tool Listing Section -->
+    <div class="container px-0 py-2" id="tool-list-container">
+        <!-- Row to contain the tool cards -->
+        <div class="row g-4 py-5 row-cols-1 row-cols-md-2 row-cols-lg-3" id="tools-grid">
+
+            {# --- PASTE ONLY PDF TOOL CARDS BELOW --- #}
+            <div class="feature col tool-card" data-tool-name="PDF to Word Converter Document Simple" data-tool-categories="pdf document converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→W</div><h3 class="fs-4 card-title">PDF to Word</h3></div><p class="card-text">Convert PDF files to editable Word documents (.docx).</p><a href="{% url 'pdf_tools:pdf_to_word' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="PDF to Excel Converter Spreadsheet Simple" data-tool-categories="pdf document converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→X</div><h3 class="fs-4 card-title">PDF to Excel</h3></div><p class="card-text">Extract tables from PDF files into Excel spreadsheets (.xlsx).</p><a href="{% url 'pdf_tools:pdf_to_excel' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="PDF to PowerPoint Converter Presentation Simple" data-tool-categories="pdf document converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→P</div><h3 class="fs-4 card-title">PDF to PowerPoint</h3></div><p class="card-text">Convert PDF pages into PowerPoint slides (.pptx).</p><a href="{% url 'pdf_tools:pdf_to_pptx' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="PDF to JPG Converter Image Simple" data-tool-categories="pdf image converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→J</div><h3 class="fs-4 card-title">PDF to JPG</h3></div><p class="card-text">Convert each page of a PDF into JPG images.</p><a href="{% url 'pdf_tools:pdf_to_jpg' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="PDF to PNG Converter Image Simple" data-tool-categories="pdf image converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→Pn</div><h3 class="fs-4 card-title">PDF to PNG</h3></div><p class="card-text">Convert each page of a PDF into high-quality PNG images.</p><a href="{% url 'pdf_tools:pdf_to_png' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="PDF to Text Converter OCR Extract AI" data-tool-categories="pdf text converter utility ai" data-tool-type="ai">
+                <div class="card h-100 shadow-sm border-info"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf icon-ai d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→T</div><h3 class="fs-4 card-title">PDF to Text (OCR) <span class="badge bg-info text-dark ms-1 align-middle">✨ AI</span></h3></div><p class="card-text">Extract text content from PDF files, including scanned PDFs using AI OCR.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Word to PDF Converter Document Simple" data-tool-categories="document pdf converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-document d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">W→P</div><h3 class="fs-4 card-title">Word to PDF</h3></div><p class="card-text">Convert Word documents (.doc, .docx) to PDF format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Excel to PDF Converter Spreadsheet Simple" data-tool-categories="document pdf converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-document d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">X→P</div><h3 class="fs-4 card-title">Excel to PDF</h3></div><p class="card-text">Convert Excel spreadsheets (.xls, .xlsx) to PDF format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="PowerPoint PPT to PDF Converter Presentation Simple" data-tool-categories="document pdf converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-document d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">PP→P</div><h3 class="fs-4 card-title">PowerPoint to PDF</h3></div><p class="card-text">Convert PowerPoint presentations (.ppt, .pptx) to PDF format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="JPG to PDF Converter Image Simple" data-tool-categories="image pdf converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">J→P</div><h3 class="fs-4 card-title">JPG to PDF</h3></div><p class="card-text">Convert your JPG images into a single PDF document.</p>            <a href="{% url 'pdf_tools:jpg_to_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg></a>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="PNG to PDF Converter Image Simple" data-tool-categories="image pdf converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Pn→P</div><h3 class="fs-4 card-title">PNG to PDF</h3></div><p class="card-text">Convert PNG images into a single PDF document.</p><a href="{% url 'pdf_tools:png_to_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="HTML to PDF Converter Webpage Simple" data-tool-categories="webdev pdf converter" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-webdev d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">H→P</div><h3 class="fs-4 card-title">HTML to PDF</h3></div><p class="card-text">Convert entire webpages or HTML code snippets to PDF.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Merge PDF Combine Files Simple" data-tool-categories="pdf utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P+P</div><h3 class="fs-4 card-title">Merge PDF</h3></div><p class="card-text">Combine multiple PDF files into a single document.</p><a href="{% url 'pdf_tools:merge_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Merger <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Split PDF Extract Pages Simple" data-tool-categories="pdf utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P/P</div><h3 class="fs-4 card-title">Split PDF</h3></div><p class="card-text">Extract specific pages or page ranges from a PDF file.</p><a href="{% url 'pdf_tools:split_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Splitter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Compress PDF Reduce File Size Simple" data-tool-categories="pdf utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P↓</div><h3 class="fs-4 card-title">Compress PDF</h3></div><p class="card-text">Reduce the file size of your PDF documents.</p><a href="{% url 'pdf_tools:compress_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Compressor <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Rotate PDF Pages Simple" data-tool-categories="pdf utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P⟳</div><h3 class="fs-4 card-title">Rotate PDF</h3></div><p class="card-text">Rotate specific pages or the entire PDF document.</p><a href="{% url 'pdf_tools:rotate_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Rotator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Add Watermark PDF Text Image Simple Document Security" data-tool-categories="pdf utility document security" data-tool-type="simple">
+                <div class="card h-100 shadow-sm">
+                    <div class="card-body d-flex flex-column">
+                        <div class="mb-3 text-center">
+                            <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P™</div>
+                            <h3 class="fs-4 card-title">Add Watermark to PDF</h3>
+                        </div>
+                        <p class="card-text">Overlay text or an image watermark onto every page of your PDF document.</p>
+                        <a href="{% url 'pdf_tools:add_watermark' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                            Go to Watermarker <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Add Page Numbers PDF Simple" data-tool-categories="pdf utility" data-tool-type="simple">
+                 <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P#</div><h3 class="fs-4 card-title">Add Page Numbers</h3></div><p class="card-text">Insert page numbers into your PDF documents.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+            <div class="feature col tool-card" data-tool-name="Add Watermark PDF Stamp Simple" data-tool-categories="pdf utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P™</div><h3 class="fs-4 card-title">Add Watermark PDF</h3></div><p class="card-text">Add text or image watermarks to your PDF files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="Unlock PDF Remove Password Restriction Simple" data-tool-categories="pdf utility" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P🔓</div><h3 class="fs-4 card-title">Unlock PDF</h3></div><p class="card-text">Remove password restrictions from PDFs (if you have the password).</p><a href="{% url 'pdf_tools:unlock_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Unlocker <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+             <div class="feature col tool-card" data-tool-name="Protect PDF Add Password Encrypt Simple Security" data-tool-categories="pdf utility security" data-tool-type="simple">
+                <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P🔒</div><h3 class="fs-4 card-title">Protect PDF</h3></div><p class="card-text">Add password protection and encryption to your PDF files.</p><a href="{% url 'pdf_tools:protect_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Protector <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+            </div>
+
+            {# --- END PDF TOOL CARDS --- #}
+
+        </div> <!-- /row #tools-grid -->
+        <!-- Message shown when no tools match filters -->
+        <div id="no-results-message" class="text-center py-5" style="display: none;">
+            <h2>No PDF tools found matching your criteria.</h2>
+            <p>Try adjusting your search or filters.</p>
+        </div>
+    </div> <!-- /container #tool-list-container -->
+</div>
+<!-- SVG definitions are in base.html -->
+{% endblock %}
+
+
+{% block extra_js %}
+<!-- JavaScript for Search and Filter (Adapted for PDF category page) -->
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const searchInput = document.getElementById('tool-search-input');
+    // Only select TYPE checkboxes on this page
+    const typeCheckboxes = document.querySelectorAll('.type-filter-checkbox');
+    const toolCards = document.querySelectorAll('.tool-card'); // Cards on this page only
+    const noResultsMessage = document.getElementById('no-results-message');
+    const toolsGrid = document.getElementById('tools-grid');
+    const clearFiltersBtns = document.querySelectorAll('.clear-filters-btn');
+    const offcanvasElement = document.getElementById('offcanvasFiltersPdf'); // Use the correct ID
+    const offcanvasInstance = bootstrap.Offcanvas.getInstance(offcanvasElement) || new bootstrap.Offcanvas(offcanvasElement);
+
+    // Sync checkboxes between inline and offcanvas
+    function syncCheckboxes(sourceCheckbox) {
+        const isType = sourceCheckbox.classList.contains('type-filter-checkbox');
+        const value = sourceCheckbox.value;
+        const isChecked = sourceCheckbox.checked;
+
+        if (isType) {
+            typeCheckboxes.forEach(cb => {
+                if (cb.value === value && cb !== sourceCheckbox) {
+                    cb.checked = isChecked;
+                }
+            });
+        }
+        // No need to sync categories on this page
+    }
+
+    function filterTools() {
+        const searchTerm = searchInput.value.toLowerCase().trim();
+        const selectedTypes = [...new Set(Array.from(typeCheckboxes)
+                                       .filter(checkbox => checkbox.checked)
+                                       .map(checkbox => checkbox.value))];
+        let visibleCount = 0;
+
+        toolCards.forEach(card => {
+            const toolName = card.dataset.toolName.toLowerCase();
+            const toolType = card.dataset.toolType;
+            // Category check is implicit - all cards are PDF tools
+
+            const typeMatch = selectedTypes.includes(toolType); // Tool must match one of the selected types
+            const searchMatch = searchTerm === '' || toolName.includes(searchTerm);
+
+            // Show/Hide Card: Type and Search must match
+            if (typeMatch && searchMatch) {
+                card.style.display = '';
+                visibleCount++;
+            } else {
+                 card.style.display = 'none';
+            }
+        });
+
+        // Show/Hide "No Results" message and grid
+        if (visibleCount === 0) {
+            noResultsMessage.style.display = 'block';
+            toolsGrid.style.display = 'none';
+        } else {
+            noResultsMessage.style.display = 'none';
+            toolsGrid.style.display = '';
+        }
+    }
+
+    // --- Event Listeners ---
+    searchInput.addEventListener('input', filterTools);
+
+    // Add listeners to Type checkboxes only, and sync them
+    typeCheckboxes.forEach(checkbox => {
+        checkbox.addEventListener('change', (event) => {
+            syncCheckboxes(event.target);
+            filterTools();
+        });
+    });
+
+    // Add listeners to ALL clear buttons
+    clearFiltersBtns.forEach(button => {
+        button.addEventListener('click', () => {
+            searchInput.value = '';
+            typeCheckboxes.forEach(checkbox => checkbox.checked = true); // Check both type boxes
+            // No categories to clear
+            filterTools(); // Re-apply filters
+
+            // Optionally close offcanvas if it's open
+             if (offcanvasElement.classList.contains('show')) {
+                 offcanvasInstance.hide();
+             }
+        });
+    });
+
+    // Initial filter run on page load
+     filterTools();
+});
+</script>
+
+{# --- Theme Toggle Script (Inherited from base.html) --- #}
+
+{% endblock %}
