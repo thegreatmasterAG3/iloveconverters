@@ -92,293 +92,908 @@
     <!-- Tool Listing Section -->
     <div class="container px-0 py-2" id="tool-list-container"> {# Remove container padding if filters are inside container #}
         <!-- Row to contain the tool cards -->
-        <div class="row g-4 py-5 row-cols-1 row-cols-md-2 row-cols-lg-3" id="tools-grid">
-            {# --- PASTE ONLY SIMPLE TOOL CARDS BELOW (same as before) --- #}
-            <!-- =========== PDF Tools (Simple Only) =========== -->
-        <div class="feature col tool-card" data-tool-name="PDF to Word Converter Document Simple" data-tool-categories="pdf document converter" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→W</div><h3 class="fs-4 card-title">PDF to Word</h3></div><p class="card-text">Convert PDF files to editable Word documents (.docx).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="PDF to Excel Converter Spreadsheet Simple" data-tool-categories="pdf document converter" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→X</div><h3 class="fs-4 card-title">PDF to Excel</h3></div><p class="card-text">Extract tables from PDF files into Excel spreadsheets (.xlsx).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="PDF to PowerPoint Converter Presentation Simple" data-tool-categories="pdf document converter" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→P</div><h3 class="fs-4 card-title">PDF to PowerPoint</h3></div><p class="card-text">Convert PDF pages into PowerPoint slides (.pptx).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="PDF to JPG Converter Image Simple" data-tool-categories="pdf image converter" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→J</div><h3 class="fs-4 card-title">PDF to JPG</h3></div><p class="card-text">Convert each page of a PDF into JPG images.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="PDF to PNG Converter Image Simple" data-tool-categories="pdf image converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→Pn</div><h3 class="fs-4 card-title">PDF to PNG</h3></div><p class="card-text">Convert each page of a PDF into high-quality PNG images.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Word to PDF Converter Document Simple" data-tool-categories="document pdf converter" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-document d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">W→P</div><h3 class="fs-4 card-title">Word to PDF</h3></div><p class="card-text">Convert Word documents (.doc, .docx) to PDF format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Excel to PDF Converter Spreadsheet Simple" data-tool-categories="document pdf converter" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-document d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">X→P</div><h3 class="fs-4 card-title">Excel to PDF</h3></div><p class="card-text">Convert Excel spreadsheets (.xls, .xlsx) to PDF format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="PowerPoint PPT to PDF Converter Presentation Simple" data-tool-categories="document pdf converter" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-document d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">PP→P</div><h3 class="fs-4 card-title">PowerPoint to PDF</h3></div><p class="card-text">Convert PowerPoint presentations (.ppt, .pptx) to PDF format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="JPG to PDF Converter Image Simple" data-tool-categories="image pdf converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">J→P</div><h3 class="fs-4 card-title">JPG to PDF</h3></div><p class="card-text">Convert your JPG images into a single PDF document.</p><a href="{% url 'converters:jpg_to_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg></a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="PNG to PDF Converter Image Simple" data-tool-categories="image pdf converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Pn→P</div><h3 class="fs-4 card-title">PNG to PDF</h3></div><p class="card-text">Convert PNG images into a single PDF document.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="HTML to PDF Converter Webpage Simple" data-tool-categories="webdev pdf converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-webdev d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">H→P</div><h3 class="fs-4 card-title">HTML to PDF</h3></div><p class="card-text">Convert entire webpages or HTML code snippets to PDF.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Merge PDF Combine Files Simple" data-tool-categories="pdf utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P+P</div><h3 class="fs-4 card-title">Merge PDF</h3></div><p class="card-text">Combine multiple PDF files into a single document.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Split PDF Extract Pages Simple" data-tool-categories="pdf utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P/P</div><h3 class="fs-4 card-title">Split PDF</h3></div><p class="card-text">Extract specific pages or page ranges from a PDF file.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Compress PDF Reduce File Size Simple" data-tool-categories="pdf utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P↓</div><h3 class="fs-4 card-title">Compress PDF</h3></div><p class="card-text">Reduce the file size of your PDF documents.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Rotate PDF Pages Simple" data-tool-categories="pdf utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P⟳</div><h3 class="fs-4 card-title">Rotate PDF</h3></div><p class="card-text">Rotate specific pages or the entire PDF document.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Add Page Numbers PDF Simple" data-tool-categories="pdf utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P#</div><h3 class="fs-4 card-title">Add Page Numbers</h3></div><p class="card-text">Insert page numbers into your PDF documents.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Add Watermark PDF Stamp Simple" data-tool-categories="pdf utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P™</div><h3 class="fs-4 card-title">Add Watermark PDF</h3></div><p class="card-text">Add text or image watermarks to your PDF files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Unlock PDF Remove Password Restriction Simple" data-tool-categories="pdf utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P🔓</div><h3 class="fs-4 card-title">Unlock PDF</h3></div><p class="card-text">Remove password restrictions from PDFs (if you have the password).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Protect PDF Add Password Encrypt Simple Security" data-tool-categories="pdf utility security" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P🔒</div><h3 class="fs-4 card-title">Protect PDF</h3></div><p class="card-text">Add password protection and encryption to your PDF files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
+    <div class="row g-4 py-5 row-cols-1 row-cols-md-2 row-cols-lg-3" id="tools-grid">
 
-       <!-- =========== Image Tools (Simple Only) =========== -->
-       <div class="feature col tool-card" data-tool-name="JPG to PNG Converter Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">J>Pn</div><h3 class="fs-4 card-title">JPG to PNG</h3></div><p class="card-text">Convert JPG images to PNG format (supports transparency).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="PNG to JPG Converter Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Pn>J</div><h3 class="fs-4 card-title">PNG to JPG</h3></div><p class="card-text">Convert PNG images to JPG format (smaller file size).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="WebP to JPG Converter Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Wp>J</div><h3 class="fs-4 card-title">WebP to JPG</h3></div><p class="card-text">Convert modern WebP images to the widely compatible JPG format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="JPG to WebP Converter Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">J>Wp</div><h3 class="fs-4 card-title">JPG to WebP</h3></div><p class="card-text">Convert JPG images to the efficient WebP format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="HEIC to JPG Converter iPhone Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">H>J</div><h3 class="fs-4 card-title">HEIC to JPG</h3></div><p class="card-text">Convert Apple HEIC images to standard JPG format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="SVG to PNG Converter Vector Image Format Simple Developer" data-tool-categories="image converter developer" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">S>Pn</div><h3 class="fs-4 card-title">SVG to PNG</h3></div><p class="card-text">Convert Scalable Vector Graphics (SVG) to PNG images.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="ICO Converter Favicon Image Format Simple Generator Webdev" data-tool-categories="image converter generator webdev" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">>ICO</div><h3 class="fs-4 card-title">ICO Converter</h3></div><p class="card-text">Convert images (PNG, JPG) to the ICO format for favicons.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Resize Image Dimensions Scale Simple" data-tool-categories="image utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I↔</div><h3 class="fs-4 card-title">Resize Image</h3></div><p class="card-text">Change the dimensions (width/height) of your images.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Crop Image Cut Trim Simple" data-tool-categories="image utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I✂</div><h3 class="fs-4 card-title">Crop Image</h3></div><p class="card-text">Cut or trim your images to a specific area or aspect ratio.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Compress Image Reduce File Size Optimizer Simple JPG PNG" data-tool-categories="image utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I↓</div><h3 class="fs-4 card-title">Compress Image</h3></div><p class="card-text">Reduce JPG/PNG image file size with minimal quality loss.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Rotate Image Flip Simple" data-tool-categories="image utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I⟳</div><h3 class="fs-4 card-title">Rotate Image</h3></div><p class="card-text">Rotate or flip your images horizontally or vertically.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Add Watermark Image Stamp Simple" data-tool-categories="image utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I™</div><h3 class="fs-4 card-title">Add Watermark (Image)</h3></div><p class="card-text">Add text or image watermarks to your photos.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Image Color Picker Extractor Palette Hex RGB Simple Developer Generator" data-tool-categories="image utility developer generator" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I🎨</div><h3 class="fs-4 card-title">Image Color Picker</h3></div><p class="card-text">Pick colors or extract color palettes (HEX, RGB) from an image.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Image to Base64 Encoder Embed CSS Simple Developer Webdev" data-tool-categories="image converter developer webdev" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I>64</div><h3 class="fs-4 card-title">Image to Base64</h3></div><p class="card-text">Encode images into Base64 strings for embedding.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Favicon Generator ICO Website Icon Simple Image Generator Webdev" data-tool-categories="image generator webdev" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Fav</div><h3 class="fs-4 card-title">Favicon Generator</h3></div><p class="card-text">Create favicon.ico files for your website from images.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
+        <!-- =========== PDF Tools =========== -->
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="PDF to Word Converter Document Simple Docx" data-tool-categories="pdf document converter" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→W</div>
+                <h3 class="fs-4 card-title">PDF to Word</h3>
+            </div>
+            <p class="card-text">Convert PDF files into editable Microsoft Word (.docx) documents. Quality may vary.</p>
+            <a href="{% url 'pdf_tools:pdf_to_word' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="PDF to Excel Converter Spreadsheet Table Extraction Simple Document" data-tool-categories="pdf document converter utility" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→XLS</div>
+                <h3 class="fs-4 card-title">PDF to Excel</h3>
+            </div>
+            <p class="card-text">Extract tables from PDF documents into an editable Excel (.xlsx) spreadsheet. Accuracy depends on PDF structure.</p>
+            <a href="{% url 'pdf_tools:pdf_to_excel' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="PDF to PowerPoint Converter Presentation Simple Document Image" data-tool-categories="pdf document converter" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→PPT</div>
+                <h3 class="fs-4 card-title">PDF to PowerPoint</h3>
+            </div>
+            <p class="card-text">Convert PDF pages into PowerPoint slides (output slides contain images of pages).</p>
+            <a href="{% url 'pdf_tools:pdf_to_pptx' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="PDF to JPG Converter Image Simple Document High Quality" data-tool-categories="pdf image converter document" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→JPG</div>
+                <h3 class="fs-4 card-title">PDF to JPG</h3>
+            </div>
+            <p class="card-text">Convert each page (or selected pages) of a PDF document into separate JPG image files.</p>
+            <a href="{% url 'pdf_tools:pdf_to_jpg' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="PDF to PNG Converter Image Simple Document" data-tool-categories="pdf image converter document" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P→PNG</div>
+                <h3 class="fs-4 card-title">PDF to PNG</h3>
+            </div>
+            <p class="card-text">Convert each page of a PDF document into separate high-quality PNG images.</p>
+            <a href="{% url 'pdf_tools:pdf_to_png' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+    
+        <div class="feature col tool-card" data-tool-name="Word to PDF Converter Document Simple" data-tool-categories="document pdf converter" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-document d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">W→P</div><h3 class="fs-4 card-title">Word to PDF</h3></div><p class="card-text">Convert Word documents (.doc, .docx) to PDF format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Excel to PDF Converter Spreadsheet Simple" data-tool-categories="document pdf converter" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-document d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">X→P</div><h3 class="fs-4 card-title">Excel to PDF</h3></div><p class="card-text">Convert Excel spreadsheets (.xls, .xlsx) to PDF format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="PowerPoint PPT to PDF Converter Presentation Simple" data-tool-categories="document pdf converter" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-document d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">PP→P</div><h3 class="fs-4 card-title">PowerPoint to PDF</h3></div><p class="card-text">Convert PowerPoint presentations (.ppt, .pptx) to PDF format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="JPG to PDF Converter Image Simple" data-tool-categories="image pdf converter" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">J→P</div><h3 class="fs-4 card-title">JPG to PDF</h3></div><p class="card-text">Convert your JPG images into a single PDF document.</p>
+            {# --- UPDATED LINK BELOW --- #}
+            <a href="{% url 'pdf_tools:jpg_to_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg></a>
+            {# --- END UPDATED LINK --- #}
+            </div></div>
+        </div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="PNG to PDF Converter Image Document Simple" data-tool-categories="image pdf converter document" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">PNG→P</div>
+                <h3 class="fs-4 card-title">PNG to PDF</h3>
+            </div>
+            <p class="card-text">Convert one or more PNG images into a single, combined PDF document.</p>
+            <a href="{% url 'pdf_tools:png_to_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <div class="feature col tool-card" data-tool-name="HTML to PDF Converter Webpage Simple" data-tool-categories="webdev pdf converter" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-webdev d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">H→P</div><h3 class="fs-4 card-title">HTML to PDF</h3></div><p class="card-text">Convert entire webpages or HTML code snippets to PDF.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Merge PDF Combine Files Simple" data-tool-categories="pdf utility" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P+P</div><h3 class="fs-4 card-title">Merge PDF</h3></div><p class="card-text">Combine multiple PDF files into a single document.</p><a href="{% url 'pdf_tools:merge_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Merger <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Split PDF Extract Pages Simple" data-tool-categories="pdf utility" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P/P</div><h3 class="fs-4 card-title">Split PDF</h3></div><p class="card-text">Extract specific pages or page ranges from a PDF file.</p><a href="{% url 'pdf_tools:split_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Splitter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Compress PDF Reduce File Size Simple" data-tool-categories="pdf utility" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P↓</div><h3 class="fs-4 card-title">Compress PDF</h3></div><p class="card-text">Reduce the file size of your PDF documents.</p><a href="{% url 'pdf_tools:compress_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Compressor <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Rotate PDF Pages Simple" data-tool-categories="pdf utility" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P⟳</div><h3 class="fs-4 card-title">Rotate PDF</h3></div><p class="card-text">Rotate specific pages or the entire PDF document.</p><a href="{% url 'pdf_tools:rotate_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Rotator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Add Page Numbers PDF Simple" data-tool-categories="pdf utility" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P#</div><h3 class="fs-4 card-title">Add Page Numbers</h3></div><p class="card-text">Insert page numbers into your PDF documents.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Add Watermark PDF Text Image Simple Document Security" data-tool-categories="pdf utility document security" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P™</div>
+                <h3 class="fs-4 card-title">Add Watermark to PDF</h3>
+            </div>
+            <p class="card-text">Overlay text or an image watermark onto every page of your PDF document.</p>
+            <a href="{% url 'pdf_tools:add_watermark' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Watermarker <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Unlock PDF Remove Password Decrypt Simple Document Security" data-tool-categories="pdf utility document security" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P🔓</div>
+                <h3 class="fs-4 card-title">Unlock PDF</h3>
+            </div>
+            <p class="card-text">Remove password protection from an encrypted PDF file (requires current password).</p>
+            <a href="{% url 'pdf_tools:unlock_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Unlocker <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Protect PDF Add Password Encrypt Simple Document Security" data-tool-categories="pdf utility document security" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-pdf d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">P🔒</div>
+                <h3 class="fs-4 card-title">Protect PDF</h3>
+            </div>
+            <p class="card-text">Add password protection and encryption to your PDF document to secure its content.</p>
+            <a href="{% url 'pdf_tools:protect_pdf' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Protector <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
 
-       <!-- =========== Audio Tools (Simple Only) =========== -->
-        <div class="feature col tool-card" data-tool-name="MP3 to WAV Converter Audio Format Simple" data-tool-categories="audio converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">M>W</div><h3 class="fs-4 card-title">MP3 to WAV</h3></div><p class="card-text">Convert MP3 audio files to uncompressed WAV format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="WAV to MP3 Converter Audio Format Simple" data-tool-categories="audio converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">W>M</div><h3 class="fs-4 card-title">WAV to MP3</h3></div><p class="card-text">Convert WAV audio files to the popular MP3 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="M4A to MP3 Converter Audio Format Simple" data-tool-categories="audio converter" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">4A>M</div><h3 class="fs-4 card-title">M4A to MP3</h3></div><p class="card-text">Convert M4A (Apple audio) files to MP3 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="FLAC to MP3 Converter Audio Format Lossless Simple" data-tool-categories="audio converter" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">F>M</div><h3 class="fs-4 card-title">FLAC to MP3</h3></div><p class="card-text">Convert lossless FLAC audio files to MP3 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Cut Trim Audio Editor Ringtone Maker Simple" data-tool-categories="audio utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">A✂</div><h3 class="fs-4 card-title">Cut Audio</h3></div><p class="card-text">Trim or cut sections from your audio files (e.g., for ringtones).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Merge Audio Combine Tracks Join Simple" data-tool-categories="audio utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">A+A</div><h3 class="fs-4 card-title">Merge Audio</h3></div><p class="card-text">Combine multiple audio tracks into a single file.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Change Audio Volume Increase Decrease Normalize Simple" data-tool-categories="audio utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">A🔊</div><h3 class="fs-4 card-title">Change Audio Volume</h3></div><p class="card-text">Increase or decrease the volume level of audio files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Extract Audio from Video MP4 to MP3 Simple" data-tool-categories="video audio converter utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V>A</div><h3 class="fs-4 card-title">Extract Audio from Video</h3></div><p class="card-text">Extract the sound or music from a video file (e.g., MP4 to MP3).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
+        <!-- =========== Image Tools =========== -->
+         
+        <div class="feature col tool-card" data-tool-name="JPG to PNG Converter Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">J>Pn</div><h3 class="fs-4 card-title">JPG to PNG</h3></div><p class="card-text">Convert JPG images to PNG format (supports transparency).</p><a href="{% url 'image_tools:jpg_to_png' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+        </div>
+         <div class="feature col tool-card" data-tool-name="PNG to JPG Converter Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Pn>J</div><h3 class="fs-4 card-title">PNG to JPG</h3></div><p class="card-text">Convert PNG images to JPG format (smaller file size).</p><a href="{% url 'image_tools:png_to_jpg' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+        </div>
+        <!-- Inside #tools-grid -->
+        <div class="feature col tool-card" data-tool-name="WebP to PNG Converter Image Format Simple" data-tool-categories="image converter webdev" data-tool-type="simple">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3 text-center">
+                        <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">W→P</div>
+                        <h3 class="fs-4 card-title">WebP to PNG</h3>
+                    </div>
+                    <p class="card-text">Convert modern WebP images to the widely supported PNG format, keeping transparency.</p>
+                    <a href="{% url 'image_tools:webp_to_png' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                        Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                    </a>
+                </div>
+            </div>
+        </div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="WebP to JPG Converter Image Format Simple" data-tool-categories="image converter webdev" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">W→JPG</div>
+                <h3 class="fs-4 card-title">WebP to JPG</h3>
+            </div>
+            <p class="card-text">Convert modern WebP images (including animated or transparent) to the standard JPG format.</p>
+            <a href="{% url 'image_tools:webp_to_jpg' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="JPG to WebP Converter Image Format Simple" data-tool-categories="image converter webdev" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">J→Wp</div>
+                <h3 class="fs-4 card-title">JPG to WebP</h3>
+            </div>
+            <p class="card-text">Convert JPG/JPEG images to the modern, efficient WebP format with quality options.</p>
+            <a href="{% url 'image_tools:jpg_to_webp' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+         <div class="feature col tool-card" data-tool-name="HEIC to JPG Converter iPhone Image Format Simple" data-tool-categories="image converter" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">H>J</div><h3 class="fs-4 card-title">HEIC to JPG</h3></div><p class="card-text">Convert Apple HEIC images to standard JPG format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="SVG to PNG Converter Vector Image Format Simple Developer" data-tool-categories="image converter developer" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">S>Pn</div><h3 class="fs-4 card-title">SVG to PNG</h3></div><p class="card-text">Convert Scalable Vector Graphics (SVG) to PNG images.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+       <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="ICO Converter Favicon Generator Image Simple Webdev" data-tool-categories="image converter generator utility webdev" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">→ICO</div>
+                <h3 class="fs-4 card-title">ICO Converter</h3>
+            </div>
+            <p class="card-text">Create a Windows ICO file (favicon) from an image, including multiple standard sizes.</p>
+            <a href="{% url 'image_tools:ico_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <div class="feature col tool-card" data-tool-name="Resize Image Dimensions Scale Simple" data-tool-categories="image utility" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I↔</div><h3 class="fs-4 card-title">Resize Image</h3></div><p class="card-text">Change the dimensions (width/height) of your images.</p><a href="{% url 'image_tools:resize_image' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Crop Image Cut Trim Simple" data-tool-categories="image utility" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I✂</div><h3 class="fs-4 card-title">Crop Image</h3></div><p class="card-text">Cut or trim your images to a specific area or aspect ratio.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Compress Image Reduce File Size Optimizer Simple JPG PNG" data-tool-categories="image utility" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I↓</div><h3 class="fs-4 card-title">Compress Image</h3></div><p class="card-text">Reduce JPG/PNG image file size with minimal quality loss.</p><a href="{% url 'image_tools:compress_image' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Compressor <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+        </div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Rotate Image Flip Mirror Simple" data-tool-categories="image utility" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">⟳</div>
+                <h3 class="fs-4 card-title">Rotate & Flip Image</h3>
+            </div>
+            <p class="card-text">Rotate images by 90°, 180°, 270° or custom angles, and flip them horizontally or vertically.</p>
+            <a href="{% url 'image_tools:rotate_image' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Tool <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Add Watermark Image Text Stamp Simple" data-tool-categories="image utility" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">IMG™</div>
+                <h3 class="fs-4 card-title">Add Watermark (Image)</h3>
+            </div>
+            <p class="card-text">Add text or image watermarks to your photos with customization options.</p>
+            <a href="{% url 'image_tools:add_watermark' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Watermarker <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Image Color Picker Extractor Palette Hex RGB Simple Developer Generator" data-tool-categories="image utility developer generator" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">🎨</div>
+                <h3 class="fs-4 card-title">Image Color Picker</h3>
+            </div>
+            <p class="card-text">Upload an image and click on any pixel to get its HEX and RGB color codes.</p>
+            <a href="{% url 'image_tools:image_color_picker' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Picker <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
 
-       <!-- =========== Video Tools (Simple Only) =========== -->
-       <div class="feature col tool-card" data-tool-name="MOV to MP4 Converter Video Format Apple Simple" data-tool-categories="video converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">MOV→MP4</div><h3 class="fs-4 card-title">MOV to MP4</h3></div><p class="card-text">Convert Apple MOV video files to the widely compatible MP4 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="AVI to MP4 Converter Video Format Simple" data-tool-categories="video converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">AVI→MP4</div><h3 class="fs-4 card-title">AVI to MP4</h3></div><p class="card-text">Convert older AVI video files to the modern MP4 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="MP4 to GIF Converter Video Animation Simple" data-tool-categories="video image converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">MP4→GIF</div><h3 class="fs-4 card-title">MP4 to GIF</h3></div><p class="card-text">Convert short video clips (MP4) into animated GIF images.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Compress Video Reduce File Size Simple" data-tool-categories="video utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V↓</div><h3 class="fs-4 card-title">Compress Video</h3></div><p class="card-text">Reduce the file size of your video files (MP4, MOV, etc.).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Cut Trim Video Editor Clip Simple" data-tool-categories="video utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V✂</div><h3 class="fs-4 card-title">Cut Video</h3></div><p class="card-text">Trim or cut sections from your video files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Merge Video Combine Clips Join Simple" data-tool-categories="video utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V+V</div><h3 class="fs-4 card-title">Merge Video</h3></div><p class="card-text">Combine multiple video clips into a single video file.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Rotate Video Flip Orientation Simple" data-tool-categories="video utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V⟳</div><h3 class="fs-4 card-title">Rotate Video</h3></div><p class="card-text">Rotate videos that were recorded in the wrong orientation.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Resize Video Dimensions Resolution Simple" data-tool-categories="video utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V↔</div><h3 class="fs-4 card-title">Resize Video</h3></div><p class="card-text">Change the resolution (e.g., 1080p, 720p) of your video files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Add Watermark Video Stamp Logo Simple" data-tool-categories="video utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V™</div><h3 class="fs-4 card-title">Add Watermark (Video)</h3></div><p class="card-text">Add a text or logo watermark to your video files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
+         <div class="feature col tool-card" data-tool-name="Image to Base64 Encoder Embed CSS Simple Developer Webdev" data-tool-categories="image converter developer webdev" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">I>64</div><h3 class="fs-4 card-title">Image to Base64</h3></div><p class="card-text">Encode images into Base64 strings for embedding.</p><a href="{% url 'image_tools:image_to_base64' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+        </div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Favicon Generator ICO PNG Apple Android Simple Image Webdev" data-tool-categories="image utility generator webdev" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-image d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Fav</div>
+                <h3 class="fs-4 card-title">Favicon Generator</h3>
+            </div>
+            <p class="card-text">Create all necessary favicon formats (ICO, PNG, Apple Touch, Android) and HTML code from a single image.</p>
+            <a href="{% url 'image_tools:favicon_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
 
-       <!-- =========== Text Tools (Simple Only) =========== -->
-        <div class="feature col tool-card" data-tool-name="Word Counter Character Count Statistics Simple" data-tool-categories="text utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">WC</div><h3 class="fs-4 card-title">Word Counter</h3></div><p class="card-text">Count words, characters, sentences, and paragraphs in text.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Case Converter Uppercase Lowercase Title Sentence Simple" data-tool-categories="text utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Aa</div><h3 class="fs-4 card-title">Case Converter</h3></div><p class="card-text">Convert text between UPPERCASE, lowercase, Title Case, etc.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Lorem Ipsum Generator Dummy Placeholder Text Simple Developer Webdev" data-tool-categories="text generator developer webdev" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Lor</div><h3 class="fs-4 card-title">Lorem Ipsum Generator</h3></div><p class="card-text">Generate placeholder dummy text for your designs.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Text Reverser Flip String Simple Fun" data-tool-categories="text utility fun" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">↔T</div><h3 class="fs-4 card-title">Text Reverser</h3></div><p class="card-text">Reverse the characters or words in a piece of text.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Remove Line Breaks Paragraph Formatter Simple" data-tool-categories="text utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">T↵</div><h3 class="fs-4 card-title">Remove Line Breaks</h3></div><p class="card-text">Remove unnecessary line breaks from text, creating paragraphs.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Text Cleaner Remove Extra Spaces Formatting Simple" data-tool-categories="text utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">T✨</div><h3 class="fs-4 card-title">Text Cleaner</h3></div><p class="card-text">Remove extra spaces, tabs, or specific characters from text.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Text Difference Checker Compare Diff Tool Simple Developer" data-tool-categories="text utility developer" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">T≠T</div><h3 class="fs-4 card-title">Text Compare (Diff)</h3></div><p class="card-text">Compare two pieces of text and highlight the differences.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Markdown Previewer Editor MD Formatter Simple Developer Webdev" data-tool-categories="text developer webdev utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">MD</div><h3 class="fs-4 card-title">Markdown Previewer</h3></div><p class="card-text">Write Markdown text and see a live preview.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Password Generator Secure Random String Simple Security" data-tool-categories="text generator utility security" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">***</div><h3 class="fs-4 card-title">Password Generator</h3></div><p class="card-text">Generate strong, random passwords with customizable options.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Slug Generator URL Friendly Title Dasherize Simple Webdev" data-tool-categories="text generator utility webdev" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Slug</div><h3 class="fs-4 card-title">Slug Generator</h3></div><p class="card-text">Create URL-friendly slugs from text or titles.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
 
-       <!-- =========== Archive Tools (Simple Only) =========== -->
-       <div class="feature col tool-card" data-tool-name="ZIP Extractor Unzipper Unpack Archive Simple" data-tool-categories="archive utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-archive d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Zip↓</div><h3 class="fs-4 card-title">ZIP Extractor</h3></div><p class="card-text">Extract files from ZIP archives online.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Create ZIP Archive Compressor File Folder Simple" data-tool-categories="archive utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-archive d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Zip↑</div><h3 class="fs-4 card-title">Create ZIP Archive</h3></div><p class="card-text">Create ZIP archives by uploading multiple files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="RAR Extractor Unrar Unpack Archive Simple" data-tool-categories="archive utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-archive d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Rar↓</div><h3 class="fs-4 card-title">RAR Extractor</h3></div><p class="card-text">Extract files from RAR archives (check library availability/licensing).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
+       
 
-       <!-- =========== Developer Tools (Simple Only) =========== -->
-       <div class="feature col tool-card" data-tool-name="JSON Validator Formatter Beautifier Pretty Print Simple Developer Webdev" data-tool-categories="developer utility webdev text" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">{..}</div><h3 class="fs-4 card-title">JSON Formatter</h3></div><p class="card-text">Validate, format, and beautify JSON data.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="XML Validator Formatter Beautifier Simple Developer Webdev" data-tool-categories="developer utility webdev text" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded"><..></div><h3 class="fs-4 card-title">XML Formatter</h3></div><p class="card-text">Validate, format, and beautify XML data.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="HTML Validator Cleaner Lint Simple Developer Webdev" data-tool-categories="developer utility webdev" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">HTML</div><h3 class="fs-4 card-title">HTML Validator</h3></div><p class="card-text">Check HTML code for errors and best practices.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="CSS Validator Formatter Minifier Beautifier Optimize Simple Developer Webdev" data-tool-categories="developer utility webdev" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">CSS</div><h3 class="fs-4 card-title">CSS Formatter/Minifier</h3></div><p class="card-text">Format, beautify, or minify CSS code for optimization.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="JavaScript JS Validator Formatter Minifier Obfuscator Uglify Beautify Simple Developer Webdev" data-tool-categories="developer utility webdev" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">JS</div><h3 class="fs-4 card-title">JS Formatter/Minifier</h3></div><p class="card-text">Format, beautify, minify, or obfuscate JavaScript code.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="SQL Formatter Beautifier Database Query Simple Developer" data-tool-categories="developer utility" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">SQL</div><h3 class="fs-4 card-title">SQL Formatter</h3></div><p class="card-text">Format and beautify SQL queries for readability.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="URL Encoder Decoder Percent Encoding Simple Developer Webdev" data-tool-categories="developer utility webdev converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">%</div><h3 class="fs-4 card-title">URL Encoder/Decoder</h3></div><p class="card-text">Encode or decode strings for safe use in URLs.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Base64 Encoder Decoder String File Simple Developer Webdev" data-tool-categories="developer utility webdev text converter" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">64</div><h3 class="fs-4 card-title">Base64 Encoder/Decoder</h3></div><p class="card-text">Encode strings or files to Base64 and decode Base64 strings.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Color Converter HEX RGB HSL Picker Simple Developer Webdev Image" data-tool-categories="developer utility webdev image converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">🎨</div><h3 class="fs-4 card-title">Color Converter</h3></div><p class="card-text">Convert colors between HEX, RGB, and HSL formats.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Hash Generator MD5 SHA1 SHA256 Checksum Simple Developer Security" data-tool-categories="developer utility security text generator" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">#G</div><h3 class="fs-4 card-title">Hash Generator</h3></div><p class="card-text">Generate MD5, SHA-1, SHA-256 hashes for text or files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="UUID Generator GUID Unique Identifier Simple Developer" data-tool-categories="developer utility generator" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">ID</div><h3 class="fs-4 card-title">UUID Generator</h3></div><p class="card-text">Generate universally unique identifiers (UUIDs/GUIDs).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Unix Timestamp Converter Epoch Time Date Simple Developer" data-tool-categories="developer utility generator converter" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">TS</div><h3 class="fs-4 card-title">Timestamp Converter</h3></div><p class="card-text">Convert Unix timestamps to human-readable dates and vice versa.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="CSS Gradient Generator Linear Radial Simple Developer Webdev" data-tool-categories="developer utility webdev generator" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Grad</div><h3 class="fs-4 card-title">CSS Gradient Generator</h3></div><p class="card-text">Visually create CSS linear and radial gradients.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Regular Expression Regex Tester Debugger Simple Developer Text" data-tool-categories="developer utility text" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">/../</div><h3 class="fs-4 card-title">Regex Tester</h3></div><p class="card-text">Test and debug regular expressions against sample text.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="JWT Debugger Decoder JSON Web Token Simple Developer Webdev Security" data-tool-categories="developer utility webdev security" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">JWT</div><h3 class="fs-4 card-title">JWT Debugger</h3></div><p class="card-text">Decode and inspect JSON Web Tokens (JWTs).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
+        <!-- =========== Audio Tools =========== -->
 
-       <!-- =========== General Utilities (Simple Only) =========== -->
-        <div class="feature col tool-card" data-tool-name="Unit Converter Length Weight Temperature Volume Simple Generator" data-tool-categories="utility converter generator" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Units</div><h3 class="fs-4 card-title">Unit Converter</h3></div><p class="card-text">Convert various units (length, weight, temp, etc.).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Currency Converter Exchange Rates Forex Simple Generator Finance" data-tool-categories="utility converter generator finance" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-finance d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">$€¥</div><h3 class="fs-4 card-title">Currency Converter</h3></div><p class="card-text">Convert between different world currencies (requires API).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Time Zone Converter World Clock Simple Generator" data-tool-categories="utility generator" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">TZ</div><h3 class="fs-4 card-title">Time Zone Converter</h3></div><p class="card-text">Convert times between different time zones globally.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="QR Code Generator URL Text Contact Simple Image" data-tool-categories="utility generator image" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">QR</div><h3 class="fs-4 card-title">QR Code Generator</h3></div><p class="card-text">Generate QR codes for URLs, text, contact info, Wi-Fi, etc.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Barcode Generator Code128 EAN UPC Simple Image" data-tool-categories="utility generator image" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">||||</div><h3 class="fs-4 card-title">Barcode Generator</h3></div><p class="card-text">Generate various barcode formats (Code128, EAN, UPC).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Random Number Generator Integer Range Simple" data-tool-categories="utility generator" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">#?</div><h3 class="fs-4 card-title">Random Number Gen</h3></div><p class="card-text">Generate random numbers within a specified range.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Calculator Simple Scientific Math Utility" data-tool-categories="utility" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Calc</div><h3 class="fs-4 card-title">Calculator</h3></div><p class="card-text">A simple or scientific calculator for quick calculations.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="What's My IP Address Location Geolocation Simple Utility Webdev Network" data-tool-categories="utility webdev network" data-tool-type="simple">
-           <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">IP?</div><h3 class="fs-4 card-title">What's My IP?</h3></div><p class="card-text">Display your public IP address and approximate location.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-        <div class="feature col tool-card" data-tool-name="Screen Resolution Detector Size Display Simple Utility Webdev" data-tool-categories="utility webdev" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Res?</div><h3 class="fs-4 card-title">Screen Resolution</h3></div><p class="card-text">Detect and display your current screen resolution.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-       <div class="feature col tool-card" data-tool-name="Binary Converter Text Translator Simple Developer" data-tool-categories="utility text developer converter" data-tool-type="simple">
-            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">01</div><h3 class="fs-4 card-title">Binary Converter</h3></div><p class="card-text">Convert text to binary code and binary back to text.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
-       </div>
-            {# ... Paste ALL other SIMPLE tool cards here ... #}
+         <div class="feature col tool-card" data-tool-name="MP3 to WAV Converter Audio Format Simple" data-tool-categories="audio converter" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">M>W</div><h3 class="fs-4 card-title">MP3 to WAV</h3></div><p class="card-text">Convert MP3 audio files to uncompressed WAV format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="WAV to MP3 Converter Audio Format Simple" data-tool-categories="audio converter" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">W>M</div><h3 class="fs-4 card-title">WAV to MP3</h3></div><p class="card-text">Convert WAV audio files to the popular MP3 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="M4A to MP3 Converter Audio Format Simple" data-tool-categories="audio converter" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">4A>M</div><h3 class="fs-4 card-title">M4A to MP3</h3></div><p class="card-text">Convert M4A (Apple audio) files to MP3 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="FLAC to MP3 Converter Audio Format Lossless Simple" data-tool-categories="audio converter" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">F>M</div><h3 class="fs-4 card-title">FLAC to MP3</h3></div><p class="card-text">Convert lossless FLAC audio files to MP3 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Cut Trim Audio Editor Ringtone Maker Simple" data-tool-categories="audio utility" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">A✂</div><h3 class="fs-4 card-title">Cut Audio</h3></div><p class="card-text">Trim or cut sections from your audio files (e.g., for ringtones).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Merge Audio Combine Tracks Join Simple" data-tool-categories="audio utility" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">A+A</div><h3 class="fs-4 card-title">Merge Audio</h3></div><p class="card-text">Combine multiple audio tracks into a single file.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Change Audio Volume Increase Decrease Normalize Simple" data-tool-categories="audio utility" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">A🔊</div><h3 class="fs-4 card-title">Change Audio Volume</h3></div><p class="card-text">Increase or decrease the volume level of audio files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Extract Audio from Video MP4 to MP3 Simple" data-tool-categories="video audio converter utility" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-audio d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V>A</div><h3 class="fs-4 card-title">Extract Audio from Video</h3></div><p class="card-text">Extract the sound or music from a video file (e.g., MP4 to MP3).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
 
-        </div> <!-- /row #tools-grid -->
+        <!-- =========== Video Tools (Resource Intensive!) =========== -->
+        <div class="feature col tool-card" data-tool-name="MOV to MP4 Converter Video Format Apple Simple" data-tool-categories="video converter" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">MOV→MP4</div><h3 class="fs-4 card-title">MOV to MP4</h3></div><p class="card-text">Convert Apple MOV video files to the widely compatible MP4 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="AVI to MP4 Converter Video Format Simple" data-tool-categories="video converter" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">AVI→MP4</div><h3 class="fs-4 card-title">AVI to MP4</h3></div><p class="card-text">Convert older AVI video files to the modern MP4 format.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="MP4 to GIF Converter Video Animation Simple" data-tool-categories="video image converter" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">MP4→GIF</div><h3 class="fs-4 card-title">MP4 to GIF</h3></div><p class="card-text">Convert short video clips (MP4) into animated GIF images.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+         <div class="feature col tool-card" data-tool-name="Compress Video Reduce File Size Simple" data-tool-categories="video utility" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V↓</div><h3 class="fs-4 card-title">Compress Video</h3></div><p class="card-text">Reduce the file size of your video files (MP4, MOV, etc.).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Cut Trim Video Editor Clip Simple" data-tool-categories="video utility" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V✂</div><h3 class="fs-4 card-title">Cut Video</h3></div><p class="card-text">Trim or cut sections from your video files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+         <div class="feature col tool-card" data-tool-name="Merge Video Combine Clips Join Simple" data-tool-categories="video utility" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V+V</div><h3 class="fs-4 card-title">Merge Video</h3></div><p class="card-text">Combine multiple video clips into a single video file.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Rotate Video Flip Orientation Simple" data-tool-categories="video utility" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V⟳</div><h3 class="fs-4 card-title">Rotate Video</h3></div><p class="card-text">Rotate videos that were recorded in the wrong orientation.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="Resize Video Dimensions Resolution Simple" data-tool-categories="video utility" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V↔</div><h3 class="fs-4 card-title">Resize Video</h3></div><p class="card-text">Change the resolution (e.g., 1080p, 720p) of your video files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+         <div class="feature col tool-card" data-tool-name="Add Watermark Video Stamp Logo Simple" data-tool-categories="video utility" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-video d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">V™</div><h3 class="fs-4 card-title">Add Watermark (Video)</h3></div><p class="card-text">Add a text or logo watermark to your video files.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+
+        <!-- =========== Text Tools =========== -->
+         <div class="feature col tool-card" data-tool-name="Word Counter Character Count Statistics Simple" data-tool-categories="text utility" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">WC</div><h3 class="fs-4 card-title">Word Counter</h3></div><p class="card-text">Count words, characters, sentences, and paragraphs in text.</p><a href="{% url 'text_tools:word_counter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Counter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+        </div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Case Converter Uppercase Lowercase Title Sentence Simple Text" data-tool-categories="text utility" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Aa</div>
+                <h3 class="fs-4 card-title">Case Converter</h3>
+            </div>
+            <p class="card-text">Quickly change text between lower case, UPPER CASE, Sentence case, and Title Case.</p>
+            <a href="{% url 'text_tools:case_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+<div class="feature col tool-card" data-tool-name="Lorem Ipsum Generator Dummy Placeholder Text Simple Developer Webdev" data-tool-categories="text generator developer webdev utility" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Lor</div>
+                <h3 class="fs-4 card-title">Lorem Ipsum Generator</h3>
+            </div>
+            <p class="card-text">Generate standard placeholder text (paragraphs, sentences, or words) for your designs and mockups.</p>
+            <a href="{% url 'text_tools:lorem_ipsum_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+<div class="feature col tool-card" data-tool-name="Reverse Text String Word Order Flipper Simple" data-tool-categories="text utility fun" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">↔T</div>
+                <h3 class="fs-4 card-title">Reverse Text</h3>
+            </div>
+            <p class="card-text">Flip text backwards by reversing the entire string, each word individually, or the order of words.</p>
+            <a href="{% url 'text_tools:reverse_text' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Reverser <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Remove Line Breaks Empty Spaces Simple Text Utility" data-tool-categories="text utility" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">¶↵</div>
+                <h3 class="fs-4 card-title">Remove Line Breaks</h3>
+            </div>
+            <p class="card-text">Clean up text by removing all line breaks, only empty lines, or replacing breaks with spaces.</p>
+            <a href="{% url 'text_tools:remove_line_breaks' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Tool <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Text Cleaner Remover Extra Spaces Line Breaks HTML Tags Simple" data-tool-categories="text utility" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">T✨</div>
+                <h3 class="fs-4 card-title">Text Cleaner</h3>
+            </div>
+            <p class="card-text">Clean up your text by removing extra spaces, line breaks, HTML tags, and more.</p>
+            <a href="{% url 'text_tools:text_cleaner' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Cleaner <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+         <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Text Compare Difference Diff Tool Simple Developer Utility" data-tool-categories="text utility developer" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">T≠T</div>
+                <h3 class="fs-4 card-title">Text Compare (Diff)</h3>
+            </div>
+            <p class="card-text">Compare two blocks of text and highlight the differences between them side-by-side.</p>
+            <a href="{% url 'text_tools:text_compare' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Comparer <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+         <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Markdown Previewer Editor Live HTML Simple Text Developer" data-tool-categories="text developer utility webdev" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">MD</div>
+                <h3 class="fs-4 card-title">Markdown Previewer</h3>
+            </div>
+            <p class="card-text">Write Markdown text and see a real-time HTML preview with syntax highlighting.</p>
+            <a href="{% url 'text_tools:markdown_previewer' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Previewer <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Password Generator Secure Random String Simple Security Utility" data-tool-categories="text generator utility security" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-security d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">***</div>
+                <h3 class="fs-4 card-title">Password Generator</h3>
+            </div>
+            <p class="card-text">Create strong, random, and customizable passwords for your accounts.</p>
+            <a href="{% url 'utility_tools:password_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Slug Generator URL Friendly Title Dasherize Simple Webdev Text" data-tool-categories="text generator utility webdev developer" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-text d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Slug</div>
+                <h3 class="fs-4 card-title">Slug Generator</h3>
+            </div>
+            <p class="card-text">Convert any text or title into a clean, URL-friendly slug (e.g., for blog posts).</p>
+            <a href="{% url 'text_tools:slug_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+       
+
+        <!-- =========== Archive Tools =========== -->
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="ZIP Extractor Archive Unzip List Simple" data-tool-categories="archive utility" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-archive d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Zip↓</div>
+                <h3 class="fs-4 card-title">ZIP Extractor</h3>
+            </div>
+            <p class="card-text">Quickly view the list of files and folders contained within a ZIP archive without extracting.</p>
+            <a href="{% url 'archive_tools:zip_extractor' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Extractor <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="ZIP Viewer Lister Extractor Archive Simple" data-tool-categories="archive utility" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-archive d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">ZIP</div>
+                <h3 class="fs-4 card-title">ZIP File Viewer</h3>
+            </div>
+            <p class="card-text">View the list of files and folders contained within a ZIP archive without extracting.</p>
+            <a href="{% url 'archive_tools:zip_viewer' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Viewer <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Create ZIP Archive Compressor File Folder Simple" data-tool-categories="archive utility" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-archive d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Zip↑</div>
+                <h3 class="fs-4 card-title">Create ZIP Archive</h3>
+            </div>
+            <p class="card-text">Upload multiple files to combine them into a single downloadable ZIP file.</p>
+            <a href="{% url 'archive_tools:create_zip' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Archiver <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="RAR Extractor Archive Unrar List Download Simple" data-tool-categories="archive utility" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-archive d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Rar↓</div>
+                <h3 class="fs-4 card-title">RAR Extractor</h3>
+            </div>
+            <p class="card-text">View and download individual files from inside a RAR archive. Requires server support.</p>
+            <a href="{% url 'archive_tools:rar_extractor' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Extractor <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+
+        <!-- =========== Developer Tools =========== -->
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="JSON Formatter Validator Beautifier Pretty Print Simple Developer Webdev Text" data-tool-categories="developer utility webdev text" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">{ }</div>
+                <h3 class="fs-4 card-title">JSON Formatter</h3>
+            </div>
+            <p class="card-text">Validate and pretty-print your JSON data with indentation and optional key sorting.</p>
+            <a href="{% url 'text_tools:json_formatter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Formatter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="XML Formatter Beautifier Pretty Print Simple Developer Webdev" data-tool-categories="developer utility webdev text" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded"></></div>
+                <h3 class="fs-4 card-title">XML Formatter</h3>
+            </div>
+            <p class="card-text">Format and beautify your XML data for improved readability with indentation options.</p>
+            <a href="{% url 'developer_tools:xml_formatter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Formatter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+         <div class="feature col tool-card" data-tool-name="HTML Validator Cleaner Lint Simple Developer Webdev" data-tool-categories="developer utility webdev" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">HTML</div><h3 class="fs-4 card-title">HTML Validator</h3></div><p class="card-text">Check HTML code for errors and best practices.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+         <div class="feature col tool-card" data-tool-name="CSS Validator Formatter Minifier Beautifier Optimize Simple Developer Webdev" data-tool-categories="developer utility webdev" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">CSS</div><h3 class="fs-4 card-title">CSS Formatter/Minifier</h3></div><p class="card-text">Format, beautify, or minify CSS code for optimization.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <div class="feature col tool-card" data-tool-name="JavaScript JS Validator Formatter Minifier Obfuscator Uglify Beautify Simple Developer Webdev" data-tool-categories="developer utility webdev" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">JS</div><h3 class="fs-4 card-title">JS Formatter/Minifier</h3></div><p class="card-text">Format, beautify, minify, or obfuscate JavaScript code.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+         <div class="feature col tool-card" data-tool-name="SQL Formatter Beautifier Database Query Simple Developer" data-tool-categories="developer utility" data-tool-type="simple">
+             <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">SQL</div><h3 class="fs-4 card-title">SQL Formatter</h3></div><p class="card-text">Format and beautify SQL queries for readability.</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+       <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="URL Encoder Decoder Percent Encoding Simple Developer Webdev" data-tool-categories="developer utility webdev converter text" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">%</div>
+                <h3 class="fs-4 card-title">URL Encoder/Decoder</h3>
+            </div>
+            <p class="card-text">Encode text into URL-safe percent-encoded format or decode it back to human-readable text.</p>
+            <a href="{% url 'utility_tools:url_encoder_decoder' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Tool <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Base64 Encoder Decoder String File Simple Developer Webdev" data-tool-categories="developer utility webdev text converter" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">64</div>
+                <h3 class="fs-4 card-title">Base64 Encoder/Decoder</h3>
+            </div>
+            <p class="card-text">Encode text data into Base64 format or decode Base64 data back to plain text.</p>
+            <a href="{% url 'utility_tools:base64_encoder_decoder' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Tool <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Color Converter HEX RGB HSL Simple Developer Webdev Image" data-tool-categories="developer utility webdev image converter" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">🎨</div>
+                <h3 class="fs-4 card-title">Color Converter</h3>
+            </div>
+            <p class="card-text">Convert color values between HEX, RGB(A), and HSL(A) formats instantly.</p>
+            <a href="{% url 'utility_tools:color_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Hash Generator MD5 SHA1 SHA256 SHA512 Checksum Simple Developer Security" data-tool-categories="developer utility security text generator" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">#G</div>
+                <h3 class="fs-4 card-title">Hash Generator</h3>
+            </div>
+            <p class="card-text">Generate cryptographic hashes (MD5, SHA-1, SHA-256, SHA-512) from text input.</p>
+            <a href="{% url 'utility_tools:hash_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <div class="feature col tool-card" data-tool-name="UUID Generator GUID Unique Identifier Simple Developer" data-tool-categories="developer utility generator" data-tool-type="simple">
+            <div class="card h-100 shadow-sm">
+                <div class="card-body d-flex flex-column">
+                    <div class="mb-3 text-center">
+                        <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">ID</div>
+                        <h3 class="fs-4 card-title">UUID Generator</h3>
+                    </div>
+                    <p class="card-text">Generate Version 1 (Timestamp) or Version 4 (Random) universally unique identifiers.</p>
+                    <a href="{% url 'utility_tools:uuid_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                        Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+                    </a>
+                </div>
+            </div>
+       </div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Unix Timestamp Converter Epoch Time Date Simple Developer Utility" data-tool-categories="developer utility generator converter" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">TS</div>
+                <h3 class="fs-4 card-title">Timestamp Converter</h3>
+            </div>
+            <p class="card-text">Convert Unix timestamps (seconds or milliseconds) to human-readable dates (UTC & Local) and vice-versa.</p>
+            <a href="{% url 'utility_tools:timestamp_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="CSS Gradient Generator Linear Radial Simple Developer Webdev" data-tool-categories="utility developer webdev generator" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Grad</div>
+                <h3 class="fs-4 card-title">CSS Gradient Generator</h3>
+            </div>
+            <p class="card-text">Visually create linear and radial CSS background gradients and copy the code.</p>
+            <a href="{% url 'utility_tools:css_gradient_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Regex Tester Regular Expression Debugger Simple Developer Text" data-tool-categories="developer utility text" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">/../</div>
+                <h3 class="fs-4 card-title">Regex Tester</h3>
+            </div>
+            <p class="card-text">Test and debug JavaScript-compatible regular expressions against your text samples in real-time.</p>
+            <a href="{% url 'developer_tools:regex_tester' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Tester <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+         <div class="feature col tool-card" data-tool-name="JWT Debugger Decoder JSON Web Token Simple Developer Webdev Security" data-tool-categories="developer utility webdev security" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-developer d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">JWT</div><h3 class="fs-4 card-title">JWT Debugger</h3></div><p class="card-text">Decode and inspect JSON Web Tokens (JWTs).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+
+        <!-- =========== General Utilities =========== -->
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Unit Converter Length Mass Temperature Area Volume Speed Simple" data-tool-categories="utility converter generator" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">📐</div>
+                <h3 class="fs-4 card-title">Unit Converter</h3>
+            </div>
+            <p class="card-text">Convert between common units of measurement like length, mass, temperature, and more.</p>
+            <a href="{% url 'utility_tools:unit_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+
+         <div class="feature col tool-card" data-tool-name="Currency Converter Exchange Rates Forex Simple Generator Finance" data-tool-categories="utility converter generator finance" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-finance d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">$€¥</div><h3 class="fs-4 card-title">Currency Converter</h3></div><p class="card-text">Convert between different world currencies (requires API).</p><a href="#" class="icon-link d-inline-flex align-items-center mt-auto disabled">Coming Soon...</a></div></div>
+        </div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Time Zone Converter World Clock Simple Generator" data-tool-categories="utility generator" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">TZ</div>
+                <h3 class="fs-4 card-title">Time Zone Converter</h3>
+            </div>
+            <p class="card-text">Convert dates and times between different time zones around the world.</p>
+            <a href="{% url 'utility_tools:timezone_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <div class="feature col tool-card" data-tool-name="QR Code Generator URL Text Contact Simple Image" data-tool-categories="utility generator image" data-tool-type="simple">
+            <div class="card h-100 shadow-sm"><div class="card-body d-flex flex-column"><div class="mb-3 text-center"><div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">QR</div><h3 class="fs-4 card-title">QR Code Generator</h3></div><p class="card-text">Generate QR codes for URLs, text, contact info, Wi-Fi, etc.</p><a href="{% url 'utility_tools:qr_code_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a></div></div>
+        </div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Barcode Generator Code128 Code39 EAN UPC Simple Image Utility" data-tool-categories="utility generator image" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">||||</div>
+                <h3 class="fs-4 card-title">Barcode Generator</h3>
+            </div>
+            <p class="card-text">Create standard 1D barcodes like Code 128, Code 39, EAN, UPC in PNG or SVG format.</p>
+            <a href="{% url 'utility_tools:barcode_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Random Number Generator Integer Range Simple Utility" data-tool-categories="utility generator" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">#?</div>
+                <h3 class="fs-4 card-title">Random Number Generator</h3>
+            </div>
+            <p class="card-text">Generate one or more random integers within a specified minimum and maximum range.</p>
+            <a href="{% url 'utility_tools:random_number_generator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Generator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Calculator Simple Scientific Math Utility" data-tool-categories="utility" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">Calc</div>
+                <h3 class="fs-4 card-title">Calculator</h3>
+            </div>
+            <p class="card-text">Perform basic arithmetic or switch to scientific mode for more complex calculations.</p>
+            <a href="{% url 'utility_tools:calculator' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Calculator <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="What's My IP Address Location Network Simple Utility" data-tool-categories="utility network developer" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">IP?</div>
+                <h3 class="fs-4 card-title">What's My IP?</h3>
+            </div>
+            <p class="card-text">Quickly find out the public IP address your internet connection is currently using.</p>
+            <a href="{% url 'utility_tools:whats_my_ip' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Find My IP <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+         <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Screen Resolution Detector Display Size Viewport Simple Utility Webdev" data-tool-categories="utility webdev developer" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                 <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">
+                     <svg xmlns="http://www.w3.org/2000/svg" width="1em" height="1em" fill="currentColor" class="bi bi-aspect-ratio" viewBox="0 0 16 16"><path d="M0 3.5A1.5 1.5 0 0 1 1.5 2h13A1.5 1.5 0 0 1 16 3.5v9a1.5 1.5 0 0 1-1.5 1.5h-13A1.5 1.5 0 0 1 0 12.5zM1.5 3a.5.5 0 0 0-.5.5v9a.5.5 0 0 0 .5.5h13a.5.5 0 0 0 .5-.5v-9a.5.5 0 0 0-.5-.5z"/><path d="M2 4.5a.5.5 0 0 1 .5-.5h3a.5.5 0 0 1 0 1H3v1.5a.5.5 0 0 1-1 0zm12 7a.5.5 0 0 1-.5.5h-3a.5.5 0 0 1 0-1H13V9.5a.5.5 0 0 1 1 0z"/></svg>
+                 </div>
+                <h3 class="fs-4 card-title">Screen Resolution</h3>
+            </div>
+            <p class="card-text">Quickly find out your screen resolution, browser viewport size, color depth, and pixel ratio.</p>
+            <a href="{% url 'utility_tools:screen_resolution' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Detector <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+        <!-- Inside #tools-grid -->
+<div class="feature col tool-card" data-tool-name="Binary Converter Text Translator Simple Developer Utility" data-tool-categories="utility text developer converter" data-tool-type="simple">
+    <div class="card h-100 shadow-sm">
+        <div class="card-body d-flex flex-column">
+            <div class="mb-3 text-center">
+                <div class="feature-icon icon-utility d-inline-flex align-items-center justify-content-center fs-2 mb-3 p-2 rounded">01</div>
+                <h3 class="fs-4 card-title">Binary Converter</h3>
+            </div>
+            <p class="card-text">Convert text to its binary (0s and 1s) representation and vice versa (UTF-8).</p>
+            <a href="{% url 'text_tools:binary_converter' %}" class="icon-link d-inline-flex align-items-center mt-auto">
+                Go to Converter <svg class="bi" width="1em" height="1em"><use xlink:href="#chevron-right"/></svg>
+            </a>
+        </div>
+    </div>
+</div>
+
+    </div> <!-- /row #tools-grid -->
         <!-- Message shown when no tools match filters -->
         <div id="no-results-message" class="text-center py-5" style="display: none;">
             <h2>No simple tools found matching your criteria.</h2>

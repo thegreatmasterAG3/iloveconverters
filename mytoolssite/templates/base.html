@@ -15,16 +15,18 @@
     <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap" rel="stylesheet"> -->
 
     {# --- Favicon Links (assuming files are in 'static/favicons/') --- #}
-    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'favicons/apple-touch-icon.png' %}">
-    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'favicons/favicon-32x32.png' %}">
-    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'favicons/favicon-16x16.png' %}">
-    <link rel="manifest" href="{% static 'favicons/site.webmanifest' %}">
-    <link rel="mask-icon" href="{% static 'favicons/safari-pinned-tab.svg' %}" color="#5bbad5"> {# Generator might provide this #}
-    <link rel="shortcut icon" href="{% static 'favicons/favicon.ico' %}">
+    <link rel="apple-touch-icon" sizes="180x180" href="{% static 'images/favicons/apple-touch-icon.png' %}">
+    <link rel="icon" type="image/png" sizes="32x32" href="{% static 'images/favicons/favicon-32x32.png' %}">
+    <link rel="icon" type="image/png" sizes="16x16" href="{% static 'images/favicons/favicon-16x16.png' %}">
+    <link rel="manifest" href="{% static 'images/favicons/site.webmanifest' %}">
+    <link rel="mask-icon" href="{% static 'images/favicons/safari-pinned-tab.svg' %}" color="#5bbad5"> {# Generator might provide this #}
+    <link rel="shortcut icon" href="{% static 'images/favicons/favicon.ico' %}">
     <meta name="msapplication-TileColor" content="#da532c"> {# Generator provides color #}
-    <meta name="msapplication-config" content="{% static 'favicons/browserconfig.xml' %}"> {# Generator provides this file #}
+    <meta name="msapplication-config" content="{% static 'images/favicons/browserconfig.xml' %}"> {# Generator provides this file #}
     <meta name="theme-color" content="#ffffff"> {# Adjust theme color if needed #}
     {# --- End Favicon Links --- #}
+
+    
 
     <!-- Dynamic page title -->
     <title>{% block title %}My Awesome Tools{% endblock %} - iLoveConverters</title>
@@ -45,11 +47,10 @@
     <nav class="navbar navbar-expand-lg navbar-light sticky-top">
         <div class="container">
             {# --- Logo Instead of Text --- #}
-            <a class="navbar-brand" href="{% url 'home' %}">
-                 {# Logo for Light Theme #}
-                <img src="{% static 'images/logo-light-theme.svg' %}" alt="iLoveConverters Logo" height="30" class="d-inline-block align-top logo-light">
-                 {# Logo for Dark Theme (initially hidden) #}
-                <img src="{% static 'images/logo-dark-theme.svg' %}" alt="iLoveConverters Logo" height="30" class="d-inline-block align-top logo-dark d-none">
+            <a href="{% url 'home' %}" class="navbar-brand d-flex align-items-center text-decoration-none">
+                <span class="fw-bold fs-4" style="color: #457b9d; letter-spacing: 0px;">I</span>
+                <img src="{% static 'images/logo_no_bg.png' %}" alt="iLoveConverters Logo" height="30" width="40">
+                <span class="fw-bold fs-4" style="color: #457b9d; letter-spacing: 0px;">CONVERTERS</span>
             </a>
             {# --- End Logo --- #}
             <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNavDropdown" aria-controls="navbarNavDropdown" aria-expanded="false" aria-label="Toggle navigation">

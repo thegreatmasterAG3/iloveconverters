@@ -24,10 +24,10 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = 'django-insecure-z4)q5q0mydwbptjf^00*v02*h#_z$am(p17sw)4y)mug!7nh6x'
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = False
 
-# ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.18.19']
-ALLOWED_HOSTS = ['iloveconverters.com', 'www.iloveconverters.com']
+#ALLOWED_HOSTS = ['127.0.0.1', 'localhost', '192.168.18.19']
+ALLOWED_HOSTS = ['13.60.62.47','iloveconverters.com', 'www.iloveconverters.com']
 
 
 # Application definition
