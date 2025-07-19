@@ -2,7 +2,23 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "CollectionPage",
+  "name": "Latest AI News & Articles",
+  "description": "A curated list of the latest news, updates, and breakthroughs in the world of Artificial Intelligence from various sources.",
+  "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'news:news_list' %}"
+}
+</script>
+{% endblock %}
+
+{% block title %}AI News | Latest Articles & Updates in Artificial Intelligence{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Stay up-to-date with the latest news and breakthroughs in the world of Artificial Intelligence. A curated list of important AI articles and updates.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

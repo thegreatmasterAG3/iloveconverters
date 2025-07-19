@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}QR Code Generator | Create Free QR Codes Online{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Generate free QR codes for URLs, text, contact information, Wi-Fi, and more. Customize error correction and download as a high-quality PNG or SVG file.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "QR Code Generator",
+  "description": "A free web-based utility to generate QR codes from text, URLs, or other data, with options for size and format.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

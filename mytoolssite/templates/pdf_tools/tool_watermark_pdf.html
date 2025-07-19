@@ -18,7 +18,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Add Watermark to PDF",
+  "description": "A free online application to add a custom text or image watermark to every page of a PDF document.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Add Watermark to PDF | Free Online PDF Watermarker{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily add a text or image watermark to your PDF files. Customize position, transparency, and rotation to protect and brand your documents.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

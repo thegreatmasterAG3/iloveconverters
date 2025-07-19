@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}Time Zone Converter | Free Online Time Converter{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily convert the time from one city or timezone to another. Our free online tool helps you schedule meetings and calls across the globe.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Time Zone Converter",
+  "description": "A free web utility to convert dates and times between hundreds of different timezones worldwide.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

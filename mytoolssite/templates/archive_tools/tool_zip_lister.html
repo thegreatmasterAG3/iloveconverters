@@ -3,7 +3,29 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}ZIP File Viewer | View Contents of ZIP Files Online{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Quickly view the list of all files and folders inside a ZIP archive without extracting it. Our free online ZIP lister is fast and secure.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ZIP File Viewer Online",
+  "description": "A free web utility to view the list of files and folders inside a ZIP archive without needing to download or extract it.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

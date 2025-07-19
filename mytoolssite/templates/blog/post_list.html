@@ -2,7 +2,23 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "Blog",
+  "name": "iLoveConverters Blog",
+  "description": "Explore articles, how-to guides, and tutorials. Get tips on file conversion, productivity, and the latest tool updates.",
+  "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'blog:post_list' %}"
+}
+</script>
+{% endblock %}
+
+{% block title %}Blog | Tips, Tutorials & Tool Updates{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Explore articles, how-to guides, and tutorials from the iLoveConverters blog. Get tips on file conversion, productivity, and the latest tool updates.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

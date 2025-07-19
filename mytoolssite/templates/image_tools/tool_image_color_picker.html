@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Image Color Picker",
+  "description": "An online tool for designers and developers to extract HEX and RGB color codes by picking pixels from an uploaded image.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Image Color Picker | Get HEX & RGB Codes From an Image{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Upload an image and instantly pick colors to get their HEX and RGB values. A perfect tool for designers and developers to extract color palettes from photos.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

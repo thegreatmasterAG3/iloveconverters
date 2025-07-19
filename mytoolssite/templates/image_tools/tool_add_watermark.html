@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Add Watermark to Image",
+  "description": "A free online application to apply a text or image watermark to your photos with customizable position and opacity.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "MultimediaApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Add Watermark to Image | Free Online Photo Watermarker{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Protect your photos by adding a custom text or image watermark. Control the position, transparency, and size of your watermark for free online.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

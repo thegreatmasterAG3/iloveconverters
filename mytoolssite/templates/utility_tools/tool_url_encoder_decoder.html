@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}URL Encoder & Decoder | Online Percent-Encoding Tool{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily encode strings into a URL-safe format (percent-encoding) or decode them back to their original form. A free utility for web developers.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "URL Encoder & Decoder",
+  "description": "A free web utility for percent-encoding and decoding strings to ensure they are safe for use in URLs.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

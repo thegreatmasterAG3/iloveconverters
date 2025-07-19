@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PNG to PDF Converter",
+  "description": "A free web-based application to combine and convert multiple PNG images into a single PDF document.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}PNG to PDF Converter | Convert PNG Images to PDF Online{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Combine multiple PNG images into a single PDF document. Free and easy to use. Customize page size, orientation, and margins for your final PDF.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

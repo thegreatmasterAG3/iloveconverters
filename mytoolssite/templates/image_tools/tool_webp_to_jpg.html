@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "WebP to JPG Converter",
+  "description": "An online application to convert WebP images to the universally compatible JPG format.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "MultimediaApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}WebP to JPG Converter | Convert WebP to JPG Online Free{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily convert your WebP images to the universally compatible JPG format. Perfect for when you need a standard image file for sharing or editing.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

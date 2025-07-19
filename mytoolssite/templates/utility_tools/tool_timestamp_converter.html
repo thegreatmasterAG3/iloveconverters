@@ -3,7 +3,29 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}Unix Timestamp Converter | Convert Epoch Time{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="A free online tool to convert Unix timestamps (in seconds or milliseconds) to human-readable dates and vice-versa. Displays both UTC and local time.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Unix Timestamp Converter",
+  "description": "A web-based developer utility to convert between Unix timestamps (epoch time) and human-readable date formats.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

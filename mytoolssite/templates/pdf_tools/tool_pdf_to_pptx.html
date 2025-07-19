@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PDF to PowerPoint Converter",
+  "description": "A free online tool that converts each page of a PDF document into an individual slide in a Microsoft PowerPoint (.pptx) presentation.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}PDF to PowerPoint Converter | Convert PDF to PPTX Slides{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Convert each page of your PDF into an individual slide in a PowerPoint (.pptx) presentation. A simple and fast way to present your PDF documents.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

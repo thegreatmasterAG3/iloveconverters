@@ -2,7 +2,22 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "Contact Us",
+  "description": "Get in touch with the iLoveConverters team for questions, feedback, or support with any of our online tools."
+}
+</script>
+{% endblock %}
+
+{% block title %}Contact Us | Get in Touch with iLoveConverters{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Contact the iLoveConverters team. If you have any questions, feedback, or need support with any of our online tools, please use our contact form to get in touch.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

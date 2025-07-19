@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}UUID Generator | Generate UUIDs v1 & v4 Online{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Instantly generate multiple Version 1 (timestamp-based) or Version 4 (random) UUIDs. Free online tool for developers and data management.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "UUID Generator",
+  "description": "A free developer utility to generate multiple Version 1 or Version 4 universally unique identifiers (UUIDs).",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

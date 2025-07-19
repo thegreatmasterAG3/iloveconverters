@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Split PDF Tool",
+  "description": "A free web app to extract a range of pages from a larger PDF document and save them as a new file.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Split PDF | Extract Pages from PDF Files Online{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Extract a range of pages or a single page from your PDF document. Our free online PDF splitter is fast, secure, and easy to use.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

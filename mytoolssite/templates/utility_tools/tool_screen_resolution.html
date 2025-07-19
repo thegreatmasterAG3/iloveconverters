@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}What Is My Screen Resolution? | Free Display Info Tool{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Our free online tool instantly detects and displays your screen resolution, browser viewport size, color depth, and device pixel ratio.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Screen Resolution Detector",
+  "description": "A free browser-based utility that detects and displays the user's screen resolution and other display information.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

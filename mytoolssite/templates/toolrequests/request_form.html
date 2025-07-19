@@ -2,7 +2,22 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{# ... head block ... #}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "ContactPage",
+  "name": "Request a New Tool",
+  "description": "Suggest a new free online tool. We value your feedback and are always looking to add new, useful utilities for our users."
+}
+</script>
+{% endblock %}
+
+{% block title %}Request a Tool | Suggest a New Online Tool{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Have an idea for a new free online tool? Submit your suggestion here! We value your feedback and are always looking to add new, useful utilities for our users.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

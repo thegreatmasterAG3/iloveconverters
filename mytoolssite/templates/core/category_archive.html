@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Online Archive Tools (ZIP & RAR)",
+  "description": "Free web-based tools for managing compressed archives. Create ZIP files, or use the online extractor to view and download files from ZIP and RAR archives.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Archive Tools | Online ZIP & RAR Extractor{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily manage your compressed files online. Use the ZIP extractor to view contents, create new ZIP archives, or extract files from RAR archives for free.">
+{% endblock %}```
 
 {% block content %}
 <div class="container px-4 py-2"> {# Reduced top padding #}

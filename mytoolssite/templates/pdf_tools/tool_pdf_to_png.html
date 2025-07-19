@@ -4,7 +4,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PDF to PNG Converter",
+  "description": "A free online utility that converts PDF documents into high-quality, transparent PNG images.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}PDF to PNG Converter | Convert PDF to High-Quality PNG{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Free online tool to convert PDF documents to high-quality PNG images with transparent backgrounds. Select pages and set the rendering DPI.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

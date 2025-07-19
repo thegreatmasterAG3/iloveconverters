@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Text Compare (Diff) Tool",
+  "description": "A free online utility to compare two blocks of text and highlight the differences (diff) side-by-side, with options to ignore case or whitespace.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Text Compare Tool | Find Differences Between Two Texts{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Use our free online diff tool to compare two blocks of text and instantly see the differences highlighted. Ideal for checking for changes in documents or code.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

@@ -2,7 +2,30 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}Regex Tester | Online Regular Expression Tester{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Test your JavaScript-compatible regular expressions in real-time. Enter your regex pattern and test string to see all matches highlighted instantly.">
+{% endblock %}
+
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Online Regex Tester",
+  "description": "A free web-based tool for developers to test and debug JavaScript-compatible regular expressions against sample text in real-time.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

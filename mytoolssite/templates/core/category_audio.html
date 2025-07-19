@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Free Online Audio Utilities",
+  "description": "A set of free web apps for audio files. Convert audio formats (MP3, WAV), trim audio clips, merge tracks, and extract sound from videos.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "MultimediaApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Audio Tools | Free Online Audio Converter & Editor{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Work with your audio files online. Convert MP3, WAV, M4A, FLAC. Trim audio, merge tracks, and extract audio from video files with our simple tools.">
+{% endblock %}
 
 {% block content %}
 <div class="container px-4 py-2"> {# Reduced top padding #}

@@ -3,7 +3,29 @@
 {% load static %}
 {% load humanize %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Compress PDF Tool",
+  "description": "A free online utility that reduces the file size of PDF documents to make them easier to share and store.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Compress PDF | Reduce PDF File Size Online for Free{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Reduce the file size of your PDF documents while maintaining the best possible quality. Our online PDF compressor makes your files smaller and easier to share.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

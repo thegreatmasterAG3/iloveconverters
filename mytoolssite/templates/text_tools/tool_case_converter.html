@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Case Converter Tool",
+  "description": "A free online tool to easily convert text between different cases, including UPPERCASE, lowercase, Title Case, and Sentence case.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Case Converter | Convert to Uppercase, Lowercase & More{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily convert text between different cases: UPPERCASE, lowercase, Title Case, and Sentence case. A simple and free tool for text formatting.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

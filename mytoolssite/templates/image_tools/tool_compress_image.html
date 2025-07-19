@@ -3,7 +3,29 @@
 {% load static %}
 {% load humanize %} {# Load humanize filter for filesizeformat #}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Image Compressor",
+  "description": "A free online tool to reduce the file size of JPG, PNG, and WebP images while maintaining visual quality.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Compress Image | Reduce Image File Size Online{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Reduce the file size of your JPG, PNG, and WebP images with our free online image compressor. Balance quality and file size for faster web performance.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

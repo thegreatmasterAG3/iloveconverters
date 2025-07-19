@@ -2,7 +2,42 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ post.title }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "BlogPosting",
+  "mainEntityOfPage": {
+    "@type": "WebPage",
+    "@id": "{{ request.scheme }}://{{ request.get_host }}{{ post.get_absolute_url }}"
+  },
+  "headline": "{{ post.title|escapejs }}",
+  "description": "{{ post.content|striptags|truncatewords:25|escapejs }}",
+  "image": "",  {# Optional: Add URL to a featured image here if you add one to your model #}
+  "author": {
+    "@type": "Person",
+    "name": "{{ post.author.username|escapejs }}"
+  },
+  "publisher": {
+    "@type": "Organization",
+    "name": "iLoveConverters",
+    "logo": {
+      "@type": "ImageObject",
+      "url": "{{ request.scheme }}://{{ request.get_host }}{% static 'images/2_no_bg.png' %}"
+    }
+  },
+  "datePublished": "{{ post.published_date|date:'c' }}",
+  "dateModified": "{{ post.updated_date|date:'c' }}"
+}
+</script>
+{% endblock %}
+
+{% block title %}{{ post.title }} | iLoveConverters Blog{% endblock %}
+
+{% block meta_description %}
+  {# The truncatewords filter is essential to prevent the meta description from being too long #}
+  <meta name="description" content="{{ post.content|striptags|truncatewords:25 }}">
+{% endblock %}
 
 {% block content %}
 <div class="container">

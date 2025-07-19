@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Rotate PDF Tool",
+  "description": "A free web-based tool to rotate pages in a PDF document by 90, 180, or 270 degrees.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Rotate PDF | Rotate PDF Pages Online for Free{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily rotate specific pages or the entire PDF document. Rotate left (90° CCW), right (90° CW), or upside down (180°) and save your changes.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

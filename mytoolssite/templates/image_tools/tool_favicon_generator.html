@@ -3,7 +3,29 @@
 {% load static %}
 {% load humanize %} {# Needed if showing sizes later #}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Favicon Generator",
+  "description": "A comprehensive web app to generate a complete set of favicons for all platforms (ICO, PNG, Apple Touch) from a single image.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Favicon Generator | Create Favicons for All Platforms{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Generate a complete set of favicons for your website from a single image. Creates ICO, PNG, Apple Touch Icons, and provides the necessary HTML code.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

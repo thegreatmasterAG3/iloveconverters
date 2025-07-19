@@ -3,7 +3,29 @@
 {% load static %}
 {% load humanize %} {# Needed if showing sizes later #}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}Barcode Generator | Create Free Barcodes Online{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Generate standard barcodes online for free. Supports Code 128, Code 39, EAN-13, and UPC-A formats. Download as a high-quality PNG or SVG file.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Barcode Generator",
+  "description": "A free web application to generate common barcode formats like Code 128, EAN, and UPC from your data.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

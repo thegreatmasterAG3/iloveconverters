@@ -2,7 +2,32 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    {% for item in faq_items %}
+    {
+      "@type": "Question",
+      "name": "{{ item.question|escapejs }}",
+      "acceptedAnswer": {
+        "@type": "Answer",
+        "text": "{{ item.answer|striptags|escapejs }}"
+      }
+    }{% if not forloop.last %},{% endif %}
+    {% endfor %}
+  ]
+}
+</script>
+{% endblock %}
+
+{% block title %}Frequently Asked Questions (FAQ) | iLoveConverters{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Find answers to common questions about our free online tools. Learn about file limits, security, privacy, and how to use our converters and utilities.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

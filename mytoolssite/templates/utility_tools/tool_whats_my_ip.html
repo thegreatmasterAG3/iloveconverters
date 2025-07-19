@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}What Is My IP Address? | Free Public IP Lookup Tool{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Quickly find out your public IPv4 or IPv6 address. Our free online tool instantly shows you the IP address your internet traffic is coming from.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "What's My IP Address Tool",
+  "description": "A free web utility that displays the user's public IP address as seen by the web server.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

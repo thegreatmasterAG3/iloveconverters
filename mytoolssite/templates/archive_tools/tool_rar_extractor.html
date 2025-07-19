@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}RAR Extractor | Unrar Files Online for Free{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Extract files from RAR archives online. Our free tool lets you view the contents of a .rar file and download individual files directly from your browser.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Online RAR Extractor",
+  "description": "A free web app to unrar files online. Upload a RAR archive to view its contents and download individual files from within the archive.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

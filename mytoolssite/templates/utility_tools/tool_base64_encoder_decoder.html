@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}Base64 Encoder & Decoder | Online Base64 Tool{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="A free online tool to encode text to Base64 or decode a Base64 string back to its original text. Simple, fast, and uses UTF-8 encoding.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Base64 Encoder & Decoder",
+  "description": "A free online utility to encode plain text into Base64 format and decode Base64 strings back to plain text.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

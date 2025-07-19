@@ -1,0 +1,68 @@
+{# templates/core/about_page.html #}
+{% extends 'base.html' %}
+{% load static %}
+
+{% block title %}About - iLoveConverters{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="iLoveConverters - your trusted source for a comprehensive collection of online tools, converters and utilities. Learn about our commitment to simplicity, reliability, and accessibility.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "AboutPage",
+  "name": "About iLoveConverters",
+  "description": "Learn about our commitment to providing simple, reliable, and accessible free online tools for everyone.",
+  "url": "{{ request.scheme }}://{{ request.get_host }}{% url 'core:about_page' %}"
+}
+</script>
+{% endblock %}
+
+{% block content %}
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8 col-md-10">
+            <div class="card p-4 p-md-5">
+                <h1 class="text-center mb-4 border-bottom pb-2">About Us</h1>
+
+                <p class="lead">
+                    Welcome to iLoveConverters, your trusted source for a comprehensive collection of online tools, converters, and utilities. We believe that everyone should have access to simple, powerful, and free tools to manage their digital lives more efficiently.
+                </p>
+
+                <h4 class="mt-5">Our Mission</h4>
+                <p>
+                    Our mission is to provide a single, reliable destination for all your file conversion and data manipulation needs. Whether you're a student, a professional, a developer, or just someone needing a quick conversion, our goal is to offer a seamless and intuitive experience without intrusive ads or unnecessary steps.
+                </p>
+
+                <h4 class="mt-4">What We Offer</h4>
+                <p>
+                    Our site features a vast and growing library of tools, including:
+                </p>
+                <ul>
+                    <li><strong>Document & PDF Tools:</strong> Convert, merge, split, compress, and edit PDF files.</li>
+                    <li><strong>Image Utilities:</strong> Convert between formats like JPG, PNG, and WebP, resize, compress, and apply watermarks.</li>
+                    <li><strong>Developer Tools:</strong> Format code, test expressions, and generate hashes, UUIDs, and more.</li>
+                    <li><strong>AI-Powered Tools:</strong> Leverage the power of AI for tasks like background removal and data extraction.</li>
+                </ul>
+
+                <h4 class="mt-4">Our Commitment</h4>
+                <p>
+                    We are built on a foundation of three core principles:
+                </p>
+                <ul>
+                    <li><strong>Simplicity:</strong> Our tools are designed to be intuitive. No complicated interfaces, no confusing options. Just upload, convert, and download.</li>
+                    <li><strong>Reliability:</strong> We strive to ensure our tools work accurately every time. We use robust backend technologies to deliver consistent and high-quality results.</li>
+                    <li><strong>Accessibility:</strong> Our tools are free for everyone, accessible on any device with a web browser, and designed to be user-friendly for all.</li>
+                </ul>
+
+                <p class="mt-4">
+                    Thank you for using iLoveConverters. We're constantly working on adding new tools and improving existing ones based on your feedback. If you have an idea for a new tool, please don't hesitate to <a href="{% url 'toolrequests:request_form' %}">let us know</a>!
+                </p>
+
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

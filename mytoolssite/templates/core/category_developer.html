@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Free Online Developer Utilities",
+  "description": "A set of essential web-based utilities for developers. Format JSON & XML, test regular expressions, encode/decode data, and generate hashes.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Free Online Developer Tools | Formatters, Encoders & Generators{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Essential web utilities for developers. Format JSON & XML, test Regex, encode/decode Base64 & URLs, generate Hashes & UUIDs, convert colors, and more.">
+{% endblock %}
 
 {% block content %}
 <div class="container px-4 py-2"> {# Reduced top padding #}

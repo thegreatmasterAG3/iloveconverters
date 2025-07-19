@@ -2,7 +2,30 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}XML Formatter & Beautifier | Format XML Online{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Clean up and format your XML data for better readability. Paste your XML to validate and pretty-print it with your chosen indentation style.">
+{% endblock %}
+
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "XML Formatter & Beautifier",
+  "description": "A free online developer tool to validate, format, and beautify XML data for better readability with customizable indentation.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

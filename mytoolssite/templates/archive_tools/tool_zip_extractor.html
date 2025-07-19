@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}ZIP Extractor | Unzip Files Online for Free{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily extract files from a ZIP archive online. Upload your ZIP file to view its contents and download individual files without installing any software.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Online ZIP Extractor",
+  "description": "A free web-based tool to unzip files online. Upload a ZIP archive to view its contents and download individual files.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

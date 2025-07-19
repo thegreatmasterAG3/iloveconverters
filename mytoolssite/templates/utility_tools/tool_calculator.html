@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}Online Calculator | Simple & Scientific Calculator Free{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="A free, easy-to-use online calculator. Switch between a basic calculator for simple math and a scientific calculator for more complex functions.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Online Calculator",
+  "description": "A free web-based calculator with both simple and scientific modes for various mathematical calculations.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container py-4">

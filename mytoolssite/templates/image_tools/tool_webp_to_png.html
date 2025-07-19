@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "WebP to PNG Converter",
+  "description": "A free web tool that converts modern WebP images into the widely supported PNG format, preserving transparency.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "MultimediaApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}WebP to PNG Converter | Convert WebP Images to PNG{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Free online tool to convert modern WebP images into the widely supported PNG format. Preserves transparency and quality.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

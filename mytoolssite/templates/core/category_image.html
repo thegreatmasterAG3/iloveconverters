@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Free Online Image Tools",
+  "description": "A collection of web-based tools for image manipulation. Convert formats (JPG, PNG, WebP), resize, compress, rotate, and add watermarks to your images.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "MultimediaApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Image Tools | Convert, Resize & Edit Images Online{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="All the image tools you need in one place. Convert JPG, PNG, WEBP, HEIC. Resize, compress, rotate, and add watermarks to your images for free.">
+{% endblock %}
 
 {% block content %}
 <div class="container px-4 py-2"> {# Reduced top padding #}

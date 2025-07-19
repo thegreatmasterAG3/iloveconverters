@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Lorem Ipsum Generator",
+  "description": "A free web utility that generates placeholder text (Lorem Ipsum) in paragraphs, sentences, or words for use in designs and mockups.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Lorem Ipsum Generator | Generate Placeholder Text{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Generate Lorem Ipsum placeholder text for your designs and mockups. Choose the number of paragraphs, sentences, or words you need.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

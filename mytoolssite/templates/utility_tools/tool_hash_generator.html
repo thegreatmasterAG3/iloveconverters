@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}Hash Generator | MD5, SHA-1, SHA-256, SHA-512 Online{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Generate cryptographic hashes from your text input. Supports MD5, SHA-1, SHA-256, and SHA-512 algorithms. A free and secure online tool.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Online Hash Generator",
+  "description": "A free security utility to generate MD5, SHA-1, SHA-256, and SHA-512 hash digests from text.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "SecurityApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

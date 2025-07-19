@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Protect PDF Tool",
+  "description": "A free online security tool to add password protection and encryption to PDF files.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "SecurityApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Protect PDF | Add Password and Encrypt PDF Files{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Secure your sensitive PDF documents by adding a password. Our free tool encrypts your PDF file to prevent unauthorized access.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Json Formatter & Validator",
+  "description": "An online tool to format (pretty-print) and validate your JSON data. Beautify messy JSON, check for errors, and sort keys alphabetically.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}JSON Formatter & Validator | Beautify and Validate JSON{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="An online tool to format (pretty-print) and validate your JSON data. Beautify messy JSON, check for errors, and sort keys alphabetically.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

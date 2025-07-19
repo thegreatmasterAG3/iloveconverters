@@ -1,7 +1,37 @@
 {% extends 'base.html' %}
 {% load static %}
 
+{% block extra_head %}
+<script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "All Online Tools - Simple & AI Converters",
+    "description": "A comprehensive collection of free online tools for converting files, generating data, and performing utility tasks for documents, images, and more."
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "iLoveConverters Suite of Online Tools",
+    "description": "A comprehensive collection of free online file converters, generators, and utilities, including both simple and AI-powered tools.",
+    "operatingSystem": "Any (Web-based)",
+    "applicationCategory": "UtilitiesApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+]
+</script>
+{% endblock %}
+
 {% block title %}All Tools - Search & Filter{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Explore our collection of free online tools. Search and filter by type or category to find the perfect tool for your needs.">
+{% endblock %}
 
 {% block content %}
 <!-- Hero Section -->

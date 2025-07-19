@@ -2,7 +2,32 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "JPG to PDF Converter",
+  "description": "A free web tool that allows users to convert one or more JPG images into a single, combined PDF file.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}JPG to PDF Converter | Convert JPG Images to PDF Online{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Convert your JPG images into a single PDF document. Upload multiple JPG files, customize page size and orientation, and download your PDF for free.">
+{% endblock %}
+
+{# Page title and subtitle #}
+
 
 {% block content %}
 <div class="container">

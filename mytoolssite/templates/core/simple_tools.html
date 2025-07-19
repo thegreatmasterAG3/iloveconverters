@@ -5,7 +5,37 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+[
+  {
+    "@context": "https://schema.org",
+    "@type": "CollectionPage",
+    "name": "Simple & Free Online Tools",
+    "description": "A complete collection of simple and free online tools. Convert files, format text, and perform daily utility tasks with our easy-to-use web apps."
+  },
+  {
+    "@context": "https://schema.org",
+    "@type": "SoftwareApplication",
+    "name": "iLoveConverters - Simple Tools",
+    "description": "A collection of straightforward converters, generators, and utilities for everyday file and data tasks.",
+    "operatingSystem": "Any (Web-based)",
+    "applicationCategory": "UtilitiesApplication",
+    "offers": {
+      "@type": "Offer",
+      "price": "0",
+      "priceCurrency": "USD"
+    }
+  }
+]
+</script>
+{% endblock %}
+
+{% block title %}Simple & Free Online Tools | iLoveConverters{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="A complete collection of simple and free online tools. Convert files, format text, and perform daily utility tasks with our easy-to-use web apps.">
+{% endblock %}
 
 {% block content %}
 <div class="container px-4 py-2"> {# Reduced top padding #}

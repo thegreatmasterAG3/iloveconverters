@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PDF to Word Converter",
+  "description": "A free web-based tool to convert PDF documents into editable Microsoft Word (.docx) files.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}PDF to Word Converter | Convert PDF to DOCX Online Free{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily convert your PDF files into editable Word documents (.docx). Free, online, and secure. Preserves layout and formatting as much as possible.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

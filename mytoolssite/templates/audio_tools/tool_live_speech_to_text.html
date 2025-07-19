@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}Live Speech to Text | Free Online Dictation Tool{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Use your microphone to dictate text in real-time. Our free online speech-to-text tool converts your voice into text instantly in your browser.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Live Speech to Text Dictation Tool",
+  "description": "A free web-based application that uses your microphone and AI to transcribe speech into text in real-time.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "MultimediaApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

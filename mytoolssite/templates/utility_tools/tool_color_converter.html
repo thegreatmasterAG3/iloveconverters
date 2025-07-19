@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}Color Converter | HEX, RGB, HSL Conversion Tool{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="A free online color converter for web designers and developers. Instantly convert color values between HEX, RGB, and HSL formats.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Color Converter",
+  "description": "A free web utility for designers and developers to convert color codes between HEX, RGB, and HSL formats.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DesignApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

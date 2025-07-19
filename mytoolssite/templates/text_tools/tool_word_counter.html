@@ -3,7 +3,29 @@
 {% load static %}
 {% load humanize %} {# For potential number formatting later #}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Online Word Counter",
+  "description": "A free web-based utility to count the number of words, characters, sentences, and paragraphs in a block of text.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Word Counter | Character & Sentence Count Tool{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Free online word and character counter. Instantly count words, characters (with and without spaces), sentences, and paragraphs in your text.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

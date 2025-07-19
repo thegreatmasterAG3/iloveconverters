@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Online Image Resizer",
+  "description": "A free web-based application to resize images by pixels or percentage, with options to maintain aspect ratio.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "MultimediaApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Resize Image Online | Free Image Resizer Tool{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily resize any image online for free. Change dimensions by pixels or percentage while maintaining aspect ratio. Supports JPG, PNG, GIF, and WebP.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

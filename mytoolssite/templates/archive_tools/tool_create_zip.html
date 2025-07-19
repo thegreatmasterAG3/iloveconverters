@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}Create ZIP File Online | Free ZIP Archive Creator{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily create a ZIP archive from multiple files. Upload your files and download them compressed into a single, convenient ZIP file for free.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Create ZIP File Online",
+  "description": "A free online utility to create a ZIP archive from multiple files. Upload your files to compress and download them as a single ZIP file.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

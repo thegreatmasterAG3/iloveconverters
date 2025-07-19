@@ -2,11 +2,15 @@
 from django.urls import path
 from . import views # Import views from the current directory
 
+app_name = 'core'
+
 urlpatterns = [
     # When someone visits the root path (''), use the 'home' view
     path('', views.home, name='home'),
     path('simple-tools/', views.simple_tools_page, name='simple_tools_page'),
     path('ai-tools/', views.ai_tools_page, name='ai_tools_page'),
+
+    path('page/about/', views.about_page, name='about_page'),
     # Using a 'tools/' prefix for organization
     path('tools/pdf/', views.category_pdf_page, name='category_pdf'),
     path('tools/image/', views.category_image_page, name='category_image'),

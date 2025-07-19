@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "ICO Converter",
+  "description": "A free online utility to create a multi-size .ico file for website favicons from a standard image like PNG or JPG.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}ICO Converter | Create Favicon.ico from Images Online{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily create a multi-size ICO file for your website's favicon from a PNG or JPG image. Select standard sizes like 16x16, 32x32, and 48x48.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

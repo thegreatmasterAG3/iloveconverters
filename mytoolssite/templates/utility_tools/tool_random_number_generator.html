@@ -3,7 +3,29 @@
 {% load static %}
 {% load humanize %} {# For potential number formatting later #}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block title %}Random Number Generator | Generate Random Integers{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Generate one or more random numbers within a specified range (min and max). A free and simple online tool for any purpose.">
+{% endblock %}
+
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Random Number Generator",
+  "description": "A free online utility to generate random integers within a customizable minimum and maximum range.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
 
 {% block content %}
 <div class="container">

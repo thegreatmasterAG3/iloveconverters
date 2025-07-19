@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Online Video Converter & Tools",
+  "description": "A collection of simple online tools for video files. Convert video formats (MOV, MP4), compress large videos, trim clips, and create animated GIFs.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "MultimediaApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Video Tools | Online Video Converters & Utilities{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="A collection of free online video tools. Convert MOV to MP4, AVI to MP4, compress video files, trim clips, and create GIFs from videos.">
+{% endblock %}
 
 {% block content %}
 <div class="container px-4 py-2"> {# Reduced top padding #}

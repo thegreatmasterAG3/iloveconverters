@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Reverse Text Tool",
+  "description": "A free online utility to reverse text. Options include reversing the entire string, reversing each word individually, or reversing the order of words.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Reverse Text | Online Text & Word Reverser{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Flip your text backwards with our free online tool. Reverse the entire string, reverse each word individually, or reverse the order of words in a sentence.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

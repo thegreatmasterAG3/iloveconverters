@@ -19,9 +19,23 @@ from django.urls import path,include
 from django.conf import settings # Import settings
 from django.conf.urls.static import static # Import static
 
+
+# --- NEW IMPORTS for SITEMAP ---
+from django.contrib.sitemaps.views import sitemap
+from core.sitemaps import StaticViewSitemap, PostSitemap, ToolViewSitemap
+# --- END NEW IMPORTS ---
+
+# --- NEW SITEMAPS DICTIONARY ---
+sitemaps = {
+    'static': StaticViewSitemap,
+    'tools': ToolViewSitemap,
+    'blog': PostSitemap,
+}
+# --- END NEW DICTIONARY ---
+
 urlpatterns = [
     path('admin/', admin.site.urls),
-    path('', include('core.urls')),
+    path('', include('core.urls', namespace='core')),
     path('convert/', include('converters.urls')),
 
     path('blog/', include('blog.urls', namespace='blog')),
@@ -33,6 +47,10 @@ urlpatterns = [
     path('contact/', include('contact.urls', namespace='contact')),
 
     path('faq/', include('faq.urls', namespace='faq')),
+
+    # --- NEW SITEMAP URL ---
+    path('sitemap.xml', sitemap, {'sitemaps': sitemaps}, name='django.contrib.sitemaps.views.sitemap'),
+    # --- END NEW SITEMAP URL ---
 
     # --- NEW: Group tool apps under /tools/ ---
     path('tools/pdf/', include('pdf_tools.urls', namespace='pdf_tools')),

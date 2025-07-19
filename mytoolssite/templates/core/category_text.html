@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }}{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Online Text Manipulation Tools",
+  "description": "A suite of free text utilities for various tasks. Count words, change text case, generate placeholder text, clean up formatting, and more.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Text Tools & Utilities | Word Counter, Case Converter & More{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Free online text tools for any task. Use the Word Counter, Case Converter, Text Cleaner, Reverse Text tool, and Lorem Ipsum Generator instantly.">
+{% endblock %}
 
 {% block content %}
 <div class="container px-4 py-2"> {# Reduced top padding #}

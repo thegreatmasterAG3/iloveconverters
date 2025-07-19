@@ -29,8 +29,11 @@
     
 
     <!-- Dynamic page title -->
-    <title>{% block title %}My Awesome Tools{% endblock %} - iLoveConverters</title>
+    <title>{% block title %}iLoveConverters | Free Online Tools for Everyone{% endblock %}</title>
 
+    {% block meta_description %}
+  <meta name="description" content="Your number one free web app for converting files. Enjoy all the tools you need to work efficiently with your digital documents, images, and more.">
+    {% endblock %}
     <!-- Google tag (gtag.js) -->
 <script async src="https://www.googletagmanager.com/gtag/js?id=G-V3NQJD3WBR"></script>
 <script>
@@ -40,6 +43,27 @@
 
   gtag('config', 'G-V3NQJD3WBR');
 </script>
+
+<!-- START: JSON-LD WebSite Schema -->
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "WebSite",
+  "name": "iLoveConverters",
+  "url": "https://{{ request.get_host }}",
+  "potentialAction": {
+    "@type": "SearchAction",
+    "target": {
+      "@type": "EntryPoint",
+      "urlTemplate": "https://{{ request.get_host }}/#tool-search-input?q={search_term_string}"
+    },
+    "query-input": "required name=search_term_string"
+  }
+}
+</script>
+<!-- END: JSON-LD WebSite Schema -->
+
+    {% block extra_head %}{% endblock %}
 </head>
 <body>
 
@@ -47,7 +71,7 @@
     <nav class="navbar navbar-expand-lg navbar-light sticky-top">
         <div class="container">
             {# --- Logo Instead of Text --- #}
-            <a href="{% url 'home' %}" class="navbar-brand d-flex align-items-center text-decoration-none">
+            <a href="{% url 'core:home' %}" class="navbar-brand d-flex align-items-center text-decoration-none">
                 <span class="fw-bold fs-4" style="color: #457b9d; letter-spacing: 0px;">I</span>
                 <img src="{% static 'images/logo_no_bg.png' %}" alt="iLoveConverters Logo" height="30" width="40">
                 <span class="fw-bold fs-4" style="color: #457b9d; letter-spacing: 0px;">CONVERTERS</span>
@@ -61,7 +85,7 @@
 
                     <!-- Home Link -->
                     <li class="nav-item">
-                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'home' %}">Home</a>
+                        <a class="nav-link {% if request.resolver_match.url_name == 'home' %}active{% endif %}" href="{% url 'core:home' %}">Home</a>
                     </li>
 
                     <!-- Tools Dropdown -->
@@ -71,19 +95,19 @@
                         </a>
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownToolsLink">
                             <li><h6 class="dropdown-header">Overview</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'home' %}#tool-list-container">All Tools (Homepage)</a></li>
-                            <li><a class="dropdown-item" href="{% url 'simple_tools_page' %}">Simple Tools</a></li>
-                            <li><a class="dropdown-item" href="{% url 'ai_tools_page' %}">AI Tools</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:home' %}#tool-list-container">All Tools (Homepage)</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:simple_tools_page' %}">Simple Tools</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:ai_tools_page' %}">AI Tools</a></li>
                             <li><hr class="dropdown-divider"></li>
                             <li><h6 class="dropdown-header">Categories</h6></li>
-                            <li><a class="dropdown-item" href="{% url 'category_pdf' %}">PDF Tools</a></li>
-                            <li><a class="dropdown-item" href="{% url 'category_image' %}">Image Tools</a></li>
-                            <li><a class="dropdown-item" href="{% url 'category_audio' %}">Audio Tools</a></li>
-                            <li><a class="dropdown-item" href="{% url 'category_video' %}">Video Tools</a></li>
-                            <li><a class="dropdown-item" href="{% url 'category_text' %}">Text Tools</a></li>
-                            <li><a class="dropdown-item" href="{% url 'category_developer' %}">Developer Tools</a></li>
-                            <li><a class="dropdown-item" href="{% url 'category_utility' %}">Utilities</a></li>
-                            <li><a class="dropdown-item" href="{% url 'category_archive' %}">Archive Tools</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:category_pdf' %}">PDF Tools</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:category_image' %}">Image Tools</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:category_audio' %}">Audio Tools</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:category_video' %}">Video Tools</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:category_text' %}">Text Tools</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:category_developer' %}">Developer Tools</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:category_utility' %}">Utilities</a></li>
+                            <li><a class="dropdown-item" href="{% url 'core:category_archive' %}">Archive Tools</a></li>
                         </ul>
                     </li>
 
@@ -106,6 +130,7 @@
                         <ul class="dropdown-menu" aria-labelledby="navbarDropdownSupportLink">
                             <li><a class="dropdown-item" href="{% url 'toolrequests:request_form' %}">Request Tool</a></li> {# Replace '#' with {% url 'request_tool' %} #}
                             <li><a class="dropdown-item" href="{% url 'contact:contact_form' %}">Contact Us</a></li> {# Replace '#' with {% url 'contact_page' %} #}
+                            <li><a class="dropdown-item" href="{% url 'core:about_page' %}">About Us</a></li>
                             {# Optionally add FAQ link here later #}
                              <li><a class="dropdown-item" href="{% url 'faq:faq_list' %}">FAQ</a></li> 
                         </ul>

@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Live Markdown Previewer",
+  "description": "A free online editor that provides a real-time preview of rendered HTML as you write Markdown, with syntax highlighting included.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "DeveloperApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Markdown Previewer | Live Online Markdown Editor{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Write and preview Markdown text in real-time with our live editor. Supports GitHub Flavored Markdown (GFM) and includes syntax highlighting for code.">
+{% endblock %}
 
 {% block content %}
 <div class="container-fluid py-4 px-md-4"> {# Use fluid container for wider layout #}

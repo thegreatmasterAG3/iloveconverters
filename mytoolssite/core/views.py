@@ -5,6 +5,11 @@ from django.shortcuts import render
 def home(request):
     return render(request, 'core/home.html')
 
+def about_page(request):
+    """Renders the About Us page."""
+    context = {'page_title': 'About Us'}
+    return render(request, 'core/about_page.html', context)
+
 def simple_tools_page(request):
     context = {'page_title': 'Simple Online Tools'}
     return render(request, 'core/simple_tools.html', context)

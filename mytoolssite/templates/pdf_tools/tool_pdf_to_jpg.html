@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PDF to JPG Converter",
+  "description": "A free web app to convert PDF pages into high-quality JPG images. Users can select page ranges and image quality.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}PDF to JPG Converter | Convert PDF Pages to Images{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Convert your PDF files to high-quality JPG images for free. Select specific pages or convert the entire document. Customize DPI and image quality.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

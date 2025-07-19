@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Merge PDF Tool",
+  "description": "A free online utility to combine multiple PDF files into a single, organized PDF document.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Merge PDF | Combine Multiple PDF Files into One{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily combine and merge multiple PDF files into a single document online. A simple, fast, and free tool to organize your PDFs. No limits.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

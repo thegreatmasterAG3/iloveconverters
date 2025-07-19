@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "JPG to WebP Converter",
+  "description": "A free utility to convert JPG images to the modern, efficient WebP format for better website performance.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "MultimediaApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}JPG to WebP Converter | Optimize Images with WebP{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Convert your JPG images to the modern, efficient WebP format to improve website performance. Choose between lossy and lossless compression.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

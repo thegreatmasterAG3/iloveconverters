@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "Slug Generator",
+  "description": "A free online tool to convert any text string or article title into a clean, URL-friendly slug with options for separators and case.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "UtilitiesApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}Slug Generator | Create URL-Friendly Slugs from Text{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Convert any text, title, or string into a clean, URL-friendly slug. Perfect for creating SEO-friendly URLs for blog posts and web pages.">
+{% endblock %}
 
 {% block content %}
 <div class="container">

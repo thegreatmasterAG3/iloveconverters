@@ -2,7 +2,29 @@
 {% extends 'base.html' %}
 {% load static %}
 
-{% block title %}{{ page_title }} - ToolSite{% endblock %}
+{% block extra_head %}
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "SoftwareApplication",
+  "name": "PNG to JPG Converter",
+  "description": "A free web-based tool to convert PNG images into the standard JPG format, with options for background color and quality.",
+  "operatingSystem": "Any (Web-based)",
+  "applicationCategory": "MultimediaApplication",
+  "offers": {
+    "@type": "Offer",
+    "price": "0",
+    "priceCurrency": "USD"
+  }
+}
+</script>
+{% endblock %}
+
+{% block title %}PNG to JPG Converter | Convert PNG to JPG Online Free{% endblock %}
+
+{% block meta_description %}
+  <meta name="description" content="Easily convert your PNG images to high-quality JPG files. Choose a background color for transparent areas and set the desired JPG quality.">
+{% endblock %}
 
 {% block content %}
 <div class="container">
